@@ -609,10 +609,23 @@ def egg_detection(image):
             # Draw the outer circle
             cv2.circle(image, (x, y), r, (0, 255, 0), 2)
             print(f"The center of the circle is at (x={x}, y={y}) and radius is r={r}") #eggs radius is 27
+            ##y axis from 225 to 257
 
             # Draw the center of the circle
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
+
             
+            center_coordinates = (x,y+10)
+            axesLength = (30,45)
+            angle = 0
+            startAngle = 0
+            endAngle = 360
+
+
+            image = cv2.ellipse(image, center_coordinates, axesLength, 
+            angle, startAngle, endAngle, (0, 255, 0), 3) 
+
+
             # Put text 'Egg' near the detected egg
             cv2.putText(image, 'Egg', (x - r, y - r),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
