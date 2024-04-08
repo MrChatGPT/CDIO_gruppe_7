@@ -596,7 +596,7 @@ def egg_detection(image):
     ******minRadius=1 and maxRadius=40: The minimum and maximum radius of the circles to be detected.
     """
     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
-                               param1=50, param2=30, minRadius=30, maxRadius=60)
+                               param1=50, param2=30, minRadius=25, maxRadius=30)
 
   ##
 
@@ -608,6 +608,8 @@ def egg_detection(image):
             
             # Draw the outer circle
             cv2.circle(image, (x, y), r, (0, 255, 0), 2)
+            print(f"The center of the circle is at (x={x}, y={y}) and radius is r={r}") #eggs radius is 27
+
             # Draw the center of the circle
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
             

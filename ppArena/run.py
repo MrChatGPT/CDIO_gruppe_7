@@ -23,10 +23,12 @@ image = getImage()
 # detect_ball_colors(denoise)
 
 #Used for detecting circular balls in picture, and the colors in the image
-circle_detection(image)  #THIS IS THE GOOD SHIT
-detect_ball_colors(image)
+# circle_detection(image)  #THIS IS THE GOOD SHIT
+# detect_ball_colors(image)
 
 # calibrateColors2(image) #new thres
+
+egg_detection(image)
 
 # imgg = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') 
 
