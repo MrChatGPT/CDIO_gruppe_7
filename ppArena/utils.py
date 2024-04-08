@@ -284,11 +284,13 @@ def paintArenaState(image, state):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-    #image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
+    image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
-    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
-   
+   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
+
+  #  image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50egghorizontal.jpg') 
     return image
 
 
@@ -558,7 +560,30 @@ def generate_non_overlapping_points(num_points, width, height, min_distance, obs
 #     res=(720, 576), n_cross=3, n_balls=50)
 # showImage(pik)
 
+def egg_draw(image, x, y, w, h, area):
+    # Calculate center coordinates adding 10 to y for visualization purposes
+    center_coordinates = (x + w//2, y + h//2)
+    
+    # Define axes length
+    axesLength = (w//2, h//2)
+ 
+    
+    # Ellipse parameters
+    angle = 0
+    startAngle = 0
+    endAngle = 360
+    
+    # Draw the ellipse on the image
+    image = cv2.ellipse(image, center_coordinates, axesLength, 
+                        angle, startAngle, endAngle, (0, 255, 0), 3)
+    
+    # Put text 'Egg' near the detected egg
+    cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+    return image
 
+
+##Maybe "parse" the egg up in two circles. a small and a big one
 def egg_detection(image):
     # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -614,9 +639,10 @@ def egg_detection(image):
             # Draw the center of the circle
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
 
-            
+            ####Detection of egg is not properly configured when is laying in different angles...
             center_coordinates = (x,y+10)
             axesLength = (30,45)
+            # axesLength = (34,58)
             angle = 0
             startAngle = 0
             endAngle = 360
@@ -631,7 +657,7 @@ def egg_detection(image):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
     # Display the result
-    cv2.imshow('Detected eggs', image)
+    # cv2.imshow('Detected eggs', image)
 
 
     # return image
@@ -966,6 +992,10 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (255, 255, 255), 2) 
+            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            #If a big white object is detected, draw an ellipse to specify the egg
+            if(area > 3000 and area < 3800):
+                image = egg_draw(image,x,y,w,h,area)
               
             cv2.putText(image, "White Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
