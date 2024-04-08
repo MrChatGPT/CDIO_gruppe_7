@@ -288,7 +288,7 @@ def getImage():
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
+    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
 
   #  image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50egghorizontal.jpg') 
     return image
@@ -559,6 +559,28 @@ def generate_non_overlapping_points(num_points, width, height, min_distance, obs
 # pik = generateArenaImage(
 #     res=(720, 576), n_cross=3, n_balls=50)
 # showImage(pik)
+
+def car_draw(image, x, y, w, h, area):
+    # Start coordinate, here (x, y), represents the top left corner of rectangle 
+    start_point = (x, y)
+    
+    # End coordinate, here (x+w, y+h), represents the bottom right corner of rectangle
+    end_point = (x+w, y+h)
+    
+    # Green color in BGR
+    color = (0, 255, 0)  # Using a standard green color; modify as needed
+    
+    # Line thickness of 2 px
+    thickness = 2
+    
+    # Using cv2.rectangle() method to draw a rectangle around the car
+    image = cv2.rectangle(image, start_point, end_point, color, thickness)
+    
+    # Optionally, add text label if needed
+    cv2.putText(image, 'Car', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
+    
+    return image
+
 
 def egg_draw(image, x, y, w, h, area):
     # Calculate center coordinates adding 10 to y for visualization purposes
@@ -993,9 +1015,13 @@ def detect_ball_colors(image):
                                        (x + w, y + h), 
                                        (255, 255, 255), 2) 
             print(f"(x={x}, y={y}) w={w} h={h} area={area}")
-            #If a big white object is detected, draw an ellipse to specify the egg
+            #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
             if(area > 3000 and area < 3800):
                 image = egg_draw(image,x,y,w,h,area)
+            #If a big white object is detected with size of the car
+            if(area > 13000 and area < 14000):
+                image = car_draw(image,x,y,w,h,area)
+             
               
             cv2.putText(image, "White Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
