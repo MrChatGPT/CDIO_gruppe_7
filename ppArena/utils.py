@@ -10,6 +10,8 @@ from cv2 import GaussianBlur
 import numpy as np
 from config import *
 import random
+import imutils
+from imutils import paths
 
 
 
@@ -629,8 +631,8 @@ def detect_ball_colors(image):
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
             print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            if(area > 8000 and area < 15000):
-                image = cross_draw(image,x,y,w,h,area)
+            # if(area > 8000 and area < 15000):
+            #     image = cross_draw(image,x,y,w,h,area)
               
             cv2.putText(image, "Red Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
@@ -744,3 +746,13 @@ def blurred(image):
 # cv2.imshow('Denoised Image', denoised_image)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
+
+
+def CannyEdgeGray(image):
+   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+   cv2.imshow("Gray image", gray) 
+   gray = cv2.GaussianBlur(gray, (5, 5), 0)
+   cv2.imshow("Gaussian Blur", gray) 
+   edged = cv2.Canny(gray, 35, 125)
+   cv2.imshow("Canny edge B/W detection", edged) 
+
