@@ -12,7 +12,7 @@ mapping = {
     keyboard.Key.down: "B",
     keyboard.Key.left: "L",
     keyboard.Key.right: "R"
-}tisseamnd
+}
 
 # Funktion til at sende en besked via UDP
 def send_udp_message(message):
