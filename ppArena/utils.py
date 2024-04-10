@@ -160,7 +160,11 @@ def getImage():
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
     image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
+ 
+  
    
   
 
@@ -192,25 +196,62 @@ def arena_draw(image, x, y, w, h, area):
 
 ##Probably remove this... and try to resolve and get to know the canny edge detection 
 def cross_draw(image, x, y, w, h, area):
-    # Start coordinate, here (x, y)
-    start_point = (x+60, y)
+    # # Start coordinate, here (x, y)
+    # start_point = (x+60, y)
     
-    # End coordinate
-    end_point = (x+60,y+h)
+    # # End coordinate
+    # end_point = (x+60,y+h)
     
-    # Green color in BGR
-    color = (0, 255, 0)  # Using a standard green color; modify as needed
+    # # Green color in BGR
+    # color = (0, 255, 0)  # Using a standard green color; modify as needed
     
-    # Line thickness of 2 px
-    thickness = 2
+    # # Line thickness of 2 px
+    # thickness = 2
     
-    # Using cv2.rectangle() method to draw a rectangle around the car
-    image = cv2.line(image, start_point, end_point, color, thickness)
+    # # Using cv2.rectangle() method to draw a rectangle around the car
+    # image = cv2.line(image, start_point, end_point, color, thickness)
     
-    # Optionally, add text label if needed
-    cv2.putText(image, 'cross', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
+    # # Optionally, add text label if needed
+    # cv2.putText(image, 'cross', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
     
-    return image
+
+    # image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2) 
+
+
+    print("before recreating the points")
+
+     # Recreate the rectangle points from x, y, w, h
+    rect_points = np.array([
+        [x, y],
+        [x + w, y],
+        [x, y + h],
+        [x + w, y + h]
+    ], dtype=np.float32)
+
+    print("after recreating the points")
+    # The points need to be ordered correctly for minAreaRect to work
+    rect_points = cv2.convexHull(rect_points)
+
+    # Find the minimum area rectangle
+    min_area_rect = cv2.minAreaRect(rect_points)
+
+    print(f"minimum area rectangle={min_area_rect}")
+
+    # Convert the rectangle to box points (four corners)
+    box = cv2.boxPoints(min_area_rect)
+    print(f"box={box}")
+    box = np.int0(box)
+    print(f"box2={box}")
+
+
+
+    return box, min_area_rect
+
+
+
+
+
+
 
 def car_draw(image, x, y, w, h, area):
     # Start coordinate, here (x, y), represents the top left corner of rectangle 
@@ -235,7 +276,8 @@ def car_draw(image, x, y, w, h, area):
 
 
 def egg_draw(image, x, y, w, h, area):
-    # Calculate center coordinates adding 10 to y for visualization purposes
+    #https://www.geeksforgeeks.org/python-opencv-cv2-ellipse-method/
+    # Calculate center coordinates 
     center_coordinates = (x + w//2, y + h//2)
     
     # Define axes length
@@ -258,7 +300,7 @@ def egg_draw(image, x, y, w, h, area):
 
 
 
-##Maybe "parse" the egg up in two circles. a small and a big one
+##Maybe "parse" the egg up in two circles. a small and a big one THIS IS NOT IN USE
 def egg_detection(image):
     # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -635,8 +677,9 @@ def detect_ball_colors(image):
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
             # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            # if(area > 8000 and area < 15000):
-            #     image = cross_draw(image,x,y,w,h,area)
+            if(area > 8000 and area < 15000):
+                box, min_area_rect = cross_draw(image,x,y,w,h,area)
+                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
               
             cv2.putText(image, "Red Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
@@ -672,7 +715,7 @@ def detect_ball_colors(image):
                                        (255, 255, 255), 2) 
             print(f"(x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
-            if(area > 3000 and area < 4000):
+            if(area > 2900 and area < 4000):
                 image = egg_draw(image,x,y,w,h,area)
 
             #If a big white object is detected with size of the car
