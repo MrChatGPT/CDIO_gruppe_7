@@ -27,7 +27,7 @@ image = getImage()
 
 
 # denoise = cv2.fastNlMeansDenoisingColored(image, None, 10, 100, 7, 21) 
-# circle_detection(denoise)  #THIS IS THE GOOD SHIT
+# circle_detection(denoise)  
 # detect_ball_colors(denoise)
 
 
@@ -36,8 +36,8 @@ image = getImage()
 
 
 #Used for detecting circular balls in picture, and the colors in the image
-circle_detection(image)  #THIS IS THE GOOD SHIT
-detect_ball_colors(image)
+# circle_detection(image)  #THIS IS THE GOOD SHIT
+# detect_ball_colors(image)
 
 
 
@@ -51,7 +51,9 @@ detect_ball_colors(image)
 
 # video()
 
-#CannyEdgeGray(image)
+CannyEdgeGray(image)
+
+
 
 
 # egg_detection(image) #Noooo.. Not using this...

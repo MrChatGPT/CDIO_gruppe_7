@@ -676,7 +676,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
+            print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
             if(area > 8000 and area < 15000):
                 box, min_area_rect = cross_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
@@ -713,7 +713,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (255, 255, 255), 2) 
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
             if(area > 2900 and area < 4000):
                 image = egg_draw(image,x,y,w,h,area)
@@ -916,9 +916,16 @@ def blurred(image):
 
 def CannyEdgeGray(image):
    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-   cv2.imshow("Gray image", gray) 
+#    cv2.imshow("Gray image", gray) 
    gray = cv2.GaussianBlur(gray, (5, 5), 0)
-   cv2.imshow("Gaussian Blur", gray) 
+#    cv2.imshow("Gaussian Blur", gray) 
+
+
    edged = cv2.Canny(gray, 35, 125)
    cv2.imshow("Canny edge B/W detection", edged) 
+
+   cropped_image = edged[380:580, 350:530] # Slicing to crop the image
+
+   # Display the cropped image
+   cv2.imshow("cropped", cropped_image)
 
