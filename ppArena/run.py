@@ -3,6 +3,11 @@ from matplotlib import pyplot as plt
 
 image = getImage()
 
+# cv2.imshow('Image', image)
+
+# gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# cv2.imshow('gray', gray)
 #Look at this link for measuring the distance
 #https://pyimagesearch.com/2015/01/19/find-distance-camera-objectmarker-using-python-opencv/
 
@@ -25,19 +30,31 @@ image = getImage()
 # circle_detection(denoise)  #THIS IS THE GOOD SHIT
 # detect_ball_colors(denoise)
 
+
+
+
+
+
 #Used for detecting circular balls in picture, and the colors in the image
-# circle_detection(image)  #THIS IS THE GOOD SHIT
-# detect_ball_colors(image)
+circle_detection(image)  #THIS IS THE GOOD SHIT
+detect_ball_colors(image)
+
+
+
+
 
 # calibrateColors2(image) #new thres
 
-# egg_detection(image)
+
 
 # detect_ball_colorsVIDEO()
 
 # video()
 
 #CannyEdgeGray(image)
+
+
+# egg_detection(image) #Noooo.. Not using this...
 
 # imgg = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') 
 

@@ -154,11 +154,15 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-   #image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
+    # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
-    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
+    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
+   
+  
 
 #    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50egghorizontal.jpg') 
     return image
@@ -630,9 +634,9 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            if(area > 8000 and area < 15000):
-                image = cross_draw(image,x,y,w,h,area)
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
+            # if(area > 8000 and area < 15000):
+            #     image = cross_draw(image,x,y,w,h,area)
               
             cv2.putText(image, "Red Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
@@ -666,10 +670,11 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (255, 255, 255), 2) 
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
-            if(area > 3000 and area < 3800):
+            if(area > 3000 and area < 4000):
                 image = egg_draw(image,x,y,w,h,area)
+
             #If a big white object is detected with size of the car
             if(area > 13000 and area < 22000):
                 image = car_draw(image,x,y,w,h,area)
@@ -721,6 +726,9 @@ def detect_ball_colors(image):
     #     cap.release() 
     #     cv2.destroyAllWindows() 
     #     break  
+
+
+
 
 def detect_ball_colorsVIDEO():
     # Capturing video through webcam 
