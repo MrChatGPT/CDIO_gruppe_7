@@ -3,6 +3,9 @@ from matplotlib import pyplot as plt
 
 image = getImage()
 
+#Look at this link for measuring the distance
+#https://pyimagesearch.com/2015/01/19/find-distance-camera-objectmarker-using-python-opencv/
+
 # arena = Arena(image)
 
 # i = 0  # Initialize the variable "i"
@@ -28,9 +31,13 @@ image = getImage()
 
 # calibrateColors2(image) #new thres
 
-#egg_detection(image)
+# egg_detection(image)
 
-CannyEdgeGray(image)
+# detect_ball_colorsVIDEO()
+
+# video()
+
+#CannyEdgeGray(image)
 
 # imgg = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') 
 
