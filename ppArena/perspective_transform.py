@@ -13,8 +13,8 @@ input_corners = np.float32([
 ])
 
 # Width and height of the new image
-width, height = 1600, 1000
-
+width = 1600
+height = 1000
 correct_corners = np.float32([
     [0, 0],
     [width, 0],
