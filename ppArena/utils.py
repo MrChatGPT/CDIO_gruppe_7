@@ -11,6 +11,9 @@ import numpy as np
 from config import *
 import random
 import imutils
+from imutils import paths
+
+
 
 
 def save_thresholds(lower_thresh, upper_thresh, color):
@@ -96,6 +99,9 @@ def calibrateColors(image):
     cv2.destroyAllWindows()
 
 
+
+
+
 def calibrateColors2(image):
     """Function to calibrate the HSV threshold values for detecting colors, specifically orange."""
 
@@ -148,15 +154,15 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-    # image = cv2.imread('test/images/WIN_20240403_10_40_59_Pro.jpg')
-    # image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
-    image = cv2.imread('test/images/WIN_20240403_10_40_58_Pro.jpg') 
-    # image = cv2.imread('test/images/pic50upsidedown.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_43_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
+    # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
+   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
+   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
+   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
+    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
 
  
   
@@ -213,7 +219,7 @@ def cross_draw(image, x, y, w, h, area):
     # image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2) 
 
 
-    print("before recreating the points")
+    # print("before recreating the points")
 
      # Recreate the rectangle points from x, y, w, h
     rect_points = np.array([
@@ -223,20 +229,24 @@ def cross_draw(image, x, y, w, h, area):
         [x + w, y + h]
     ], dtype=np.float32)
 
-    print("after recreating the points")
+    # print("after recreating the points")
     # The points need to be ordered correctly for minAreaRect to work
     rect_points = cv2.convexHull(rect_points)
 
     # Find the minimum area rectangle
     min_area_rect = cv2.minAreaRect(rect_points)
 
-    print(f"minimum area rectangle={min_area_rect}")
+    """
+    minimum area rectangle=((1100.0, 523.5), (167.0, 168.0), 90.0)
+    The first two numbers (1100.0, 523.5), shows the x and y-axis of the central point in the square.
+    """
+    print(f"minimum area rectangle={min_area_rect}") 
 
     # Convert the rectangle to box points (four corners)
     box = cv2.boxPoints(min_area_rect)
     print(f"box={box}")
     box = np.int0(box)
-    print(f"box2={box}")
+    # print(f"box2={box}")
 
 
 
@@ -910,17 +920,20 @@ def blurred(image):
 
 
 def CannyEdgeGray(image):
-   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-#    cv2.imshow("Gray image", gray) 
+   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
+ #    cv2.imshow("Gray image", gray) 
    gray = cv2.GaussianBlur(gray, (5, 5), 0)
-#    cv2.imshow("Gaussian Blur", gray) 
+ #    cv2.imshow("Gaussian Blur", gray) 
 
-
-   edged = cv2.Canny(gray, 35, 125)
+#Original
+#    edged = cv2.Canny(gray, 35, 125)
+#    edged = cv2.Canny(gray,100, 200) #no cross to be seen
+#    edged = cv2.Canny(gray,0, 105, apertureSize=5)
+   edged = cv2.Canny(gray,0, 105)
    cv2.imshow("Canny edge B/W detection", edged) 
 
-   cropped_image = edged[380:580, 350:530] # Slicing to crop the image
+   #cropped_image = edged[240:140, 168:167] # Slicing to crop the image
 
    # Display the cropped image
-   cv2.imshow("cropped", cropped_image)
+#    cv2.imshow("cropped", cropped_image)
 
