@@ -446,8 +446,8 @@ def circle_detection(image):
 
 
     # Display the result
-    cv2.imshow('Detected Balls', image)
-    return stored_circles
+    # cv2.imshow('Detected Balls', image)
+    return image, stored_circles
 
    # return image
 
@@ -598,7 +598,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
             # if(area > 8000 and area < 15000):
             #     box, min_area_rect = square_draw(image,x,y,w,h,area)
             #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
@@ -623,10 +623,12 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
+            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
               
             cv2.putText(image, "Orange Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX,  
                         1.0, (0, 165, 255)) 
+            
   
     # Creating contour to track white color 
     contours, hierarchy = cv2.findContours(white_mask, 
