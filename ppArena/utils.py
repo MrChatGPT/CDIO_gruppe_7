@@ -424,7 +424,8 @@ def circle_detection(image):
                                param1=50, param2=28, minRadius=10, maxRadius=20) #minRadius=5, maxRadius=20
 
   ##
-
+     # List to store circle data
+    stored_circles = []
      # Filter out the circles that correspond to the ping pong balls
     if circles is not None:
         circles = np.uint16(np.around(circles))
@@ -439,10 +440,14 @@ def circle_detection(image):
             # Put text 'Ball' near the detected ball
             cv2.putText(image, 'Ball', (x - r, y - r),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            
+            # Store the circles data
+            stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
+
 
     # Display the result
     cv2.imshow('Detected Balls', image)
-
+    return stored_circles
 
    # return image
 

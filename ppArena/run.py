@@ -37,10 +37,13 @@ image = getImage()
 
 #Used for detecting circular balls in picture, and the colors in the image
 image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
-circle_detection(image)  #THIS IS THE GOOD SHIT
+circles_info = circle_detection(image)  #THIS IS THE GOOD SHIT
 detect_ball_colors(image)
 
-
+# Print stored circles information
+print("Detected and Stored Circles:")
+for circle in circles_info:
+    print(circle)
 
 
 
