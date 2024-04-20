@@ -418,10 +418,10 @@ def circle_detection(image):
     *****param2=30: The accumulator threshold for the circle centers at the detection stage. 
     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
 
-    ******minRadius=1 and maxRadius=40: The minimum and maximum radius of the circles to be detected.
+    ******minRadius= and maxRadius=: The minimum and maximum radius of the circles to be detected.
     """
     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
-                               param1=50, param2=30, minRadius=5, maxRadius=20)
+                               param1=50, param2=30, minRadius=10, maxRadius=20) #minRadius=5, maxRadius=20
 
   ##
 
