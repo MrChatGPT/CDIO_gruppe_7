@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  manual_control_app:
+    build: . # Specifies the directory containing the Dockerfile
+    devices:
+      - "/dev/input/js0:/dev/input/js0" # Grants the container access to the PlayStation controller
+    volumes:
+      - "./:/app" # Mounts the current directory to /app in the container
+    network_mode: host # Uses the host network stack for the container
+    working_dir: /app # Sets the working directory to /app inside the container
+    command: python3 utils.py # Runs the manual_control.py scripti
