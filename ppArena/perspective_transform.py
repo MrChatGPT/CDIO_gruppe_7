@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 
-image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
+# image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
+image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
 
 # input coordinates, they are just hard coded for now (genereted in get_corners.py) :3
 #top-left, top-right, bottom-right, bottom-left

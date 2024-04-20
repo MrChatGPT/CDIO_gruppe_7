@@ -154,7 +154,7 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-    # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
+    image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
@@ -162,7 +162,7 @@ def getImage():
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
 
  
   
@@ -513,65 +513,11 @@ def detect_ball_colors(image):
     red_lower = np.array([0, 113, 180], np.uint8) #HSV
     red_upper = np.array([9, 255, 255], np.uint8) #HSV
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
-  
-    # Set range for orange color and  
-    # define mask  
-    """
-    2nd attempt on the picture ending with 46, with both higher and lower values at the same time
-    I think this was the best so far?
-    """
-    ##ORIGINAL
-    # orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-    # orange_upper = np.array([20, 211, 255], np.uint8) #HSV
-    # orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
+
 
     orange_lower = np.array([11, 121, 215], np.uint8) #HSV
     orange_upper = np.array([65, 211, 255], np.uint8) #HSV
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-
-    """
-    2nd attempt on the picture ending with 58, with both higher and lower values at the same time
-    """
-    # orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-    # orange_upper = np.array([20, 211, 255], np.uint8) #HSV
-    # orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-
-    """
-    Found and calculated by median of many hsv values
-    """
-    # orange_lower = np.array([15, 157, 255], np.uint8) #HSV
-    # orange_upper = np.array([35, 177, 255], np.uint8) #HSV
-    # orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-######################################################
-   
-
-  
-    # Set range for white color and 
-    # define mask 
-    # white_lower = np.array([94, 80, 2], np.uint8) 
-    """
-    This is for the "original" picture (ending with 46)
-    """
-    # white_lower = np.array([22, 0, 181], np.uint8) #HSV
-    # white_upper = np.array([36, 126, 255], np.uint8) #HSV
-    # white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-
-    """
-    Attempt on the picture ending with 59
-    """
-    # white_lower = np.array([0, 0, 255], np.uint8) #HSV
-    # white_upper = np.array([39, 59, 255], np.uint8) #HSV
-    # white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-
-
-
-
-    """
-    Average of the two pictures HSV values
-    """
-    # white_lower = np.array([11, 0, 218], np.uint8) #HSV
-    # white_upper = np.array([38, 93, 255], np.uint8) #HSV
-    # white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
 
 
     """
@@ -583,35 +529,7 @@ def detect_ball_colors(image):
     white_upper = np.array([179, 42, 255], np.uint8) #HSV
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
 
-    #second white for getting the darker shade of white
-    # for testing purposes (detects every white ball in 38, and misses a lot in 58)
-    # white_lower = np.array([0, 25, 177], np.uint8) #HSV
-    # white_upper = np.array([31, 74, 255], np.uint8) #HSV
-    # white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-
-    # white2_lower = np.array([0, 25, 177], np.uint8) #HSV
-    # white2_upper = np.array([31, 74, 255], np.uint8) #HSV
-    # white2_mask = cv2.inRange(hsvFrame, white2_lower, white2_upper) 
     
-    """
-    Attempt on the picture ending with 58, with both higher and lower values at the same time
-    """
-    # white_lower = np.array([0, 0, 233], np.uint8) #HSV
-    # white_upper = np.array([179, 42, 255], np.uint8) #HSV
-    # white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-
-    #########################################################
-
-    # Set range for blue color and 
-    # define mask 
-    """
-    Attempt on the picture ending with 59
-    """
-    # blue_lower = np.array([55, 69, 100], np.uint8) #HSV
-    # blue_upper = np.array([107, 151, 228], np.uint8) #HSV
-    # blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-
-
 
     """
     Attempt on the picture ending with 46
@@ -619,12 +537,6 @@ def detect_ball_colors(image):
     blue_lower = np.array([95, 66, 141], np.uint8) #HSV
     blue_upper = np.array([113, 150, 205], np.uint8) #HSV
     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-
-
-
-    # green_lower = np.array([59, 205, 194], np.uint8) #HSV
-    # green_upper = np.array([179, 255, 255], np.uint8) #HSV
-    # green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
 
 
 

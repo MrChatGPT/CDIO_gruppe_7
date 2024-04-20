@@ -15,7 +15,8 @@ def draw_circle(event, x, y, flags, param):
         cv2.imshow('Image', img)
 
 # Read in your image
-img = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg')
+# img = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg')
+img = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
 
 # Set up the window and bind the function to window mouse events
 cv2.namedWindow('Image')
@@ -26,7 +27,7 @@ while True:
     cv2.imshow('Image', img)
     key = cv2.waitKey(1) & 0xFF
     # Break the loop when 'c' is pressed
-    if key == ord('c'):
+    if key == ord('q'):
         break
 
 # Check if we have exactly four points
