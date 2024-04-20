@@ -43,10 +43,18 @@ def perspectiveTrans(image):
     # input coordinates, they are just hard coded for now (generated in get_corners.py) :3
     # top-left, top-right, bottom-right, bottom-left
     input_corners = np.float32([
-        [ 360, 1055],
-        [ 288,   43],
-        [1704,   50],
-        [1687, 1041]
+        [ 930,  431],
+        [1082,  431],
+        [1082,  582],
+        [ 930,  582]
+
+        ######################
+        #no. 1 pic in the list in utils
+        # [ 360, 1055],
+        # [ 288,   43],
+        # [1704,   50],
+        # [1687, 1041]
+        ########################
         # [372, 15],
         # [1751, 17],
         # [1751, 1045],
@@ -55,6 +63,7 @@ def perspectiveTrans(image):
     ])
 
     # Width and height of the new image (O.G. picture is 1920x1080)
+    #1466x1046 is handpicked of the image     # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
     width = 1466 # 1920 #1600
     height = 1046 #1080 #1000
     correct_corners = np.float32([

@@ -154,7 +154,7 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-    image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
+    # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
@@ -162,7 +162,7 @@ def getImage():
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
+    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
 
  
   
@@ -196,7 +196,7 @@ def arena_draw(image, x, y, w, h, area):
 
 
 ##Probably remove this... and try to resolve and get to know the canny edge detection 
-def cross_draw(image, x, y, w, h, area):
+def square_draw(image, x, y, w, h, area):
     # # Start coordinate, here (x, y)
     # start_point = (x+60, y)
     
@@ -594,8 +594,12 @@ def detect_ball_colors(image):
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
             print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            if(area > 8000 and area < 15000):
-                box, min_area_rect = cross_draw(image,x,y,w,h,area)
+            # if(area > 8000 and area < 15000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+                                        
+            if(area > 1250000 and area < 1460000):
+                box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
               
             cv2.putText(image, "Red Colour", (x, y), 

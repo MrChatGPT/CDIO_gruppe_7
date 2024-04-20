@@ -36,7 +36,7 @@ image = getImage()
 
 
 #Used for detecting circular balls in picture, and the colors in the image
-image = perspectiveTrans(image)
+# image = perspectiveTrans(image)
 circle_detection(image)  #THIS IS THE GOOD SHIT
 detect_ball_colors(image)
 
