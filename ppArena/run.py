@@ -49,7 +49,7 @@ for circle in circles_info:
 (x=550, y=980) w=32 h=42 area=776.5 
 and this
 {'center': (566, 992), 'radius': 16, 'label': 'Ball'}
-is the same ball
+is the same orange ball
 """
 
 # calibrateColors2(image) #new thres
