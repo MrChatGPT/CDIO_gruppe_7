@@ -83,18 +83,17 @@ class MyController(Controller):
         return raw_value / 32767.0
 
 
+
 class MQTTClient:
-    def __init__(self, broker_url='localhost', broker_port=1883, topic=[], client_id=None, loop_method="start"):
+    def __init__(self, broker_url='localhost', broker_port=1883, topics=None, client_id=None, loop_method="start"):
         self.broker_url = broker_url
         self.broker_port = broker_port
-        self.subscribe_topics = topic
+        self.subscribe_topics = topics if topics is not None else []  # Ensure topics is always a list
         self.loop_method = loop_method
         self.client_id = client_id or str(uuid.uuid4())
-        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, self.client_id)
+        self.client = mqtt.Client(client_id=self.client_id)
         self.client.reconnect_delay_set(min_delay=1, max_delay=120)
-    
 
-    
         # Assign event callbacks
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -104,32 +103,34 @@ class MQTTClient:
         if self.loop_method == "start":
             self.client.loop_start()  # Start the network loop in a separate thread
         elif self.loop_method == "forever":
-            self.client.loop_forever()
+            self.client.loop_forever()  # Blocks here
 
     def on_connect(self, client, userdata, flags, rc):
         print(f"Connected with result code {rc}")
-        # Subscribing in on_connect() means that if we lose the connection and
-        # reconnect then subscriptions will be renewed.
-        for t in self.subscribe_topics:
-            self.client.subscribe(t)
+        # Subscribing to all topics
+        for topic in self.subscribe_topics:
+            self.client.subscribe(topic)
 
     def on_message(self, client, userdata, msg):
         print(f"Message received: {msg.topic} {msg.payload.decode()}")
 
-    def publish(self, topic,message):
+    def publish(self, topic, message):
         self.client.publish(topic, message)
 
     def disconnect(self):
-        self.client.loop_stop()  # Stop the loop
-        self.client.disconnect()  # Disconnect the client
+        self.client.loop_stop()  # Stop the loop only if loop_start was used
+        self.client.disconnect()
 
 # Usage
 if __name__ == "__main__":
-    client = MQTTClient(broker_url="localhost", broker_port=1883, topic="test/topic")
+    topics = ["test/topic"]  # Example with a single topic in a list
+    client = MQTTClient(broker_url="localhost", broker_port=1883, topics=topics)
     client.connect()
-    client.publish('pik',"Hello MQTT!")
+    time.sleep(1)  # Small delay to ensure connection setup
+    client.publish(topics[0], "Hello MQTT!")
     time.sleep(10)  # Keep the client running to listen for messages
     client.disconnect()
+
 
 if __name__ == "__main__":
     controller = MyController()  # Create the controller object
