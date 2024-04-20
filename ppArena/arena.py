@@ -43,10 +43,16 @@ def perspectiveTrans(image):
     # input coordinates, they are just hard coded for now (generated in get_corners.py) :3
     # top-left, top-right, bottom-right, bottom-left
     input_corners = np.float32([
-        [ 352,     1038.9999],
-        [ 352,       15   ],
+        [ 352,       15   ],       
         [1746.9998,   15   ],
-        [1746.9998 , 1038.9999]
+        [1746.9998 , 1038.9999],
+        [ 352,     1038.9999]
+        #######################
+        #This works when switching height and width, but the photo is flipped
+        # [ 352,     1038.9999],
+        # [ 352,       15   ],
+        # [1746.9998,   15   ],
+        # [1746.9998 , 1038.9999]
         ######################
         #cross' xy coordinates
         # [ 930,  431],
@@ -72,8 +78,10 @@ def perspectiveTrans(image):
     # Width and height of the new image (O.G. picture is 1920x1080)
     #1466x1046 is handpicked of the image     # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
     # w=1395 h=1024
-    width = 1024#1395 # 1920 #1600
-    height = 1395# 1024 #1080 #1000
+    # width = 1024#1395 # 1920 #1600
+    # height = 1395# 1024 #1080 #1000
+    width = 1395  #1395 # 1920 #1600
+    height = 1024 # 1024 #1080 #1000
     correct_corners = np.float32([
         [0, 0],
         [width, 0],
