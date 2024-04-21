@@ -1,24 +1,25 @@
 from utils import MQTTClient, MyController
-import time
-import sys
+
 controller = MyController()  # Create the controller object
-client = MQTTClient(client_id='controller')
-topics ={'wheels':'robot/wheels', 'servo':'robot/servo_motor', 'stepper':'robot/stepper_motor'}
+client = MQTTClient(client_id='controller',loop_method='forever')
+topic = 'robot/control'
+
+new_message = None
+last_message = None
 
 def publish_controller_data():
+    global new_message, last_message  # Declare these variables as global
+    new_message = (controller.wheels, controller.R2_value, controller.x_value, controller.circle_value)
     # Publish wheels data
-    client.publish(topics['wheels'], controller.wheels)
-    # Publish servo data (assuming this is another attribute you want to monitor)
-    client.publish(topics['servo'], controller.servo)
-    # Publish stepper motor data
-    client.publish(topics['stepper'], controller.stepper)
+    if new_message != last_message:
+        client.publish(topic, new_message)
+        last_message = new_message  # Update the last_message to the new_message after publishing
 
 controller.new_data_callback = publish_controller_data
 
 
 if __name__ == "__main__":
-    controller.start()  # Start the controller thread
+    controller.start()  
     client.connect()
-    #client.publish(topics['wheels'], controller.wheels)
     while True:
-        time.sleep(1)
+        pass
