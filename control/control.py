@@ -9,7 +9,7 @@ last_message = None
 
 def publish_controller_data():
     global new_message, last_message  # Declare these variables as global
-    new_message = (controller.wheels, controller.R2_value, controller.x_value, controller.circle_value)
+    new_message = (controller.wheels, controller.x_value, controller.circle_value)
     # Publish wheels data
     if new_message != last_message:
         client.publish(topic, new_message)
