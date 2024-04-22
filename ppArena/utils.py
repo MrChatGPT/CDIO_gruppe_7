@@ -195,7 +195,7 @@ def arena_draw(image, x, y, w, h, area):
     return image
 
 
-##Probably remove this... and try to resolve and get to know the canny edge detection 
+
 def square_draw(image, x, y, w, h, area):
     # # Start coordinate, here (x, y)
     # start_point = (x+60, y)
@@ -229,6 +229,7 @@ def square_draw(image, x, y, w, h, area):
         [x + w, y + h]
     ], dtype=np.float32)
 
+    print(f"rect_points={rect_points}")
     # print("after recreating the points")
     # The points need to be ordered correctly for minAreaRect to work
     rect_points = cv2.convexHull(rect_points)
@@ -236,7 +237,7 @@ def square_draw(image, x, y, w, h, area):
     # Find the minimum area rectangle
     min_area_rect = cv2.minAreaRect(rect_points)
 
-    """
+    """ Cross
     minimum area rectangle=((1100.0, 523.5), (167.0, 168.0), 90.0)
     The first two numbers (1100.0, 523.5), shows the x and y-axis of the central point in the square.
     """
@@ -246,7 +247,7 @@ def square_draw(image, x, y, w, h, area):
     box = cv2.boxPoints(min_area_rect)
     print(f"box={box}")
     box = np.int0(box)
-    # print(f"box2={box}")
+ 
 
 
 
@@ -598,7 +599,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
+            print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
             # if(area > 8000 and area < 15000):
             #     box, min_area_rect = square_draw(image,x,y,w,h,area)
             #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)

@@ -43,10 +43,21 @@ def perspectiveTrans(image):
     # input coordinates, they are just hard coded for now (generated in get_corners.py) :3
     # top-left, top-right, bottom-right, bottom-left
     input_corners = np.float32([
-        [ 352,       15   ],       
-        [1746.9998,   15   ],
-        [1746.9998 , 1038.9999],
-        [ 352,     1038.9999]
+        [ 287,   43],
+        [1704,   43],
+        [1704, 1052],
+        [ 287, 1052]
+        # [ 237,    0],
+        # [1751,    0],
+        # [1751, 1080],
+        # [ 237, 1080]
+  
+        #########################
+        #have used this so far, but this is manually pointed out 
+        # [ 352,       15   ],       
+        # [1746.9998,   15   ],
+        # [1746.9998 , 1038.9999],
+        # [ 352,     1038.9999]
         #######################
         #This works when switching height and width, but the photo is flipped
         # [ 352,     1038.9999],

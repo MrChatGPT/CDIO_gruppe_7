@@ -30,20 +30,27 @@ image = getImage()
 # circle_detection(denoise)  
 # detect_ball_colors(denoise)
 
+"""
+When getting the input corners from the function square_draw, and using the perspective, a big red square is detected... 
+has not occured earlier.. 
+This has to be solved.
+"""
 
-
-
-
-
-#Used for detecting circular balls in picture, and the colors in the image
-image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
-image, circles_info = circle_detection(image)  #THIS IS THE GOOD SHIT
+#Without image correction
+circle_detection(image)  #THIS IS THE GOOD SHIT
 detect_ball_colors(image)
 
+#Used for detecting objects in picture, and the colors in the image (with image correction)
+# image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
+# image, circles_info = circle_detection(image)  #THIS IS THE GOOD SHIT
+# detect_ball_colors(image)
+
+
+
 # Print stored circles information
-print("Detected and Stored Circles:")
-for circle in circles_info:
-    print(circle)
+# print("Detected and Stored Circles:")
+# for circle in circles_info:
+#     print(circle)
 
 """
 (x=550, y=980) w=32 h=42 area=776.5 
