@@ -1,4 +1,4 @@
-Run setup script to set up necesary pacages. Only tested in linux, but it might work on windows as well?
+Run setup script to set up necesary packages. Only tested in linux, but it might work on windows as well?
 
 Python version 3.12.2 was used for testing
 
