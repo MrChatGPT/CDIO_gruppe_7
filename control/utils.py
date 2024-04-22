@@ -31,70 +31,70 @@ class MyController(Controller):
     # Function is called when R3 is moved
     def on_R3_x_at_rest(self):
         self.R3_value[0] = 0
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback() 
 
     def on_R3_y_at_rest(self):
         self.R3_value[1] = 0 
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value) 
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value) 
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_R3_down(self, value):
         self.R3_value[1] = -self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_R3_up(self, value):
         self.R3_value[1] = -self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_R3_left(self, value):
         self.R3_value[0] = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
 
     def on_R3_right(self, value):
         self.R3_value[0] = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     # Function is called when L3 is moved
     def on_L3_x_at_rest(self):
         self.L3_value = 0
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_L3_left(self, value):
         self.L3_value = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_L3_right(self, value):
         self.L3_value = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     # Function is called when R2 is pressed
     def on_R2_press(self, value):
         self.R2_value = (self.map_stick_value(value)+1)/2
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
     
     def on_R2_release(self):
         self.R2_value = 0
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value, self.R2_value)
+        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
@@ -132,33 +132,8 @@ class MyController(Controller):
         if -self.stick_dead_zone < abs(mapped_value) < self.stick_dead_zone:
             return 0
         return mapped_value
-    
-    # @staticmethod
-    # # function to convert x and y values to angle
-    # def calc_wheels_speed(x, y, rotation, xy_power,angle=None): 
-    #     if x == 0 and y == 0 and rotation == 0:
-    #         return (0, 0, 0, 0), 0
-    #     elif x == 0 and y == 0:
-    #         return (rotation, -rotation, rotation, -rotation), 0
-    #     else:
-    #         angle = math.atan2(y, x) if angle is None else angle
-    #         sin_angle = math.sin(angle - math.pi/4)
-    #         cos_angle = math.cos(angle - math.pi/4)
-            
-    #         max_val = max(abs(sin_angle), abs(cos_angle))
-    #         leftFront = xy_power*(cos_angle/max_val) + rotation #left front
-    #         rightFront = xy_power*(sin_angle/max_val) - rotation #right front
-    #         leftRear = xy_power*(sin_angle/max_val) + rotation #left rear
-    #         rightRear = xy_power*(cos_angle/max_val) - rotation #right rear
-
-    #         max_speed = max(abs(leftFront), abs(rightFront), abs(leftRear), abs(rightRear))
-    #         if max_speed > 1:
-    #             leftFront = leftFront/max_speed
-    #             rightFront = rightFront/max_speed
-    #             leftRear = leftRear/max_speed
-    #             rightRear = rightRear/max_speed
-    #         return (leftFront, rightFront, leftRear, rightRear), angle
-        
+   
+       
 
     @staticmethod
     def calculate_wheel_contributions(angle, xy_power, rotation):
@@ -182,7 +157,7 @@ class MyController(Controller):
         return speeds
     
     @staticmethod
-    def calculate_wheel_speeds(x, y, rotation, xy_power):
+    def calculate_wheel_speeds(x, y, rotation):
         if x == 0 and y == 0:
             if rotation == 0:
                 return (0, 0, 0, 0)
@@ -190,7 +165,9 @@ class MyController(Controller):
                 return (rotation, -rotation, rotation, -rotation)
 
         angle = math.atan2(y, x)
-        wheel_speeds = MyController.calculate_wheel_contributions(angle, xy_power, rotation)
+        xy_speed = math.hypot(x,y)
+
+        wheel_speeds = MyController.calculate_wheel_contributions(angle, xy_speed, rotation)
         wheel_speeds = MyController.normalize_wheel_speeds(wheel_speeds)
 
         return wheel_speeds

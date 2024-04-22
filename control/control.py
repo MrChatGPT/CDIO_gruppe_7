@@ -1,21 +1,22 @@
 from utils import MQTTClient, MyController
 
-controller = MyController()  # Create the controller object
-client = MQTTClient(client_id='controller',loop_method='forever')
+controller = MyController() 
+client = MQTTClient(client_id='controller',loop_method='start')
 topic = 'robot/control'
 
-new_message = None
-last_message = None
-
 def publish_controller_data():
-    global new_message, last_message  # Declare these variables as global
-    new_message = (controller.wheels, controller.x_value, controller.circle_value)
-    # Publish wheels data
-    if new_message != last_message:
-        client.publish(topic, new_message)
-        last_message = new_message  # Update the last_message to the new_message after publishing
+    last_message = None  
 
-controller.new_data_callback = publish_controller_data
+    def publish():
+        nonlocal last_message
+        new_message = (controller.wheels, controller.x_value, controller.R2_value)
+        if new_message != last_message: # Only publish if message changed.
+            client.publish(topic, new_message)
+            last_message = new_message
+    
+    return publish
+
+controller.new_data_callback = publish_controller_data()
 
 
 if __name__ == "__main__":
