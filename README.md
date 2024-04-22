@@ -4,7 +4,7 @@ Run setup script to set up necessary packages. Only tested in linux, but it migh
 ## Python version
 3.12.2 was used for testing
 
-If using anaconda/miniconda use
+If using anaconda/miniconda use  
 `conda create --name uni python=3.12.2`
 
 
