@@ -8,6 +8,10 @@ If using anaconda/miniconda use
 conda create --name uni python=3.12.2
 
 
-- [x] Be cool
-- [ ] Sleep
-- [ ] Have some fun
+
+
+
+#TO-DO list 
+- [x] Be cool 😎
+- [ ] Sleep 💤
+- [ ] Have some fun 😜
