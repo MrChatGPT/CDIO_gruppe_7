@@ -211,13 +211,3 @@ class MQTTClient:
         self.client.loop_stop()  # Stop the loop only if loop_start was used
         self.client.disconnect()
 
-if __name__ == "__main__":
-    controller = MyController()  # Create the controller object
-    controller.start()  # Start the controller thread
-
-    start_time = time.time()
-    while time.time() - start_time < 120:  # Run for 10 seconds
-        print(f"R3: {controller.R3_value}\nL3: {controller.L3_value}\nAngle: {round(controller.angle,3)}\nxy_xy_power: {round(controller.xy_power,3)}\nWheels: {[round(w,3) for w in controller.wheels]}\nR2: {controller.R2_value}\nx: {controller.x_value}", flush=True)
-        time.sleep(0.1)  # Delay to prevent flooding the output
-
-    sys.exit(0)
