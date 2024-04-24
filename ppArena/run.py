@@ -30,6 +30,17 @@ image = getImage()
 # circle_detection(denoise)  
 # detect_ball_colors(denoise)
 
+#https://pyimagesearch.com/2014/04/21/building-pokedex-python-finding-game-boy-screen-step-4-6/
+ratio = image.shape[0] / 1024 #resize image height to 765 pixels  (used later)
+orig = image.copy()  #copy of original pic
+
+image = imutils.resize(image, height = 1024)
+
+
+
+
+
+
 """
 When getting the input corners from the function square_draw, and using the perspective, a big red square is detected... 
 has not occured earlier.. 

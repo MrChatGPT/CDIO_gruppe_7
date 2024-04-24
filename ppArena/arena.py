@@ -91,8 +91,8 @@ def perspectiveTrans(image):
     # w=1395 h=1024
     # width = 1024#1395 # 1920 #1600
     # height = 1395# 1024 #1080 #1000
-    width = 1395  #1395 # 1920 #1600
-    height = 1024 # 1024 #1080 #1000
+    width = 1417#1395  #1395 # 1920 #1600
+    height = 765 #1024 # 1024 #1080 #1000
     correct_corners = np.float32([
         [0, 0],
         [width, 0],
