@@ -12,7 +12,8 @@ from config import *
 import random
 import imutils
 from imutils import paths
-
+import argparse
+from skimage import exposure
 
 
 
@@ -244,6 +245,13 @@ def square_draw(image, x, y, w, h, area):
     print(f"minimum area rectangle={min_area_rect}") 
 
     # Convert the rectangle to box points (four corners)
+    """
+    Box prints out the the coordinates respectively:
+    box=[xTopleft,yTopleft],
+        [xTopright, yTopright],
+        [xBottomright, yBottomright],
+        [xBottomleft,yBottomleft]
+    """
     box = cv2.boxPoints(min_area_rect)
     print(f"box={box}")
     box = np.int0(box)
@@ -600,9 +608,9 @@ def detect_ball_colors(image):
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
             print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            # if(area > 8000 and area < 15000):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            if(area > 8000 and area < 15000):
+                box, min_area_rect = square_draw(image,x,y,w,h,area)
+                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                                         
             if(area > 1250000 and area < 1460000):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
@@ -845,6 +853,9 @@ def blurred(image):
 
 def CannyEdgeGray(image):
    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
+   cv2.imshow("gray pic", gray) 
+   gray = cv2.bilateralFilter(gray, 11, 17, 17)
+   cv2.imshow("gray bilateral", gray) 
  #    cv2.imshow("Gray image", gray) 
    gray = cv2.GaussianBlur(gray, (5, 5), 0)
  #    cv2.imshow("Gaussian Blur", gray) 
@@ -861,3 +872,17 @@ def CannyEdgeGray(image):
    # Display the cropped image
 #    cv2.imshow("cropped", cropped_image)
 
+def testcrosssearch(image):
+    #https://pyimagesearch.com/2014/04/21/building-pokedex-python-finding-game-boy-screen-step-4-6/
+    
+    # image = cv2.imread(argparse["query"])
+    ratio = image.shape[0] / 500.0
+    orig = image.copy()
+    image = imutils.resize(image, height = 500)
+
+    # convert the image to grayscale, blur it, and find edges
+    # in the image
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.bilateralFilter(gray, 11, 17, 17)
+    edged = cv2.Canny(gray, 30, 200)
+    cv2.imshow("canny", edged)

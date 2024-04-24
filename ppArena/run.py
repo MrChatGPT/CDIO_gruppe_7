@@ -31,10 +31,10 @@ image = getImage()
 # detect_ball_colors(denoise)
 
 #https://pyimagesearch.com/2014/04/21/building-pokedex-python-finding-game-boy-screen-step-4-6/
-ratio = image.shape[0] / 1024 #resize image height to 765 pixels  (used later)
-orig = image.copy()  #copy of original pic
+# ratio = image.shape[0] / 1024 #resize image height to 765 pixels  (used later)
+# orig = image.copy()  #copy of original pic
 
-image = imutils.resize(image, height = 1024)
+# image = imutils.resize(image, height = 1024)
 
 
 
@@ -48,8 +48,8 @@ This has to be solved.
 """
 
 #Without image correction
-circle_detection(image)  #THIS IS THE GOOD SHIT
-detect_ball_colors(image)
+# circle_detection(image)  #THIS IS THE GOOD SHIT
+# detect_ball_colors(image)
 
 #Used for detecting objects in picture, and the colors in the image (with image correction)
 # image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
@@ -78,10 +78,14 @@ is the same orange ball
 
 # video()
 
+# detect_ball_colors(image)
+# image = perspectiveTrans(image)
 # CannyEdgeGray(image)
 
+# cv2.imshow('image of cross', image)
 
 
+testcrosssearch(image)
 
 # egg_detection(image) #Noooo.. Not using this...
 
