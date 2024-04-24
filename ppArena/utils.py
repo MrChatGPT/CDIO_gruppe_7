@@ -886,3 +886,28 @@ def testcrosssearch(image):
     gray = cv2.bilateralFilter(gray, 11, 17, 17)
     edged = cv2.Canny(gray, 30, 200)
     cv2.imshow("canny", edged)
+
+    #edged.copy(), copy of our image, caused by findContours manipulates the image that is passed
+    #cv2.RETR_TREE tells OpenCV to compute the hierarchy (relationship) between contours
+    #cv2.CV_CHAIN_APPROX_SIMPLE tells OpenCV to compress the contours to save space 
+    #In return, the cv2.findContours function gives us a list of contours that it has found, but we have to parse it
+    cnts = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    cnts = imutils.grab_contours(cnts)
+    cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:10]
+    screenCnt = None
+
+
+    # loop over our contours
+    for c in cnts:
+       # approximate the contour
+       peri = cv2.arcLength(c, True)
+       approx = cv2.approxPolyDP(c, 0.015 * peri, True)
+       # if our approximated contour has twelve points, then
+       # we can assume that we have found our cross
+       if len(approx) == 12:
+         screenCnt = approx
+         break
+       
+    cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 3) 
+    cv2.imshow("fingers crossed", image) 
+    cv2.waitKey(0)
