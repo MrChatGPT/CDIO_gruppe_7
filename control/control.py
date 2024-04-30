@@ -9,7 +9,7 @@ def publish_controller_data():
 
     def publish():
         nonlocal last_message
-        new_message = (controller.wheels, controller.x_value, controller.R2_value)
+        new_message = (controller.wheels, controller.R2_value)
         if new_message != last_message: # Only publish if message changed.
             client.publish(topic, new_message)
             last_message = new_message
@@ -24,3 +24,5 @@ if __name__ == "__main__":
     client.connect()
     while True:
         pass
+
+
