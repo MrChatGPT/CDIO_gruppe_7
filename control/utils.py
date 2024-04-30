@@ -3,10 +3,12 @@ import time
 import threading
 import sys
 import paho.mqtt.client as mqtt
-import uuid 
+import uuid
 from pyPS4Controller.controller import Controller 
 import math
 import json
+
+
 
 
 
@@ -15,73 +17,75 @@ class MyController(Controller):
     This class is used to define the controller object. It inherits from the Controller class in the pyPS4Controller library.
     The default location of the controller interface is /dev/input/js0.
     '''
-    def __init__(self, interface="/dev/input/js0", connecting_using_ds4drv=False, **kwargs):
+    def __init__(self, interface="/dev/input/js0",event_format="3Bh2b", connecting_using_ds4drv=False, **kwargs):
         super().__init__(interface=interface,
-                         connecting_using_ds4drv=connecting_using_ds4drv, **kwargs)
+                         connecting_using_ds4drv=connecting_using_ds4drv,event_format=event_format, **kwargs)
         self.R3_value = [0, 0]
         self.L3_value = 0
-        self.x_value = 1
+        self.x_value = 1    
         self.R2_value = 0
         self.circle_value = 0
         self.new_data_callback = None
         self.xy_power = 0
-        self.wheels = [0,0,0,0]
-        self.stick_dead_zone = 0.05
+        self.motors = [0,0,0,0]
+        self.stick_dead_zone = 0.1
+    
 
     # Function is called when R3 is moved
     def on_R3_x_at_rest(self):
         self.R3_value[0] = 0
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        # set the first entries in self.motors[] to the calculated wheel speeds
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback() 
 
     def on_R3_y_at_rest(self):
         self.R3_value[1] = 0 
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value) 
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value) 
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_R3_down(self, value):
         self.R3_value[1] = -self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_R3_up(self, value):
         self.R3_value[1] = -self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_R3_left(self, value):
         self.R3_value[0] = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
 
     def on_R3_right(self, value):
         self.R3_value[0] = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     # Function is called when L3 is moved
     def on_L3_x_at_rest(self):
         self.L3_value = 0
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_L3_left(self, value):
         self.L3_value = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
     def on_L3_right(self, value):
         self.L3_value = self.map_stick_value(value)
-        self.wheels = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
+        self.motors = self.calculate_wheel_speeds(self.R3_value[0], self.R3_value[1], self.L3_value)
         if self.new_data_callback is not None:
             self.new_data_callback()
 
@@ -102,11 +106,6 @@ class MyController(Controller):
         self.x_value = self.x_value * -1
         if self.new_data_callback is not None:
             self.new_data_callback()
-
-    #def on_x_release(self):
-    #    self.x_value = 0
-    #    if self.new_data_callback is not None:
-    #        self.new_data_callback()
 
     def on_circle_press(self):
         self.circle_value = 1
@@ -145,22 +144,22 @@ class MyController(Controller):
         left_rear = xy_power * (sin_angle / max_val) + rotation
         right_rear = xy_power * (cos_angle / max_val) - rotation
 
-        return left_front, right_front, left_rear, right_rear
+        return [left_front, right_front, left_rear, right_rear]
 
     @staticmethod
     def normalize_wheel_speeds(speeds):
         max_speed = max(abs(speed) for speed in speeds)
         if max_speed > 1:
-            return tuple(speed / max_speed for speed in speeds)
+            return [speed / max_speed for speed in speeds]
         return speeds
     
     @staticmethod
     def calculate_wheel_speeds(x, y, rotation):
         if x == 0 and y == 0:
             if rotation == 0:
-                return (0, 0, 0, 0)
+                return [0, 0, 0, 0]
             else:
-                return (rotation, -rotation, rotation, -rotation)
+                return [rotation, -rotation, rotation, -rotation]
 
         angle = math.atan2(y, x)
         xy_speed = math.hypot(x,y)
@@ -208,4 +207,3 @@ class MQTTClient:
     def disconnect(self):
         self.client.loop_stop()  # Stop the loop only if loop_start was used
         self.client.disconnect()
-
