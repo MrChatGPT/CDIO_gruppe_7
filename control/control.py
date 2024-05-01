@@ -1,6 +1,4 @@
-from calendar import c
 from utils import MQTTClient, MyController
-from time import sleep
 
 controller = MyController() 
 client = MQTTClient(client_id='controller',loop_method='start')

@@ -104,7 +104,7 @@ class MotorController:
             while self.encoder.value() < target_ticks:
                 time.sleep(sleep_duration)
                 if self.encoder.get_speed() == 0 and self.encoder.value() > 1: 
-                    self.backtrack_motor(self.encoder.value() - 7, speed, sleep_duration) 
+                    self.backtrack_motor(self.encoder.value() - 7, speed, sleep_duration) # 7 appears to work best 
                     break
         finally:
             self.pickup.stop()
@@ -138,12 +138,12 @@ class MotorController:
 
         if command[1] == 1:  
             if self.encoder_thread is None or not self.encoder_thread.is_alive():
-                self.encoder_thread = threading.Thread(target=self.run_motor_with_encoder, args=(49, "forward", 0.7, 0.0001))
+                self.encoder_thread = threading.Thread(target=self.run_motor_with_encoder, args=(49, "forward", 0.7, 0.001))
                 self.encoder_thread.start()
         else:
                 if command[2] == 1:
                         if self.encoder_thread is None or not self.encoder_thread.is_alive():
-                                self.encoder_thread = threading.Thread(target=self.run_motor_with_encoder, args=(500, "backward", 1, 0.0001))
+                                self.encoder_thread = threading.Thread(target=self.run_motor_with_encoder, args=(500, "backward", 1, 0.001))
                                 self.encoder_thread.start()
                         
                 
