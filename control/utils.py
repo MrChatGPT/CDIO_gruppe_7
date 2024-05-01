@@ -8,10 +8,6 @@ from pyPS4Controller.controller import Controller
 import math
 import json
 
-
-
-
-
 class MyController(Controller):
     '''
     This class is used to define the controller object. It inherits from the Controller class in the pyPS4Controller library.
