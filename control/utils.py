@@ -22,13 +22,15 @@ class MyController(Controller):
                          connecting_using_ds4drv=connecting_using_ds4drv,event_format=event_format, **kwargs)
         self.R3_value = [0, 0]
         self.L3_value = 0
-        self.x_value = 1    
-        self.R2_value = 0
-        self.circle_value = 0
+        #self.x_value = 1    
+        #self.R2_value = 0
+        self.R1_value = 0
+        self.L1_value = 0
+        #self.circle_value = 0
         self.new_data_callback = None
         self.xy_power = 0
         self.motors = [0,0,0,0]
-        self.stick_dead_zone = 0.1
+        self.stick_dead_zone = 0.05
     
 
     # Function is called when R3 is moved
@@ -90,32 +92,54 @@ class MyController(Controller):
             self.new_data_callback()
 
     # Function is called when R2 is pressed
-    def on_R2_press(self, value):
-        self.R2_value = ((self.map_stick_value(value)+1)/2)*self.x_value
+    # def on_R2_press(self, value):
+    #     self.R2_value = ((self.map_stick_value(value)+1)/2)*self.x_value
+    #     if self.new_data_callback is not None:
+    #         self.new_data_callback()
+    
+    # def on_R2_release(self):
+    #     self.R2_value = 0
+    #     if self.new_data_callback is not None:
+    #         self.new_data_callback()
+
+    
+    # Function is called when R1 is pressed
+    def on_R1_press(self):
+        self.R1_value = 1
         if self.new_data_callback is not None:
             self.new_data_callback()
     
-    def on_R2_release(self):
-        self.R2_value = 0
+    def on_R1_release(self):
+        self.R1_value = 0
+        if self.new_data_callback is not None:
+            self.new_data_callback()
+
+    # Function is called when L1 is pressed
+    def on_L1_press(self):
+        self.L1_value = 1
+        if self.new_data_callback is not None:
+            self.new_data_callback()
+    def on_L1_release(self):
+        self.L1_value = 0
         if self.new_data_callback is not None:
             self.new_data_callback()
 
 
     # Function is called when X is pressed
-    def on_x_press(self):
-        self.x_value = self.x_value * -1
-        if self.new_data_callback is not None:
-            self.new_data_callback()
+    # def on_x_press(self):
+    #     self.x_value = self.x_value * -1
+    #     if self.new_data_callback is not None:
+    #         self.new_data_callback()
 
-    def on_circle_press(self):
-        self.circle_value = 1
-        if self.new_data_callback is not None:
-            self.new_data_callback()
+    # def on_circle_press(self):
+    #     self.circle_value = 1
+    #     if self.new_data_callback is not None:
+    #         self.new_data_callback()
     
-    def on_circle_release(self):
-        self.circle_value = 0
-        if self.new_data_callback is not None:
-            self.new_data_callback()
+    # def on_circle_release(self):
+    #     self.circle_value = 0
+    #     if self.new_data_callback is not None:
+    #         self.new_data_callback()
 
 
     def start(self):
