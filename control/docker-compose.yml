@@ -4,8 +4,8 @@ services:
   mosquitto_broker_app:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
-    ports:
-      - "1883:1883"
+    # ports:
+    #   - "1883:1883"
     volumes:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
     network_mode: host

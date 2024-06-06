@@ -20,6 +20,8 @@ def publish_controller_data():
 controller.new_data_callback = publish_controller_data()
 
 
+
+
 if __name__ == "__main__":
     controller.start()  
     client.connect()
