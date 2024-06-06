@@ -195,10 +195,7 @@ def goal_draw(image, x, y):
  
     
     # Coordinates for the goal rectangle
-    # goal_x = 352+20
-    # goal_y = 512-63
-    # goal_w = 22
-    # goal_h = 130
+    ##LEFT GOAL
     goal_x = x+20
     goal_y = y+430
     goal_w = 22
@@ -212,6 +209,22 @@ def goal_draw(image, x, y):
     image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
     cv2.putText(image, 'L', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
 
+
+
+    # Coordinates for the goal rectangle
+    ##RIGHT GOAL
+    goal_x = x+1360
+    goal_y = y+470
+    goal_w = 22
+    goal_h = 75
+    
+    start_point_goal = (goal_x, goal_y)
+    end_point_goal = (goal_x + goal_w, goal_y + goal_h)
+    color_goal = (0, 255, 0)
+    thickness_goal = 2
+    
+    image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
+    cv2.putText(image, 'R', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
 
     # # To display the image
     # cv2.imshow('Result', image)
