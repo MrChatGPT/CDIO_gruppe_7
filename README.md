@@ -6,6 +6,15 @@ Please don't read this
 This section is to give a brief understanding of the different functions in each file.
 
 ## Files
+1. ***run.py*** is the program to execute.  
+2. ***utils.py*** every function is primarily stored in here.  
+3. ***perspective_transform.py*** used to make image correction, by transforming the  perspective.  
+4. ***get_corners.py*** manually choose the points in the image in order to do an image correction (only for test purposes).  
+5. ***arena.py***  same as perspective_transform.py, here it is just incorporated with the rest of the code (or tried to :3).
+
+The images that are used is stored in test/images.
+
+_________________________________
 
 ### utils.py
 `def calibrateColors2(image)`: - Used for calibrating the given image and find the correct colors manually.
@@ -23,7 +32,7 @@ This section is to give a brief understanding of the different functions in each
 
 
 ###  run.py
-`def basicDetectofImage():` - Detects the obstacles, all basic. i.e. the balls, egg, and colors.
+`def basicDetectofImage():` - Detects the obstacles, all basic. I.e. the balls, egg, and colors.
 
 `def getMeSomeBallInfo():` - Enable or disable the perspective transform. But this function is used to to image correction, to detect balls, egg, colors, and get the xy coordinates from the balls.
 
