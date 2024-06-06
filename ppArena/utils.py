@@ -191,12 +191,16 @@ def getImage():
 
 
 #TESTING
-def goal_draw(image):
+def goal_draw(image, x, y):
  
     
     # Coordinates for the goal rectangle
-    goal_x = 352+20
-    goal_y = 512-63
+    # goal_x = 352+20
+    # goal_y = 512-63
+    # goal_w = 22
+    # goal_h = 130
+    goal_x = x+20
+    goal_y = y+430
     goal_w = 22
     goal_h = 130
     
@@ -206,11 +210,11 @@ def goal_draw(image):
     thickness_goal = 2
     
     image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
-    cv2.putText(image, '', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
+    cv2.putText(image, 'L', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
 
 
-    # To display the image
-    cv2.imshow('Result', image)
+    # # To display the image
+    # cv2.imshow('Result', image)
     
     return image
 
@@ -643,6 +647,7 @@ def detect_ball_colors(image):
             if(area > 1250000 and area < 1460000):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+                image = goal_draw(image, x, y)
               
             cv2.putText(image, "Red Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
