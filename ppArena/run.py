@@ -38,22 +38,25 @@ has not occured earlier..
 This has to be solved.
 """
 
-#Without image correction
+#Without image correction (Transform)
 
 def basicDetectofImage():
     circle_detection(image)  #THIS IS THE GOOD SHIT
     detect_ball_colors(image)
 
-#Used for detecting objects in picture, and the colors in the image (with image correction)
-# def getMeSomeBallInfo():
-#     # image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
-#     image, circles_info = circle_detection(image)  # THIS IS THE GOOD SHIT
-#     detect_ball_colors(image)
 
-#     # Print stored circles information
-#     print("Detected and Stored Circles:")
-#     for circle in circles_info:
-#         print(circle)
+
+
+#Used for detecting objects in picture, and the colors in the image (with image correction, (Transform))
+def getMeSomeBallInfo():
+    # image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
+    image, circles_info = circle_detection(image)  # THIS IS THE GOOD SHIT
+    detect_ball_colors(image)
+
+    # Print stored circles information
+    print("Detected and Stored Circles:")
+    for circle in circles_info:
+        print(circle)
 
 
 """
@@ -68,36 +71,16 @@ is the same orange ball
 
 
 
-# calibrateColors2(image) #new thres
-
-
-
-# detect_ball_colorsVIDEO()
-
-# video()
-
-# detect_ball_colors(image)
-# image = perspectiveTrans(image)
-# CannyEdgeGray(image)
+def wBabyCanny():
+    detect_ball_colors(image)
+    image = perspectiveTrans(image)
+    CannyEdgeGray(image)
 
 # cv2.imshow('image of cross', image)
 
 
 #testcrosssearch(image)
 
-# egg_detection(image) #Noooo.. Not using this...
-
-# imgg = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') 
-
-# gray = cv2.cvtColor(imgg, cv2.COLOR_BGR2GRAY) 
-
-# cv2.imshow('gray', gray)
-# cv2.imwrite('pic38gray.png', gray)
-# imageora = image
-# imagewhi = image
-#calibrateColors(image) #old thres
-# calibrateColors2(imageora)  #new thres
-# calibrateColors2(imagewhi)  #new thres
 
 #image = generateArenaImage(1920, 1, 9)
 
@@ -120,6 +103,11 @@ is the same orange ball
 
 
 
+#################################################################################################
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
+########################            RUN THE DESIRED FUNCTION             ######################## 
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
+#################################################################################################
 
 basicDetectofImage()
 
@@ -127,11 +115,14 @@ basicDetectofImage()
 
 
 
+
+
+
+
+
+
+
 int
-# while True:
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-    
-#         break
 while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
