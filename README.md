@@ -21,8 +21,7 @@ _________________________________
 ### utils.py
 `def calibrateColors2(image)`: - Used for calibrating the given image and find the correct colors manually.
 
-
-`def arena_draw(image, x, y, w, h, area):` - Draws the arenas circumference based on another function that detects the red color in the photo. Therefore the biggest red obstacle in photo, is the arenas circumference.
+`def goal_draw(image, x, y):` - Draws the goals based on the xy coordinates of the big red arena.
 
 `def square_draw(image, x, y, w, h, area):` - Used for the red cross.
 
