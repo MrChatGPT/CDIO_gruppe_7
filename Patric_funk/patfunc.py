@@ -12,7 +12,7 @@ class Egg:
     pass
 
 # Example list of objects including a cross, a car, and an egg
-objects = [Cross(), Car(0, 0, 0), Egg()]
+objects = [Cross(), Car(3, 5, 0), Egg()]
 
 def move_to_target(target_position):
     # Find the car object in the list
