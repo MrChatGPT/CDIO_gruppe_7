@@ -1,16 +1,18 @@
 Please don't read this
 
 
-
 # Overview of ppArena
-This section is to give a brief understanding of the different functions in each file.
+This section is to give a brief understanding of your life..
 
 ## Files
 1. ***run.py*** is the program to execute.  
 2. ***utils.py*** every function is primarily stored in here.  
 3. ***perspective_transform.py*** used to make image correction, by transforming the  perspective.  
 4. ***get_corners.py*** manually choose the points in the image in order to do an image correction (only for test purposes).  
-5. ***arena.py***  same as perspective_transform.py, here it is just incorporated with the rest of the code (or tried to :3).
+5. ***arena.py***  same as perspective_transform.py, here it is just incorporated with the rest of the code (or tried to :3).     
+
+
+
 
 The images that are used is stored in test/images.
 
