@@ -12,7 +12,7 @@ class Egg:
     pass
 
 # Example list of objects including a cross, a car, and an egg
-objects = [Cross(), Car(3, 5, 0), Egg()]
+objects = [Cross(), Car(0, 0, 0), Egg()]
 
 def move_to_target(target_position):
     # Find the car object in the list
@@ -31,7 +31,15 @@ def move_to_target(target_position):
     # Move in the y direction
     if current_y != target_y:
         if current_y < target_y:
-            adjust_angle(car, 0)
+            #adjust_angle(car, 0)
+            if car.angle == 0:
+                adjust_angle(car, 0)
+            elif car.angle == 90:
+                adjust_angle(car, -90)
+            elif car.angle == 180:
+                adjust_angle(car, 180)
+            elif car.angle == 270:
+                adjust_angle(car, 90)
             while current_y < target_y:
                 move_forward(car, 1)
                 current_y += 1
@@ -44,12 +52,27 @@ def move_to_target(target_position):
     # Move in the x direction
     if current_x != target_x:
         if current_x < target_x:
-            adjust_angle(car, 90)
+            #adjust_angle(car, 90)
+            if car.angle == 0:
+                adjust_angle(car, 90)
+            elif car.angle == 90:
+                adjust_angle(car, 0)
+            elif car.angle == 180:
+                adjust_angle(car, -90)
+            elif car.angle == 270:
+                adjust_angle(car, 180)
             while current_x < target_x:
                 move_forward(car, 1)
                 current_x += 1
         else:
-            adjust_angle(car, 270)
+            if car.angle == 0:
+                adjust_angle(car, -90)
+            elif car.angle == 90:
+                adjust_angle(car, 180)
+            elif car.angle == 180:
+                adjust_angle(car, 90)
+            elif car.angle == 270:
+                adjust_angle(car, 0)
             while current_x > target_x:
                 move_forward(car, 1)
                 current_x -= 1
@@ -71,8 +94,13 @@ def move_forward(car, step):
         car.x -= step
 
 def adjust_angle(car, new_angle):
-    car.angle = new_angle % 360
-    print(f"Adjusting angle to {car.angle} degrees")
+    if car.angle+new_angle < 0:
+        new_angle = 270
+    print(f"Adjusting angle from {car.angle} to {car.angle+new_angle} degrees")
+    car.angle += new_angle % 360
+    if car.angle == 360:
+        car.angle = 0
+
 
 # Example usage
 #my pos = 3,5   targ pos = 0,0 expected angle = 180+90 = 270
@@ -81,7 +109,7 @@ move_to_target(target_position)
 #my pos = 0,0 targ pos = 3,5 expected angle = 0+90 = 90
 target_position = (3, 5)
 move_to_target(target_position)
-#my pos = 3,5 targ pos = 2,5 expected angle = 180+90 = 270 (eller -90)
+#my pos = 3,5 targ pos = 2,5 expected angle = 0+270 = 270 
 target_position = (2, 5)
 move_to_target(target_position)
 #my pos = 2,5 targ pos = 4,6 expected angle = 0+90 = 90
