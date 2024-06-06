@@ -155,7 +155,7 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-    image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
+    # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
@@ -163,18 +163,12 @@ def getImage():
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
-
- 
-  
-   
-  
-
+    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
 #    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50egghorizontal.jpg') 
     return image
 
-
-def arena_draw(image, x, y, w, h, area):
+#THE REAL FUNCTION
+# def arena_draw(image, x, y, w, h, area):
     # Start coordinate, here (x, y), represents the top left corner of rectangle 
     start_point = (x, y)
     
@@ -194,6 +188,40 @@ def arena_draw(image, x, y, w, h, area):
     cv2.putText(image, 'arena', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
     
     return image
+
+
+#TESTING
+def goal_draw(image):
+ 
+    
+    # Coordinates for the goal rectangle
+    goal_x = 352+20
+    goal_y = 512-63
+    goal_w = 22
+    goal_h = 130
+    
+    start_point_goal = (goal_x, goal_y)
+    end_point_goal = (goal_x + goal_w, goal_y + goal_h)
+    color_goal = (0, 255, 0)
+    thickness_goal = 2
+    
+    image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
+    cv2.putText(image, '', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
+
+
+    # To display the image
+    cv2.imshow('Result', image)
+    
+    return image
+
+
+
+
+
+
+
+
+
 
 
 #Used for the cross, but not limited to
@@ -874,104 +902,3 @@ def CannyEdgeGray(image):
 
 
 
-
-
-def testcrosssearch(image):
-    #https://pyimagesearch.com/2014/04/21/building-pokedex-python-finding-game-boy-screen-step-4-6/
-    
-    # image = cv2.imread(argparse["query"])
-    ratio = image.shape[0] / 400
-    orig = image.copy()
-    image = imutils.resize(image, height = 400)
-
-    # convert the image to grayscale, blur it, and find edges
-    # in the image
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    gray = cv2.bilateralFilter(gray, 11, 17, 17)
-    edged = cv2.Canny(gray, 30, 200)
-    cv2.imshow("canny", edged)
-
-    #edged.copy(), copy of our image, caused by findContours manipulates the image that is passed
-    #cv2.RETR_TREE tells OpenCV to compute the hierarchy (relationship) between contours
-    #cv2.CV_CHAIN_APPROX_SIMPLE tells OpenCV to compress the contours to save space 
-    #In return, the cv2.findContours function gives us a list of contours that it has found, but we have to parse it
-    cnts = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-    cnts = imutils.grab_contours(cnts)
-    cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:10]
-    screenCnt = None
-
-
-    # loop over our contours
-    for c in cnts:
-       # approximate the contour
-       peri = cv2.arcLength(c, True)
-       approx = cv2.approxPolyDP(c, 0.015 * peri, True)
-       # if our approximated contour has twelve points, then
-       # we can assume that we have found our cross
-       if len(approx) == 12:
-         screenCnt = approx
-         break
-       
-    cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2) 
-    cv2.imshow("fingers crossed", image) 
-    # cv2.waitKey(0)
-
-    # pts = screenCnt.reshape(12, 2)
-    # rect = np.zeros((12, 2), dtype = "float32")
-
-    # # the top-left point has the smallest sum whereas the
-    # # bottom-right has the largest sum
-    # s = pts.sum(axis = 1)
-    # rect[0] = pts[np.argmin(s)]
-    # rect[2] = pts[np.argmax(s)]
-    # #   compute the difference between the points -- the top-right
-    # # will have the minumum difference and the bottom-left will
-    # # have the maximum difference
-    # diff = np.diff(pts, axis = 1)
-    # rect[1] = pts[np.argmin(diff)]
-    # rect[3] = pts[np.argmax(diff)]
-    # # multiply the rectangle by the original ratio
-    # rect *= ratio
-
-    # # now that we have our rectangle of points, let's compute
-    # # the width of our new image
-    # (tl, tr, br, bl) = rect
-    # widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-    # widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-    # # ...and now for the height of our new image
-    # heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-    # heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-    # # take the maximum of the width and height values to reach
-    # # our final dimensions
-    # maxWidth = max(int(widthA), int(widthB))
-    # maxHeight = max(int(heightA), int(heightB))
-    # # construct our destination points which will be used to
-    # # map the screen to a top-down, "birds eye" view
-    # dst = np.array([
-	# [0, 0],
-	# [maxWidth - 1, 0],
-	# [maxWidth - 1, maxHeight - 1],
-	# [0, maxHeight - 1]], dtype = "float32")
-    # # calculate the perspective transform matrix and warp
-    # # the perspective to grab the screen
-    # M = cv2.getPerspectiveTransform(rect, dst)
-    # warp = cv2.warpPerspective(orig, M, (maxWidth, maxHeight))
-
-    # # convert the warped image to grayscale and then adjust
-    # # the intensity of the pixels to have minimum and maximum
-    # # values of 0 and 255, respectively
-    # warp = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
-    # arp = exposure.rescale_intensity(warp, out_range = (0, 255))
-    # # the pokemon we want to identify will be in the top-right
-    # # corner of the warped image -- let's crop this region out
-    # (h, w) = warp.shape
-    # (dX, dY) = (int(w * 0.4), int(h * 0.45))
-    # crop = warp[10:dY, w - dX:w - 10]
-    # # save the cropped image to file
-    # cv2.imwrite("cropped.png", crop)
-    # # show our images
-    # cv2.imshow("image", image)
-    # cv2.imshow("edge", edged)
-    # cv2.imshow("warp", imutils.resize(warp, height = 400))
-    # cv2.imshow("crop", imutils.resize(crop, height = 400))
-    # cv2.waitKey(0)

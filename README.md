@@ -2,7 +2,7 @@ Please don't read this
 
 
 # Overview of ppArena
-This section is to give a brief understanding of your life..
+The purpose of this section, is to give you a brief understanding of your life..
 
 ## Files
 1. ***run.py*** is the program to execute.  
