@@ -22,7 +22,7 @@ This section is to give a brief understanding of the different functions in each
 `def detect_ball_colors(image):` - The previous found color ranges are here used in order to differentiate between the specific colors in the the photo. 
 
 
-## run.py
+###  run.py
 `def basicDetectofImage():` - Detects the obstacles, all basic. i.e. the balls, egg, and colors.
 
 `def getMeSomeBallInfo():` - Enable or disable the perspective transform. But this function is used to to image correction, to detect balls, egg, colors, and get the xy coordinates from the balls.
