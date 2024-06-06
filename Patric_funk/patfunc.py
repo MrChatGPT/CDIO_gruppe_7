@@ -75,5 +75,15 @@ def adjust_angle(car, new_angle):
     print(f"Adjusting angle to {car.angle} degrees")
 
 # Example usage
+#my pos = 3,5   targ pos = 0,0 expected angle = 180+90 = 270
 target_position = (0, 0)
+move_to_target(target_position)
+#my pos = 0,0 targ pos = 3,5 expected angle = 0+90 = 90
+target_position = (3, 5)
+move_to_target(target_position)
+#my pos = 3,5 targ pos = 2,5 expected angle = 180+90 = 270 (eller -90)
+target_position = (2, 5)
+move_to_target(target_position)
+#my pos = 2,5 targ pos = 4,6 expected angle = 0+90 = 90
+target_position = (4, 6)
 move_to_target(target_position)
