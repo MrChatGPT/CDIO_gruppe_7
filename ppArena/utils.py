@@ -8,7 +8,7 @@ from turtle import up
 import cv2
 from cv2 import GaussianBlur
 import numpy as np
-from config import *
+# from config import *
 import random
 import imutils
 from imutils import paths
@@ -160,7 +160,7 @@ def getImage():
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
+   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
@@ -196,7 +196,7 @@ def arena_draw(image, x, y, w, h, area):
     return image
 
 
-
+#Used for the cross, but not limited to
 def square_draw(image, x, y, w, h, area):
     # # Start coordinate, here (x, y)
     # start_point = (x+60, y)
@@ -314,84 +314,84 @@ def egg_draw(image, x, y, w, h, area):
 
 
 
-##Maybe "parse" the egg up in two circles. a small and a big one THIS IS NOT IN USE
-def egg_detection(image):
-    # Convert to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# ##Maybe "parse" the egg up in two circles. a small and a big one THIS IS NOT IN USE
+# def egg_detection(image):
+#     # Convert to grayscale
+#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Apply a blur
-    """ 
-    *Parameter one, gray, is the source image converted to grayscale. 
-    Making the algorithms that operate on the image computationally less intensive.
+#     # Apply a blur
+#     """ 
+#     *Parameter one, gray, is the source image converted to grayscale. 
+#     Making the algorithms that operate on the image computationally less intensive.
 
-    **Parameter two and three is the kernel size. Which determines the width and height of the Gaussian filter. 
-    A kernel size of (9, 9) means that the filter window is 9 pixels by 9 pixels. 
-    The larger the kernel, the stronger the blur effect.
+#     **Parameter two and three is the kernel size. Which determines the width and height of the Gaussian filter. 
+#     A kernel size of (9, 9) means that the filter window is 9 pixels by 9 pixels. 
+#     The larger the kernel, the stronger the blur effect.
     
-    ***The standard deviation in the X and Y directions; when set to 0, it is calculated from the kernel size. 
-    A higher value for standard deviation means more blur.
-    """
-    gray_blurred = cv2.GaussianBlur(gray, (9, 9), 0)  
+#     ***The standard deviation in the X and Y directions; when set to 0, it is calculated from the kernel size. 
+#     A higher value for standard deviation means more blur.
+#     """
+#     gray_blurred = cv2.GaussianBlur(gray, (9, 9), 0)  
 
 
     
-    # Perform Hough Circle Transform (Detect circles)
-    """
-    *cv2.HOUGH_GRADIENT, this method is the only one available for circle detection in OpenCV and uses the gradient information of the image.
+#     # Perform Hough Circle Transform (Detect circles)
+#     """
+#     *cv2.HOUGH_GRADIENT, this method is the only one available for circle detection in OpenCV and uses the gradient information of the image.
     
-    **dp=1 means the accumulator has the same resolution as the input image. 
-    If dp is greater, the accumulator resolution is reduced, and vice versa.
+#     **dp=1 means the accumulator has the same resolution as the input image. 
+#     If dp is greater, the accumulator resolution is reduced, and vice versa.
    
-    ***minDist=40: The minimum distance between the centers of detected circles.
+#     ***minDist=40: The minimum distance between the centers of detected circles.
     
-    ****param1=50: The higher threshold of the two passed to the Canny edge detector (the lower one is half of this). It's used in the edge detection stage.
+#     ****param1=50: The higher threshold of the two passed to the Canny edge detector (the lower one is half of this). It's used in the edge detection stage.
 
-    *****param2=30: The accumulator threshold for the circle centers at the detection stage. 
-    The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
+#     *****param2=30: The accumulator threshold for the circle centers at the detection stage. 
+#     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
 
-    ******minRadius=1 and maxRadius=40: The minimum and maximum radius of the circles to be detected.
-    """
-    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
-                               param1=50, param2=30, minRadius=25, maxRadius=30)
+#     ******minRadius=1 and maxRadius=40: The minimum and maximum radius of the circles to be detected.
+#     """
+#     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
+#                                param1=50, param2=30, minRadius=25, maxRadius=30)
 
-  ##
+#   ##
 
-     # Filter out the circles that correspond to the egg
-    if circles is not None:
-        circles = np.uint16(np.around(circles))
-        for i in circles[0, :]:
-            x, y, r = i[0], i[1], i[2]  # x, y center and radius of circle
+#      # Filter out the circles that correspond to the egg
+#     if circles is not None:
+#         circles = np.uint16(np.around(circles))
+#         for i in circles[0, :]:
+#             x, y, r = i[0], i[1], i[2]  # x, y center and radius of circle
             
-            # Draw the outer circle
-            cv2.circle(image, (x, y), r, (0, 255, 0), 2)
-            print(f"The center of the circle is at (x={x}, y={y}) and radius is r={r}") #eggs radius is 27
-            ##y axis from 225 to 257
+#             # Draw the outer circle
+#             cv2.circle(image, (x, y), r, (0, 255, 0), 2)
+#             print(f"The center of the circle is at (x={x}, y={y}) and radius is r={r}") #eggs radius is 27
+#             ##y axis from 225 to 257
 
-            # Draw the center of the circle
-            cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
+#             # Draw the center of the circle
+#             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
 
-            ####Detection of egg is not properly configured when is laying in different angles...
-            center_coordinates = (x,y+10)
-            axesLength = (30,45)
-            # axesLength = (34,58)
-            angle = 0
-            startAngle = 0
-            endAngle = 360
-
-
-            image = cv2.ellipse(image, center_coordinates, axesLength, 
-            angle, startAngle, endAngle, (0, 255, 0), 3) 
+#             ####Detection of egg is not properly configured when is laying in different angles...
+#             center_coordinates = (x,y+10)
+#             axesLength = (30,45)
+#             # axesLength = (34,58)
+#             angle = 0
+#             startAngle = 0
+#             endAngle = 360
 
 
-            # Put text 'Egg' near the detected egg
-            cv2.putText(image, 'Egg', (x - r, y - r),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
-
-    # Display the result
-    # cv2.imshow('Detected eggs', image)
+#             image = cv2.ellipse(image, center_coordinates, axesLength, 
+#             angle, startAngle, endAngle, (0, 255, 0), 3) 
 
 
-    # return image
+#             # Put text 'Egg' near the detected egg
+#             cv2.putText(image, 'Egg', (x - r, y - r),
+#                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+
+#     # Display the result
+#     # cv2.imshow('Detected eggs', image)
+
+
+#     # return image
 
 
 def circle_detection(image):
@@ -710,121 +710,121 @@ def detect_ball_colors(image):
 
 
 
-def detect_ball_colorsVIDEO():
-    # Capturing video through webcam 
-    webcam = cv2.VideoCapture(0) 
+# def detect_ball_colorsVIDEO():
+#     # Capturing video through webcam 
+#     webcam = cv2.VideoCapture(0) 
     
-    # Start a while loop 
-    while(1): 
+#     # Start a while loop 
+#     while(1): 
         
-        # Reading the video from the 
-        # webcam in image frames 
-        _, image = webcam.read() 
+#         # Reading the video from the 
+#         # webcam in image frames 
+#         _, image = webcam.read() 
     
-        # Convert the imageFrame in  
-        # BGR(RGB color space) to  
-        # HSV(hue-saturation-value) 
-        # color space 
-        hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+#         # Convert the imageFrame in  
+#         # BGR(RGB color space) to  
+#         # HSV(hue-saturation-value) 
+#         # color space 
+#         hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
         
-        # Set range for red color and  
-        # define mask 
-        red_lower = np.array([0, 113, 180], np.uint8) #HSV
-        red_upper = np.array([9, 255, 255], np.uint8) #HSV
-        red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
+#         # Set range for red color and  
+#         # define mask 
+#         red_lower = np.array([0, 113, 180], np.uint8) #HSV
+#         red_upper = np.array([9, 255, 255], np.uint8) #HSV
+#         red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
     
-        # Set range for orange color and  
-        # define mask  
-        orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-        orange_upper = np.array([65, 211, 255], np.uint8) #HSV
-        orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
+#         # Set range for orange color and  
+#         # define mask  
+#         orange_lower = np.array([11, 121, 215], np.uint8) #HSV
+#         orange_upper = np.array([65, 211, 255], np.uint8) #HSV
+#         orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
     
-        # Set range for white color and 
-        # define mask 
-        white_lower = np.array([6, 0, 191], np.uint8) #HSV
-        white_upper = np.array([179, 42, 255], np.uint8) #HSV
-        white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
+#         # Set range for white color and 
+#         # define mask 
+#         white_lower = np.array([6, 0, 191], np.uint8) #HSV
+#         white_upper = np.array([179, 42, 255], np.uint8) #HSV
+#         white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
-        # Set range for blue color and 
-        # define mask 
-        blue_lower = np.array([95, 66, 141], np.uint8) #HSV
-        blue_upper = np.array([113, 150, 205], np.uint8) #HSV
-        blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+#         # Set range for blue color and 
+#         # define mask 
+#         blue_lower = np.array([95, 66, 141], np.uint8) #HSV
+#         blue_upper = np.array([113, 150, 205], np.uint8) #HSV
+#         blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
     
-        # Morphological Transform, Dilation 
-        # for each color and bitwise_and operator 
-        # between imageFrame and mask determines 
-        # to detect only that particular color 
-        kernel = np.ones((5, 5), "uint8") 
+#         # Morphological Transform, Dilation 
+#         # for each color and bitwise_and operator 
+#         # between imageFrame and mask determines 
+#         # to detect only that particular color 
+#         kernel = np.ones((5, 5), "uint8") 
         
-        # For red color 
-        red_mask = cv2.dilate(red_mask, kernel) 
-        res_red = cv2.bitwise_and(image, image, mask = red_mask) 
+#         # For red color 
+#         red_mask = cv2.dilate(red_mask, kernel) 
+#         res_red = cv2.bitwise_and(image, image, mask = red_mask) 
         
-        # For orange color 
-        orange_mask = cv2.dilate(orange_mask, kernel) 
-        res_orange = cv2.bitwise_and(image, image, mask = orange_mask) 
+#         # For orange color 
+#         orange_mask = cv2.dilate(orange_mask, kernel) 
+#         res_orange = cv2.bitwise_and(image, image, mask = orange_mask) 
         
-        # For white color 
-        white_mask = cv2.dilate(white_mask, kernel) 
-        res_white = cv2.bitwise_and(image, image, mask = white_mask) 
+#         # For white color 
+#         white_mask = cv2.dilate(white_mask, kernel) 
+#         res_white = cv2.bitwise_and(image, image, mask = white_mask) 
         
-        # For blue color 
-        blue_mask = cv2.dilate(blue_mask, kernel) 
-        res_blue = cv2.bitwise_and(image, image, mask = blue_mask) 
+#         # For blue color 
+#         blue_mask = cv2.dilate(blue_mask, kernel) 
+#         res_blue = cv2.bitwise_and(image, image, mask = blue_mask) 
         
-        # Creating contour to track red color 
-        contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+#         # Creating contour to track red color 
+#         contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
         
-        for pic, contour in enumerate(contours): 
-            area = cv2.contourArea(contour) 
-            if(area > 300): 
-                x, y, w, h = cv2.boundingRect(contour) 
-                image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2) 
-                cv2.putText(image, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))     
+#         for pic, contour in enumerate(contours): 
+#             area = cv2.contourArea(contour) 
+#             if(area > 300): 
+#                 x, y, w, h = cv2.boundingRect(contour) 
+#                 image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2) 
+#                 cv2.putText(image, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))     
       
-        # Creating contour to track orange color 
-        contours, hierarchy = cv2.findContours(orange_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+#         # Creating contour to track orange color 
+#         contours, hierarchy = cv2.findContours(orange_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
         
-        for pic, contour in enumerate(contours): 
-            area = cv2.contourArea(contour) 
-            if(area > 300): 
-                x, y, w, h = cv2.boundingRect(contour) 
-                image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)  
-                cv2.putText(image, "Orange Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255)) 
+#         for pic, contour in enumerate(contours): 
+#             area = cv2.contourArea(contour) 
+#             if(area > 300): 
+#                 x, y, w, h = cv2.boundingRect(contour) 
+#                 image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)  
+#                 cv2.putText(image, "Orange Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255)) 
       
-        # Creating contour to track white color 
-        contours, hierarchy = cv2.findContours(white_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-        for pic, contour in enumerate(contours): 
-            area = cv2.contourArea(contour)
+#         # Creating contour to track white color 
+#         contours, hierarchy = cv2.findContours(white_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+#         for pic, contour in enumerate(contours): 
+#             area = cv2.contourArea(contour)
         
 
-        # Program Termination 
-        cv2.imshow("Multiple Color Detection in Real-TIme", image) 
-        if cv2.waitKey(10) & 0xFF == ord('q'): 
-           webcam.release() 
-           cv2.destroyAllWindows() 
-           break
+#         # Program Termination 
+#         cv2.imshow("Multiple Color Detection in Real-TIme", image) 
+#         if cv2.waitKey(10) & 0xFF == ord('q'): 
+#            webcam.release() 
+#            cv2.destroyAllWindows() 
+#            break
 
 
  
-def video():
-    # Capturing video through webcam 
-    webcam = cv2.VideoCapture(0) 
+# def video():
+#     # Capturing video through webcam 
+#     webcam = cv2.VideoCapture(0) 
     
-    # Start a while loop 
-    while(1): 
+#     # Start a while loop 
+#     while(1): 
         
-        # Reading the video from the 
-        # webcam in image frames 
-        _, image = webcam.read() 
+#         # Reading the video from the 
+#         # webcam in image frames 
+#         _, image = webcam.read() 
 
-            # Program Termination 
-        cv2.imshow("Multiple Color Detection in Real-TIme", image) 
-        if cv2.waitKey(10) & 0xFF == ord('q'): 
-           webcam.release() 
-           cv2.destroyAllWindows() 
-           break
+#             # Program Termination 
+#         cv2.imshow("Multiple Color Detection in Real-TIme", image) 
+#         if cv2.waitKey(10) & 0xFF == ord('q'): 
+#            webcam.release() 
+#            cv2.destroyAllWindows() 
+#            break
 
     
 

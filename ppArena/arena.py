@@ -1,5 +1,5 @@
 from utils import *
-from robot import Robot
+# from robot import Robot
 import cv2
 import numpy as np
 #from pyimagesearch import imutils
@@ -8,39 +8,6 @@ import numpy as np
 import argparse
 import imutils
 
-
-class Arena():
-    """Class to represent the arena"""
-
-    def __init__(self, image):
-        self.oldState = updateArena(image)
-        self.newState = self.oldState
-        self.robot = Robot(self.newState)
-
-    def getOldState(self):
-        return self.oldState
-
-    def getNewState(self):
-        return self.newState
-
-    def updateState(self, image):
-        """Function to update the arena state"""
-        self.oldState = self.newState
-        self.newState = updateArena(image)
-        self.robot.setHead(self.newState[2])
-        self.robot.setTail(self.newState[3])
-
-    def planAction(self):
-        """Function to plan the next action"""
-        # TODO: Implement this
-        #   Drive to goal
-
-        pass
-
-    def executeAction(self):
-        """Function to execute the next action"""
-        # TODO: Implement this
-        pass
 
 
 def perspectiveTrans(image):
@@ -75,18 +42,18 @@ def perspectiveTrans(image):
         # [1746.9998 , 1038.9999]
         ######################
         #cross' xy coordinates
-        [ 1016,  440],
-        [1184,  440],
-        [1184,  607],
-        [ 1016,  607]
+        # [ 1016,  440],
+        # [1184,  440],
+        # [1184,  607],
+        # [ 1016,  607]
         #####################
 
         ######################
         #no. 1 pic in the list in utils
-        # [ 360, 1055],
-        # [ 288,   43],
-        # [1704,   50],
-        # [1687, 1041]
+        [ 360, 1055],
+        [ 288,   43],
+        [1704,   50],
+        [1687, 1041]
         ########################
         # [372, 15],
         # [1751, 17],

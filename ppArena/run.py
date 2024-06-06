@@ -11,15 +11,6 @@ image = getImage()
 #Look at this link for measuring the distance
 #https://pyimagesearch.com/2015/01/19/find-distance-camera-objectmarker-using-python-opencv/
 
-# arena = Arena(image)
-
-# i = 0  # Initialize the variable "i"
-
-# while i < 100:
-#     image = getImage()
-#     arena.updateState(image)
-#     i += 1
-#     state = arena.getNewState()
 
 #calibrateColors(image) #Shown without indicators/names
 # denoise = cv2.fastNlMeansDenoisingColored(image, None, 10, 100, 7, 21) 
@@ -48,20 +39,22 @@ This has to be solved.
 """
 
 #Without image correction
-# circle_detection(image)  #THIS IS THE GOOD SHIT
-# detect_ball_colors(image)
+
+def basicDetectofImage():
+    circle_detection(image)  #THIS IS THE GOOD SHIT
+    detect_ball_colors(image)
 
 #Used for detecting objects in picture, and the colors in the image (with image correction)
-# image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
-# image, circles_info = circle_detection(image)  #THIS IS THE GOOD SHIT
-# detect_ball_colors(image)
+# def getMeSomeBallInfo():
+#     # image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
+#     image, circles_info = circle_detection(image)  # THIS IS THE GOOD SHIT
+#     detect_ball_colors(image)
 
+#     # Print stored circles information
+#     print("Detected and Stored Circles:")
+#     for circle in circles_info:
+#         print(circle)
 
-
-# Print stored circles information
-# print("Detected and Stored Circles:")
-# for circle in circles_info:
-#     print(circle)
 
 """
 (x=550, y=980) w=32 h=42 area=776.5 
@@ -69,6 +62,11 @@ and this
 {'center': (566, 992), 'radius': 16, 'label': 'Ball'}
 is the same orange ball
 """
+
+
+
+
+
 
 # calibrateColors2(image) #new thres
 
@@ -85,7 +83,7 @@ is the same orange ball
 # cv2.imshow('image of cross', image)
 
 
-testcrosssearch(image)
+#testcrosssearch(image)
 
 # egg_detection(image) #Noooo.. Not using this...
 
@@ -118,6 +116,16 @@ testcrosssearch(image)
 
 #calibrateColors(image)
 #paintArenaState(image, state)
+
+
+
+
+
+basicDetectofImage()
+
+
+
+
 
 int
 # while True:
