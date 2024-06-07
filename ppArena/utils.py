@@ -573,8 +573,8 @@ def detect_ball_colors(image):
     
     # Set range for red color and  
     # define mask 
-    red_lower = np.array([0, 113, 180], np.uint8) #HSV
-    red_upper = np.array([9, 255, 255], np.uint8) #HSV
+    red_lower = np.array([6, 128, 244], np.uint8) #HSV  0, 113, 180
+    red_upper = np.array([10, 163, 255], np.uint8) #HSV  9, 255, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
 

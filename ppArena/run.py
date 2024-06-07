@@ -75,7 +75,7 @@ def wBabyCanny(image):
     circle_detection(image) 
     detect_ball_colors(image)
     #CannyEdgeGray(image)
-    cv2.imshow('New image', image)
+    #cv2.imshow('New image', image)
 
 
 #testcrosssearch(image)
@@ -115,7 +115,8 @@ def wBabyCanny(image):
 
 wBabyCanny(image)
 
-
+# image = detect_arena(image)
+# calibrateColors2(image)
 
 
 

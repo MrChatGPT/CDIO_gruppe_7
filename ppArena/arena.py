@@ -131,7 +131,7 @@ def detect_arena(image):
       
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 300): 
+        if(area > 100000): 
             x, y, w, h = cv2.boundingRect(contour) 
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
