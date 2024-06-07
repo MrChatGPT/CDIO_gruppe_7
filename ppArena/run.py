@@ -70,9 +70,11 @@ is the same orange ball
 
 
 def wBabyCanny(image):
-    detect_ball_colors(image)
-    image = perspectiveTrans(image)
-    CannyEdgeGray(image)
+    image = detect_arena(image)
+    # image = perspectiveTrans(image)
+    circle_detection(image) 
+   # detect_ball_colors(image)
+    #CannyEdgeGray(image)
     cv2.imshow('New image', image)
 
 
