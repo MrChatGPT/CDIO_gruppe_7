@@ -187,6 +187,7 @@ def perspectiveTransDyn(image,x,y,w,h):
     # w=1395 h=1024
     # width = 1024#1395 # 1920 #1600
     # height = 1395# 1024 #1080 #1000
+    print(f"width is: w={w} , height is h={h}\nIn perspective trans dyn")
     width = w #1,536 #1417#1395  #1395 # 1920 #1600
     height = h #864 #765 #1024 # 1024 #1080 #1000
     correct_corners = np.float32([

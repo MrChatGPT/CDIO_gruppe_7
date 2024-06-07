@@ -32,8 +32,16 @@ _________________________________
 `def detect_ball_colors(image):` - The previous found color ranges are here used in order to differentiate between the specific colors in the the photo. 
 
 
+
 ###  run.py
 `def basicDetectofImage():` - Detects the obstacles, all basic. I.e. the balls, egg, and colors.
 
-`def getMeSomeBallInfo():` - Enable or disable the perspective transform. But this function is used to to image correction, to detect balls, egg, colors, and get the xy coordinates from the balls.
+`def getMeSomeBallInfo():` -  Detects the obstacles, all basic. I.e. the balls, egg, and colors and get the xy coordinates from the balls.
 
+`def wBabyCanny(image):` - Used when transforming the perspective. First the arena is detected, and then detect the obstacles, all basic. I.e. the balls, egg, and colors.
+
+
+### arena.py
+`def detect_arena(image):` - Detects only the big red square (arena) in the picture.
+
+`def perspectiveTransDyn(image,x,y,w,h):` - Used to determine the transformed picture, dynamically.
