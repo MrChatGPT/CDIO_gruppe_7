@@ -136,18 +136,19 @@ def detect_arena(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            if(area > 8000 and area < 15000):
-                box, min_area_rect = square_draw(image,x,y,w,h,area)
-                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                                        
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
+            # if(area > 8000 and area < 15000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            print(f"Before drawing the area")                             
             if(area > 1250000 and area < 1460000):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                 image = goal_draw(image, x, y)
                 image = perspectiveTransDyn(image,x,y,w,h)
+                print(f"after drawing the area")
               
-            cv2.putText(image, "Red Colour", (x, y), 
+            cv2.putText(image, "Red Colour arena", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
                         (0, 0, 255))     
   

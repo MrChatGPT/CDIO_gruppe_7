@@ -661,12 +661,12 @@ def detect_ball_colors(image):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                                         
-            if(area > 1250000 and area < 1460000):
-                box, min_area_rect = square_draw(image,x,y,w,h,area)
-                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                image = goal_draw(image, x, y)
+            # if(area > 1250000 and area < 1460000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            #     image = goal_draw(image, x, y)
               
-            cv2.putText(image, "Red Colour", (x, y), 
+            cv2.putText(image, "Red Colour utils", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
                         (0, 0, 255))     
   
@@ -717,21 +717,21 @@ def detect_ball_colors(image):
                         1.0, (255, 255, 255)) 
             
 
-    # Creating contour to track blue color 
-    contours, hierarchy = cv2.findContours(blue_mask, 
-                                           cv2.RETR_TREE, 
-                                           cv2.CHAIN_APPROX_SIMPLE) 
-    for pic, contour in enumerate(contours): 
-        area = cv2.contourArea(contour) 
-        if(area > 300): 
-            x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y), 
-                                       (x + w, y + h), 
-                                       (255, 85, 0), 2) 
+    # # Creating contour to track blue color 
+    # contours, hierarchy = cv2.findContours(blue_mask, 
+    #                                        cv2.RETR_TREE, 
+    #                                        cv2.CHAIN_APPROX_SIMPLE) 
+    # for pic, contour in enumerate(contours): 
+    #     area = cv2.contourArea(contour) 
+    #     if(area > 300): 
+    #         x, y, w, h = cv2.boundingRect(contour) 
+    #         image = cv2.rectangle(image, (x, y), 
+    #                                    (x + w, y + h), 
+    #                                    (255, 85, 0), 2) 
               
-            cv2.putText(image, "Blue Colour", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        1.0, (255, 85, 0)) 
+    #         cv2.putText(image, "Blue Colour", (x, y), 
+    #                     cv2.FONT_HERSHEY_SIMPLEX, 
+    #                     1.0, (255, 85, 0)) 
               
 
 

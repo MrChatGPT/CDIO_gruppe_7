@@ -73,7 +73,7 @@ def wBabyCanny(image):
     image = detect_arena(image)
     # image = perspectiveTrans(image)
     circle_detection(image) 
-   # detect_ball_colors(image)
+    detect_ball_colors(image)
     #CannyEdgeGray(image)
     cv2.imshow('New image', image)
 
