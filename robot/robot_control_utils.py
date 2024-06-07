@@ -72,6 +72,8 @@ class MQTTClientHandler:
     def run(self):
         """ Start the MQTT client loop """
         self.client.loop_forever()
+
+        
 class MotorController:
     def __init__(self, command_queue, encoder_pin=18):
         Device.pin_factory = PiGPIOFactory()

@@ -1,2 +1,2 @@
 pyPS4Controller
-paho-mqtt
+paho-mqt
