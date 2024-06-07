@@ -69,14 +69,11 @@ is the same orange ball
 
 
 
-
-
-def wBabyCanny():
+def wBabyCanny(image):
     detect_ball_colors(image)
     image = perspectiveTrans(image)
     CannyEdgeGray(image)
-
-# cv2.imshow('image of cross', image)
+    cv2.imshow('New image', image)
 
 
 #testcrosssearch(image)
@@ -109,12 +106,12 @@ def wBabyCanny():
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #################################################################################################
 
-basicDetectofImage()
+# basicDetectofImage()
 
 
 # goal_draw(image)
 
-
+wBabyCanny(image)
 
 
 
