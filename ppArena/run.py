@@ -108,12 +108,12 @@ def wBabyCanny(image):
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #################################################################################################
 
-# basicDetectofImage()
+basicDetectofImage()
 
 
 # goal_draw(image)
 
-wBabyCanny(image)
+# wBabyCanny(image)
 
 # image = detect_arena(image)
 # calibrateColors2(image)

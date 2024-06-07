@@ -19,41 +19,7 @@ from skimage import exposure
 
 
 
-def save_thresholds(lower_thresh, upper_thresh, color):
-    """Function to save the threshold values in config.py"""
 
-    lower_set = False
-    upper_set = False
-
-    # Read the existing content of config.py
-    with open('config.py', 'r') as file:
-        lines = file.readlines()
-
-    # Update the lines with new threshold values
-    updated_lines = []
-    for line in lines:
-        if line.startswith(f'{color.upper()}_LOWER_THRESHOLD'):
-            updated_lines.append(
-                f'{color.upper()}_LOWER_THRESHOLD = {lower_thresh}\n')
-            upper_set = True
-        elif line.startswith(f'{color.upper()}_UPPER_THRESHOLD'):
-            updated_lines.append(
-                f'{color.upper()}_UPPER_THRESHOLD = {upper_thresh}\n')
-            lower_set = True
-        else:
-            updated_lines.append(line)
-
-    # Add the threshold values if they are not already set
-    if not lower_set:
-        updated_lines.append(
-            f'{color.upper()}_LOWER_THRESHOLD = {lower_thresh}\n')
-    if not upper_set:
-        updated_lines.append(
-            f'{color.upper()}_UPPER_THRESHOLD = {upper_thresh}\n')
-
-    # Write the updated content back to config.py
-    with open('config.py', 'w') as file:
-        file.writelines(updated_lines)
 
 
 def calibrateColors(image):
@@ -238,13 +204,7 @@ def goal_draw(image, x, y):
 
 
 
-
-
-
-
-
-
-#Used for the cross, but not limited to
+#Used for the cross (and arena), but not limited to
 def square_draw(image, x, y, w, h, area):
     # # Start coordinate, here (x, y)
     # start_point = (x+60, y)
@@ -308,6 +268,56 @@ def square_draw(image, x, y, w, h, area):
 
 
     return box, min_area_rect
+
+
+
+def line_draw(image, x, y, w, h, area):
+
+    # Green color in BGR 
+    color = (0, 255, 0) 
+    
+    # Line thickness of 9 px 
+    thickness = 9
+ 
+
+
+    # represents the top left corner of image 
+    start_point = (x, y) 
+    # represents the top right corner of image 
+    end_point = (x+w, y) 
+    # Draw a diagonal green line with thickness of 9 px 
+    image = cv2.line(image, start_point, end_point, color, thickness) 
+
+
+
+
+    # represents the top left corner of image 
+    start_point = (x, y) 
+    # represents the bottom left corner of image 
+    end_point = (x, y+h) 
+    # Draw a diagonal green line
+    image = cv2.line(image, start_point, end_point, color, thickness) 
+
+
+
+    # represents the top right corner of image 
+    start_point = (x+w, y) 
+    # represents the bottom right corner of image 
+    end_point = (x+w, y+h) 
+    # Draw a diagonal green line
+    image = cv2.line(image, start_point, end_point, color, thickness) 
+
+    # represents the bottom left corner of image 
+    start_point = (x, y+h) 
+    # represents the bottom right corner of image 
+    end_point = (x+w, y+h) 
+    # Draw a diagonal green line
+    image = cv2.line(image, start_point, end_point, color, thickness) 
+
+    return image
+
+
+
 
 
 
@@ -574,8 +584,8 @@ def detect_ball_colors(image):
     
     # Set range for red color and  
     # define mask 
-    red_lower = np.array([6, 128, 244], np.uint8) #HSV   0, 113, 180 #
-    red_upper = np.array([10, 163, 255], np.uint8) #HSV  9, 255, 255 #
+    red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
+    red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
 
@@ -589,8 +599,8 @@ def detect_ball_colors(image):
     BEST SO FAR
     """
     #ORIGINAL
-    white_lower = np.array([6, 0, 191], np.uint8) #HSV
-    white_upper = np.array([179, 42, 255], np.uint8) #HSV
+    white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
+    white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
 
     
@@ -606,7 +616,7 @@ def detect_ball_colors(image):
 
 
 
-
+    a=1 # boolean  flag (cause i dont know how to do it here)
 
 
 
@@ -650,6 +660,8 @@ def detect_ball_colors(image):
                                            cv2.RETR_TREE, 
                                            cv2.CHAIN_APPROX_SIMPLE) 
       
+    #MAybe save the data, and when this function is almost done, fiind the median of the two values if any. Or just use the only one
+    #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
         if(area > 300): 
@@ -662,10 +674,11 @@ def detect_ball_colors(image):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                                         
-            # if(area > 1250000 and area < 1460000):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-            #     image = goal_draw(image, x, y)
+            if((area > 1250000 and area < 1460000) and a==1 ):
+                box, min_area_rect = square_draw(image,x,y,w,h,area)
+                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+                image = goal_draw(image, x, y)
+                a=0
               
             cv2.putText(image, "Red Colour utils", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
@@ -683,7 +696,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
               
             cv2.putText(image, "Orange Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX,  
@@ -701,9 +714,9 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (255, 255, 255), 2) 
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
-            if(area > 2900 and area < 4000):
+            if(area > 2000 and area < 4000): #before 2900
                 image = egg_draw(image,x,y,w,h,area)
 
             #If a big white object is detected with size of the car
