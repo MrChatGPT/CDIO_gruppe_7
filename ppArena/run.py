@@ -1,5 +1,6 @@
 from arena import *
 from matplotlib import pyplot as plt 
+from transform_arena import *
 
 image = getImage()
 
@@ -31,16 +32,9 @@ image = getImage()
 
 
 
-
-"""
-When getting the input corners from the function square_draw, and using the perspective, a big red square is detected... 
-has not occured earlier.. 
-This has to be solved.
-"""
-
 #Without image correction (Transform)
 
-def basicDetectofImage():
+def basicDetectofImage(image):
     circle_detection(image)  #THIS IS THE GOOD SHIT
     detect_ball_colors(image)
 
@@ -48,15 +42,20 @@ def basicDetectofImage():
 
 
 #Used for detecting objects in picture, and the colors in the image (with image correction, (Transform))
-def getMeSomeBallInfo():
+def getMeSomeBallInfo(image):
     # image = perspectiveTrans(image) #Problems when cutting edges off, making the correct size wxh
     image, circles_info = circle_detection(image)  # THIS IS THE GOOD SHIT
-    detect_ball_colors(image)
-
+    # image, orange_detected = detect_ball_colors(image)
+    image = detect_ball_colors(image)
     # Print stored circles information
     print("Detected and Stored Circles:")
     for circle in circles_info:
         print(circle)
+ 
+    # Print stored circles information
+    # print("Detected and Stored orange spots:")
+    # print(orange_detected)
+
 
 
 """
@@ -70,10 +69,12 @@ is the same orange ball
 
 
 def wBabyCanny(image):
-     # image = perspectiveTrans(image)
-    image = detect_arena(image)
+     # image = perspectiveTrans(image) #cant remember the setup..
+    # image = detect_arena(image)  #detects arena dynanamically
+    calibrate(image)
+    image = transform(image)
     circle_detection(image) 
-    detect_ball_colors(image)
+    image = detect_ball_colors(image)
     #CannyEdgeGray(image)
     #cv2.imshow('New image', image)
 
@@ -108,17 +109,17 @@ def wBabyCanny(image):
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #################################################################################################
 
-basicDetectofImage()
-
+# basicDetectofImage(image)
+# getMeSomeBallInfo(image)
 
 # goal_draw(image)
 
-# wBabyCanny(image)
+wBabyCanny(image)
 
 # image = detect_arena(image)
 # calibrateColors2(image)
 
-
+# cv2.imshow("Multiple Color Detection in Real-TIme", image) 
 
 
 

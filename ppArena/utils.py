@@ -14,6 +14,7 @@ import imutils
 from imutils import paths
 import argparse
 from skimage import exposure
+import json
 
 #from arena import perspectiveTransDyn
 
@@ -123,7 +124,7 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-    # image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
+    image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
 
@@ -132,7 +133,7 @@ def getImage():
    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
+    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
     # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50egghorizontal.jpg') 
     return image
 
@@ -169,7 +170,7 @@ def goal_draw(image, x, y):
     goal_y = y+430
     goal_w = 22
     goal_h = 130
-    
+  
     start_point_goal = (goal_x, goal_y)
     end_point_goal = (goal_x + goal_w, goal_y + goal_h)
     color_goal = (0, 255, 0)
@@ -187,6 +188,8 @@ def goal_draw(image, x, y):
     goal_w = 22
     goal_h = 75
     
+
+
     start_point_goal = (goal_x, goal_y)
     end_point_goal = (goal_x + goal_w, goal_y + goal_h)
     color_goal = (0, 255, 0)
@@ -238,7 +241,7 @@ def square_draw(image, x, y, w, h, area):
         [x + w, y + h]
     ], dtype=np.float32)
 
-    print(f"rect_points={rect_points}")
+    # print(f"rect_points={rect_points}")
     # print("after recreating the points")
     # The points need to be ordered correctly for minAreaRect to work
     rect_points = cv2.convexHull(rect_points)
@@ -250,7 +253,7 @@ def square_draw(image, x, y, w, h, area):
     minimum area rectangle=((1100.0, 523.5), (167.0, 168.0), 90.0)
     The first two numbers (1100.0, 523.5), shows the x and y-axis of the central point in the square.
     """
-    print(f"minimum area rectangle={min_area_rect}") 
+    # print(f"minimum area rectangle={min_area_rect}") 
 
     # Convert the rectangle to box points (four corners)
     """
@@ -261,7 +264,7 @@ def square_draw(image, x, y, w, h, area):
         [xBottomleft,yBottomleft]
     """
     box = cv2.boxPoints(min_area_rect)
-    print(f"box={box}")
+    # print(f"box={box}")
     box = np.int0(box)
  
 
@@ -511,12 +514,14 @@ def circle_detection(image):
             # Store the circles data
             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
 
+    # with open('stored_circles.json', 'w') as file:
+    #     json.dump(stored_circles, file, indent=4)
 
     # Display the result
     # cv2.imshow('Detected Balls', image)
     return image, stored_circles
 
-   # return image
+    # return image
 
   ##
     #cv2.waitKey(0)
@@ -617,8 +622,8 @@ def detect_ball_colors(image):
 
 
     a=1 # boolean  flag (cause i dont know how to do it here)
-
-
+    orange_detected = []
+   
 
 
     ###########################################################
@@ -669,7 +674,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
                                        (0, 0, 255), 2) 
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
             if(area > 8000 and area < 15000):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
@@ -696,7 +701,20 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            # orange_detected.append({'startpoint': (x, y), 'width': w, 'height': h, 'label': 'Orange'})
+                # Create a dictionary for each detected orange
+            # orange_data = {
+            #      'startpoint': (x, y),
+            #      'width': w,
+            #      'height': h,
+            #      'label': 'Orange',
+            #      'area': area  # Optionally store the area
+            # }
+        
+            #  # Append the dictionary to the list
+            # orange_detected.append(orange_data)
+
               
             cv2.putText(image, "Orange Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX,  
@@ -714,7 +732,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (255, 255, 255), 2) 
-            print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
+            # print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
             if(area > 2000 and area < 4000): #before 2900
                 image = egg_draw(image,x,y,w,h,area)
@@ -764,8 +782,18 @@ def detect_ball_colors(image):
     #         cv2.putText(image, "Blue Colour", (x, y), 
     #                     cv2.FONT_HERSHEY_SIMPLEX, 
     #                     1.0, (255, 2, 0)) 
+
+
+
+
+
     # Program Termination 
-    cv2.imshow("Multiple Color Detection in Real-TIme", image) 
+    cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
+
+
+    # return orange_detected, image
+    return image
+
     # if cv2.waitKey(10) & 0xFF == ord('q'): 
     #     cap.release() 
     #     cv2.destroyAllWindows() 
