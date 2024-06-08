@@ -47,14 +47,15 @@ def getMeSomeBallInfo(image):
     image, circles_info = circle_detection(image)  # THIS IS THE GOOD SHIT
     # image, orange_detected = detect_ball_colors(image)
     image = detect_ball_colors(image)
+    # check_point_in_orange_region(px, py, contours)
     # Print stored circles information
-    print("Detected and Stored Circles:")
-    for circle in circles_info:
-        print(circle)
+    # print("Detected and Stored Circles:")
+    # for circle in circles_info:
+    #     print(circle)
  
-    # Print stored circles information
-    # print("Detected and Stored orange spots:")
-    # print(orange_detected)
+    # Call the function to print the balls
+    # print_balls("balls.json")
+
 
 
 
@@ -110,11 +111,11 @@ def wBabyCanny(image):
 #################################################################################################
 
 # basicDetectofImage(image)
-# getMeSomeBallInfo(image)
+getMeSomeBallInfo(image)
 
 # goal_draw(image)
 
-wBabyCanny(image)
+# wBabyCanny(image)
 
 # image = detect_arena(image)
 # calibrateColors2(image)

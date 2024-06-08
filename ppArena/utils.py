@@ -574,7 +574,10 @@ def load_balls(filename="balls.json"):
     # Convert the list of lists back to a list of tuples
     return [tuple(center) for center in balls]
 
-
+def print_balls(filename="balls.json"):
+    balls = load_balls(filename)
+    for ball in balls:
+        print(ball)
 
 #TRUE
 def detect_ball_colors(image):
@@ -632,8 +635,8 @@ def detect_ball_colors(image):
 
 
     orange_detected = []
-    point_in_orange_region = False
-    px, py = 918, 1008
+    # point_in_orange_region = False
+    px, py = 1302, 166
    
 
 
@@ -690,11 +693,11 @@ def detect_ball_colors(image):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                                         
-            if((area > 1250000 and area < 1460000) and a==1 ):
+            if(area > 1250000 and area < 1460000):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                image = goal_draw(image, x, y)
-                a=0
+                # image = goal_draw(image, x, y)
+                
               
             cv2.putText(image, "Red Colour utils", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
@@ -712,23 +715,25 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
 
               
             cv2.putText(image, "Orange Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX,  
                         1.0, (0, 165, 255)) 
-            
-            # Check if the point (px, py) is inside this contour
-            dist = cv2.pointPolygonTest(contour, (px, py), False)
-            if dist >= 0:
-                point_in_orange_region = True
-                # break  # Exit the loop if the point is found in any contour
+            orange_detected.append(contour)
+            check_point_in_orange_region(contours)
+            # check_point_in_orange_region(px, py, contours)
+            # # Check if the point (px, py) is inside this contour
+            # dist = cv2.pointPolygonTest(contour, (px, py), False)
+            # if dist >= 0:
+            #     point_in_orange_region = True
+            #     # break  # Exit the loop if the point is found in any contour
            
-            if point_in_orange_region:
-                print(f"The point ({px}, {py}) is within an orange region.")
-            else:
-                print(f"The point ({px}, {py}) is not within any orange region.")
+            # if point_in_orange_region:
+            #     print(f"The point ({px}, {py}) is within an orange region.")
+            # else:
+            #     print(f"The point ({px}, {py}) is not within any orange region.")
 
   
     # Creating contour to track white color 
@@ -808,6 +813,36 @@ def detect_ball_colors(image):
     #     cap.release() 
     #     cv2.destroyAllWindows() 
     #     break  
+
+
+
+
+
+# def save_contours(circles, filename="orangecontour.json"):
+#     balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+#     with open(filename, 'w') as file:
+#         json.dump(balls, file, indent=4)
+
+
+# Function to check if a point is within any detected orange region
+def check_point_in_orange_region(contours):
+    # print_balls("balls.json")
+
+    # Check each ball coordinate
+    balls = load_balls("balls.json")
+    for px, py in balls:
+        point_in_orange_region = False
+        for contour in contours:
+            # Check if the point (px, py) is inside this contour
+            dist = cv2.pointPolygonTest(contour, (px, py), False)
+            if dist >= 0:
+                point_in_orange_region = True
+                break  # Exit the loop if the point is found in any contour
+
+        if point_in_orange_region:
+            print(f"The point ({px}, {py}) is within an orange region.")
+        else:
+            print(f"The point ({px}, {py}) is not within any orange region.")
 
 
 
