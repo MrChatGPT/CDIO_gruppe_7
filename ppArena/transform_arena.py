@@ -74,8 +74,8 @@ def find_corners(img):
 
 def transform(img):
     # resulution (can be made smaller if we want to)
-    # the arena is 180 * 120, so we multiply by 5 for this
-    width, height = 1395, 975
+    # the arena is 180 * 120, so we multiply by 5 for this nah we dont do that
+    width, height = 1250, 900
 
     corners = load_calibration_data('calibration_data.json')
     input_corners = np.float32(corners)
@@ -93,9 +93,9 @@ def transform(img):
     # transform
     transformed = cv2.warpPerspective(img, matrix, (width, height))
 
-    cv2.imshow('Transformed Image', transformed)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow('Transformed Image', transformed)
+    # cv2.waitKey(2000)
+    # cv2.destroyAllWindows()
     return transformed
 
 def calibrate(img):
@@ -109,5 +109,3 @@ def calibrate(img):
             else:
                 break
 
-# calibrate(cv2.imread('ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg'))
-# transform(cv2.imread('ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg'))

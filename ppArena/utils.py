@@ -125,13 +125,13 @@ def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
     # image = cv2.imread('test/images/WIN_20240403_10_40_59_Pro.jpg')
-    image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
+    # image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
     # image = cv2.imread('test/images/WIN_20240403_10_40_58_Pro.jpg') 
     # image = cv2.imread('test/images/pic50upsidedown.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
+    image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
     # image = cv2.imread('test/images/pic50egghorizontal.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
     return image
@@ -373,87 +373,6 @@ def egg_draw(image, x, y, w, h, area):
     return image
 
 
-
-# ##Maybe "parse" the egg up in two circles. a small and a big one THIS IS NOT IN USE
-# def egg_detection(image):
-#     # Convert to grayscale
-#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-#     # Apply a blur
-#     """ 
-#     *Parameter one, gray, is the source image converted to grayscale. 
-#     Making the algorithms that operate on the image computationally less intensive.
-
-#     **Parameter two and three is the kernel size. Which determines the width and height of the Gaussian filter. 
-#     A kernel size of (9, 9) means that the filter window is 9 pixels by 9 pixels. 
-#     The larger the kernel, the stronger the blur effect.
-    
-#     ***The standard deviation in the X and Y directions; when set to 0, it is calculated from the kernel size. 
-#     A higher value for standard deviation means more blur.
-#     """
-#     gray_blurred = cv2.GaussianBlur(gray, (9, 9), 0)  
-
-
-    
-#     # Perform Hough Circle Transform (Detect circles)
-#     """
-#     *cv2.HOUGH_GRADIENT, this method is the only one available for circle detection in OpenCV and uses the gradient information of the image.
-    
-#     **dp=1 means the accumulator has the same resolution as the input image. 
-#     If dp is greater, the accumulator resolution is reduced, and vice versa.
-   
-#     ***minDist=40: The minimum distance between the centers of detected circles.
-    
-#     ****param1=50: The higher threshold of the two passed to the Canny edge detector (the lower one is half of this). It's used in the edge detection stage.
-
-#     *****param2=30: The accumulator threshold for the circle centers at the detection stage. 
-#     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
-
-#     ******minRadius=1 and maxRadius=40: The minimum and maximum radius of the circles to be detected.
-#     """
-#     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
-#                                param1=50, param2=30, minRadius=25, maxRadius=30)
-
-#   ##
-
-#      # Filter out the circles that correspond to the egg
-#     if circles is not None:
-#         circles = np.uint16(np.around(circles))
-#         for i in circles[0, :]:
-#             x, y, r = i[0], i[1], i[2]  # x, y center and radius of circle
-            
-#             # Draw the outer circle
-#             cv2.circle(image, (x, y), r, (0, 255, 0), 2)
-#             print(f"The center of the circle is at (x={x}, y={y}) and radius is r={r}") #eggs radius is 27
-#             ##y axis from 225 to 257
-
-#             # Draw the center of the circle
-#             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
-
-#             ####Detection of egg is not properly configured when is laying in different angles...
-#             center_coordinates = (x,y+10)
-#             axesLength = (30,45)
-#             # axesLength = (34,58)
-#             angle = 0
-#             startAngle = 0
-#             endAngle = 360
-
-
-#             image = cv2.ellipse(image, center_coordinates, axesLength, 
-#             angle, startAngle, endAngle, (0, 255, 0), 3) 
-
-
-#             # Put text 'Egg' near the detected egg
-#             cv2.putText(image, 'Egg', (x - r, y - r),
-#                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
-
-#     # Display the result
-#     # cv2.imshow('Detected eggs', image)
-
-
-#     # return image
-
-
 def circle_detection(image):
     # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -670,23 +589,26 @@ def detect_ball_colors(image):
         area = cv2.contourArea(contour) 
         if(area > 300): 
             x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y),  
-                                       (x + w, y + h),  
-                                       (0, 0, 255), 2) 
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            if(area > 8000 and area < 15000):
-                box, min_area_rect = square_draw(image,x,y,w,h,area)
-                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            center_x, center_y = x + w // 2, y + h // 2
+            # Length of the cross arms
+            arm_length = max(w, h) // 2
+             # Draw horizontal line of the cross
+            cv2.line(image, (center_x - arm_length, center_y), (center_x + arm_length, center_y), (0, 0, 255), 2)
+            # Draw vertical line of the cross
+            cv2.line(image, (center_x, center_y - arm_length), (center_x, center_y + arm_length), (0, 0, 255), 2)
+            
+            # if(area > 8000 and area < 15000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                                         
-            if((area > 1250000 and area < 1460000) and a==1 ):
-                box, min_area_rect = square_draw(image,x,y,w,h,area)
-                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                image = goal_draw(image, x, y)
-                a=0
+            # if((area > 1250000 and area < 1460000) and a==1 ):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            #     image = goal_draw(image, x, y)
+            #     a=0
               
-            cv2.putText(image, "Red Colour utils", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
-                        (0, 0, 255))     
+            cv2.putText(image, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+ 
   
     # Creating contour to track orange color 
     contours, hierarchy = cv2.findContours(orange_mask, 
