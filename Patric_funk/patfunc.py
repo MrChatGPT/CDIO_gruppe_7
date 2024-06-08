@@ -2,29 +2,41 @@
 #                          x,    y,   phi,  eat,  eject
 #publish_controller_data(0.1,0.1,0.1,0,0)
 
-# Example classes for objects
+
+import json
+
 class Car:
     def __init__(self, x, y, angle):
         self.x = x
         self.y = y
         self.angle = angle
 
-class Cross:
-    pass
+    def __repr__(self):
+        return f"Car(x={self.x}, y={self.y}, angle={self.angle})"
 
-class Egg:
-    pass
+def get_car_data_from_json(file_path):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    
+    # Assuming the JSON structure is as mentioned: [[0, 32, 0]]
+    if data and isinstance(data, list) and len(data) > 0:
+        car_data = data[0]
+        if len(car_data) == 3:
+            x, y, angle = car_data
+            return Car(x, y, angle)
+        else:
+            raise ValueError("Invalid car data structure in JSON file.")
+    else:
+        raise ValueError("Invalid JSON structure.")
+
 
 # Example list of objects including a cross, a car, and an egg
-objects = [Cross(), Car(3, 5, 0), Egg()]
 
 def move_to_target(target_position):
-    # Find the car object in the list
-    car = next((obj for obj in objects if isinstance(obj, Car)), None)
-    
-    if not car:
-        print("Car not found in the list")
-        return
+
+
+    car_file_path = 'car.json'
+    car = get_car_data_from_json(car_file_path)
     
     # Extract the current position from the car object
     current_x, current_y = car.x, car.y
