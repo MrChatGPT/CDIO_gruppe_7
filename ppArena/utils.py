@@ -125,13 +125,13 @@ def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
     # image = cv2.imread('test/images/WIN_20240403_10_40_59_Pro.jpg')
-    image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
+    # image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
     # image = cv2.imread('test/images/WIN_20240403_10_40_58_Pro.jpg') 
     # image = cv2.imread('test/images/pic50upsidedown.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
+    image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
     # image = cv2.imread('test/images/pic50egghorizontal.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
     return image
@@ -567,6 +567,16 @@ def save_balls(circles, filename="balls.json"):
     balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
     with open(filename, 'w') as file:
         json.dump(balls, file, indent=4)
+
+def saveOrange_balls(balls, filename="orangeballs.json"):
+    # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+    with open(filename, 'w') as file:
+        json.dump(balls, file, indent=4)
+
+def saveWhite_balls(balls, filename="whiteballs.json"):
+    # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+    with open(filename, 'w') as file:
+        json.dump(balls, file, indent=4)
         
 def load_balls(filename="balls.json"):
     with open(filename, 'r') as file:
@@ -827,6 +837,11 @@ def detect_ball_colors(image):
 # Function to check if a point is within any detected orange region
 def check_point_in_orange_region(contours):
     # print_balls("balls.json")
+    
+    #To store balls in separate arrays
+    white_balls = []
+    orange_balls = []
+
 
     # Check each ball coordinate
     balls = load_balls("balls.json")
@@ -841,129 +856,15 @@ def check_point_in_orange_region(contours):
 
         if point_in_orange_region:
             print(f"The point ({px}, {py}) is within an orange region.")
+            orange_balls.append((px, py))
         else:
             print(f"The point ({px}, {py}) is not within any orange region.")
+            white_balls.append((px, py))
 
 
+    saveOrange_balls(orange_balls)
+    saveWhite_balls(white_balls)
 
-
-# def detect_ball_colorsVIDEO():
-#     # Capturing video through webcam 
-#     webcam = cv2.VideoCapture(0) 
-    
-#     # Start a while loop 
-#     while(1): 
-        
-#         # Reading the video from the 
-#         # webcam in image frames 
-#         _, image = webcam.read() 
-    
-#         # Convert the imageFrame in  
-#         # BGR(RGB color space) to  
-#         # HSV(hue-saturation-value) 
-#         # color space 
-#         hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-        
-#         # Set range for red color and  
-#         # define mask 
-#         red_lower = np.array([0, 113, 180], np.uint8) #HSV
-#         red_upper = np.array([9, 255, 255], np.uint8) #HSV
-#         red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
-    
-#         # Set range for orange color and  
-#         # define mask  
-#         orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-#         orange_upper = np.array([65, 211, 255], np.uint8) #HSV
-#         orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-    
-#         # Set range for white color and 
-#         # define mask 
-#         white_lower = np.array([6, 0, 191], np.uint8) #HSV
-#         white_upper = np.array([179, 42, 255], np.uint8) #HSV
-#         white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-    
-#         # Set range for blue color and 
-#         # define mask 
-#         blue_lower = np.array([95, 66, 141], np.uint8) #HSV
-#         blue_upper = np.array([113, 150, 205], np.uint8) #HSV
-#         blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-    
-#         # Morphological Transform, Dilation 
-#         # for each color and bitwise_and operator 
-#         # between imageFrame and mask determines 
-#         # to detect only that particular color 
-#         kernel = np.ones((5, 5), "uint8") 
-        
-#         # For red color 
-#         red_mask = cv2.dilate(red_mask, kernel) 
-#         res_red = cv2.bitwise_and(image, image, mask = red_mask) 
-        
-#         # For orange color 
-#         orange_mask = cv2.dilate(orange_mask, kernel) 
-#         res_orange = cv2.bitwise_and(image, image, mask = orange_mask) 
-        
-#         # For white color 
-#         white_mask = cv2.dilate(white_mask, kernel) 
-#         res_white = cv2.bitwise_and(image, image, mask = white_mask) 
-        
-#         # For blue color 
-#         blue_mask = cv2.dilate(blue_mask, kernel) 
-#         res_blue = cv2.bitwise_and(image, image, mask = blue_mask) 
-        
-#         # Creating contour to track red color 
-#         contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-        
-#         for pic, contour in enumerate(contours): 
-#             area = cv2.contourArea(contour) 
-#             if(area > 300): 
-#                 x, y, w, h = cv2.boundingRect(contour) 
-#                 image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2) 
-#                 cv2.putText(image, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))     
-      
-#         # Creating contour to track orange color 
-#         contours, hierarchy = cv2.findContours(orange_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-        
-#         for pic, contour in enumerate(contours): 
-#             area = cv2.contourArea(contour) 
-#             if(area > 300): 
-#                 x, y, w, h = cv2.boundingRect(contour) 
-#                 image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)  
-#                 cv2.putText(image, "Orange Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255)) 
-      
-#         # Creating contour to track white color 
-#         contours, hierarchy = cv2.findContours(white_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-#         for pic, contour in enumerate(contours): 
-#             area = cv2.contourArea(contour)
-        
-
-#         # Program Termination 
-#         cv2.imshow("Multiple Color Detection in Real-TIme", image) 
-#         if cv2.waitKey(10) & 0xFF == ord('q'): 
-#            webcam.release() 
-#            cv2.destroyAllWindows() 
-#            break
-
-
- 
-# def video():
-#     # Capturing video through webcam 
-#     webcam = cv2.VideoCapture(0) 
-    
-#     # Start a while loop 
-#     while(1): 
-        
-#         # Reading the video from the 
-#         # webcam in image frames 
-#         _, image = webcam.read() 
-
-#             # Program Termination 
-#         cv2.imshow("Multiple Color Detection in Real-TIme", image) 
-#         if cv2.waitKey(10) & 0xFF == ord('q'): 
-#            webcam.release() 
-#            cv2.destroyAllWindows() 
-#            break
-
-    
 
 
 
