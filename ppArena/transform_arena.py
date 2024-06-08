@@ -101,13 +101,13 @@ def transform(img):
 def calibrate(img):
         backup = img.copy()
         find_corners(img)
-        # while True:
-        #     calibration = input("Would you like to redo the calibration?[y/n]:")
-        #     if calibration == "y":
-        #         img = backup.copy()
-        #         find_corners(img)
-        #     else:
-        #         break
+        while True:
+            calibration = input("Would you like to redo the calibration?[y/n]:")
+            if calibration == "y":
+                img = backup.copy()
+                find_corners(img)
+            else:
+                break
 
 # calibrate(cv2.imread('ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg'))
 # transform(cv2.imread('ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg'))
