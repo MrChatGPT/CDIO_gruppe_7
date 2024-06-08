@@ -36,12 +36,13 @@ def move_to_target(target_position):
     if current_y != target_y:
         if current_y < target_y: #vi skal altså op ad ^
             #overvej at smid et threshold ind her
-            if car.angle > 0:
-                publish_controller_data(0,0,-0.1,0,0) #vi vender os mod venstre
-                return
-            if car.angle > 270:
-                publish_controller_data(0,0,0.1,0,0) #vi vender os mod højre
-                return
+            if car.angle != 0:
+                if car.angle > 0:
+                    publish_controller_data(0,0,-0.1,0,0) #vi vender os mod venstre
+                    return
+                if car.angle > 270:
+                    publish_controller_data(0,0,0.1,0,0) #vi vender os mod højre
+                    return
             publish_controller_data(0,0.1,0,0,0) #vi rykker 0.1 i y-retningen (opad)
             return
         else: #så skal vi altså nedad ˅
@@ -52,8 +53,8 @@ def move_to_target(target_position):
                 if car.angle > 180:
                     publish_controller_data(0,0,-0.1,0,0)#vi "fjerner" grader indtil vi er på 180
                     return
-        publish_controller_data(0,0.1,0,0,0) #vi rykker 0.1 i y-retningen (opad)
-        return
+            publish_controller_data(0,0.1,0,0,0) #vi rykker 0.1 i y-retningen (opad)
+            return
     
     # Move in the x direction
     # nu er vores angle enten 0 eller 180:
@@ -69,7 +70,7 @@ def move_to_target(target_position):
                 if car.angle == 180:
                     publish_controller_data(0,0,0.1,0,0) #hvis vi allerede er ved 180, skal vi bare mod højre
                     return    
-                if car.angle > 180:
+                if car.angle < 270:
                     publish_controller_data(0,0,0.1,0,0) #Hvis vi er større end 180, skal vi fortsat mod højre
                     return
             publish_controller_data(0,0.1,0,0,0)
@@ -77,16 +78,16 @@ def move_to_target(target_position):
         else: #så skal vi til højre
             if car.angle != 90:
                 if car.angle == 180:
-                    publish_controller_data(0,0,-0.1,0,0)
+                    publish_controller_data(0,0,-0.1,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
                     return    
                 if car.angle > 90:
-                    publish_controller_data(0,0,-0.1,0,0)
+                    publish_controller_data(0,0,-0.1,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
                     return    
                 if car.angle == 0:
-                    publish_controller_data(0,0,0.1,0,0) #hvis vi peger opad ved 0 grader, skal vi bare tilte mod højre
+                    publish_controller_data(0,0,0.1,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
                     return
-                if car.angle > 0:
-                    publish_controller_data(0,0,0.1,0,0) #hvis vi er større end 0 skal vi også pege mod højre
+                if car.angle < 90:
+                    publish_controller_data(0,0,0.1,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
                     return
             publish_controller_data(0,0.1,0,0,0)
             return
