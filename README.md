@@ -29,8 +29,17 @@ _________________________________
 
 `def circle_detection(image):` - Detects a fixed size range of circles matching with the size of the ping-pong balls.
 
+`def save_balls(circles, filename="balls.json"):` - Stores all the detected balls in the file 'balls.json'.  
+
+`def saveOrange_balls(balls, filename="orangeballs.json"):` - Stores the orange balls in the file 'orangeballs.json'. 
+
+`def saveWhite_balls(balls, filename="whiteballs.json"):` - Stores the white balls in the file 'whiteballs.json'.
+
+`def print_balls(filename="balls.json"):` - Prints the file 'balls.json' out.  
+
 `def detect_ball_colors(image):` - The previous found color ranges are here used in order to differentiate between the specific colors in the the photo. 
 
+`def check_point_in_orange_region(contours):` - Used to compare if the center of the xy coordinates from the detected circles is present, in an orange detected area. That is, to check if the ball is orange.
 
 
 ###  run.py
@@ -38,10 +47,11 @@ _________________________________
 
 `def getMeSomeBallInfo():` -  Detects the obstacles, all basic. I.e. the balls, egg, and colors and get the xy coordinates from the balls.
 
-`def wBabyCanny(image):` - Used when transforming the perspective. First the arena is detected, and then detect the obstacles, all basic. I.e. the balls, egg, and colors.
+`def wBabyCanny(image):` - Used when transforming the perspective. First the arena is detected, and then detects the obstacles, all basic. I.e. the balls, egg, and colors.
 
+ 
 
-### arena.py
-`def detect_arena(image):` - Detects only the big red square (arena) in the picture.
+<!--  ### arena.py `def detect_arena(image):` - Detects only the big red square (arena) in the picture.
 
-`def perspectiveTransDyn(image,x,y,w,h):` - Used to determine the transformed picture, dynamically.
+`def perspectiveTransDyn(image,x,y,w,h):` - Used to determine the transformed picture, dynamically. -->
+
