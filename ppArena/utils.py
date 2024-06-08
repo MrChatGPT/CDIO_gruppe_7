@@ -124,17 +124,16 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     
-    image = cv2.imread( '/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_59_Pro.jpg')
-   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_39_46_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
-
-   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240403_10_40_58_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50upsidedown.jpg') 
-   # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_43_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
-    # image = cv2.imread('/home/slothie/CDIO_gruppe_7/ppArena/test/images/pic50egghorizontal.jpg') 
+    # image = cv2.imread('test/images/WIN_20240403_10_40_59_Pro.jpg')
+    image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
+    # image = cv2.imread('test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
+    # image = cv2.imread('test/images/WIN_20240403_10_40_58_Pro.jpg') 
+    # image = cv2.imread('test/images/pic50upsidedown.jpg') 
+    # image = cv2.imread('test/images/WIN_20240410_10_31_43_Pro.jpg') 
+    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
+    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
+    # image = cv2.imread('test/images/pic50egghorizontal.jpg') 
+    # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
     return image
 
 #THE REAL FUNCTION
