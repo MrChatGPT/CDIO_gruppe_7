@@ -128,10 +128,10 @@ def getImage():
     # image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
     # image = cv2.imread('test/images/WIN_20240403_10_40_58_Pro.jpg') 
-    # image = cv2.imread('test/images/pic50upsidedown.jpg') 
+    image = cv2.imread('test/images/pic50upsidedown.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
-    image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
+    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
     # image = cv2.imread('test/images/pic50egghorizontal.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
     return image
@@ -587,27 +587,49 @@ def detect_ball_colors(image):
     #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 300): 
-            x, y, w, h = cv2.boundingRect(contour) 
-            center_x, center_y = x + w // 2, y + h // 2
-            # Length of the cross arms
-            arm_length = max(w, h) // 2
-             # Draw horizontal line of the cross
-            cv2.line(image, (center_x - arm_length, center_y), (center_x + arm_length, center_y), (0, 0, 255), 2)
-            # Draw vertical line of the cross
-            cv2.line(image, (center_x, center_y - arm_length), (center_x, center_y + arm_length), (0, 0, 255), 2)
+        if area > 300:
+            rect = cv2.minAreaRect(contour)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
             
-            # if(area > 8000 and area < 15000):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                                        
-            # if((area > 1250000 and area < 1460000) and a==1 ):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-            #     image = goal_draw(image, x, y)
-            #     a=0
-              
-            cv2.putText(image, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+            center = (int(rect[0][0]), int(rect[0][1]))
+            size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
+            angle = rect[2] + 45
+            
+            # Create a rotation matrix
+            M = cv2.getRotationMatrix2D(center, angle, 1.0)
+            
+            # Calculate the end points of the cross lines
+            end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
+                    int(center[1] + size[0] * np.sin(np.radians(angle))))
+            end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
+                    int(center[1] - size[0] * np.sin(np.radians(angle))))
+            end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
+                    int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
+            end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
+                    int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
+            
+            # Draw the cross
+            cv2.line(image, end1, end2, (0, 0, 255), 2)
+            cv2.line(image, end3, end4, (0, 0, 255), 2)
+            
+            cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+            
+            no_go_zones = []
+            cross_width = 10
+            no_go_zones.append([
+                (end1, end2),
+                (end3, end4)
+            ])
+            # no_go_zones.append([
+            #     (end3[0] - cross_width, end3[1] - cross_width),
+            #     (end3[0] + cross_width, end3[1] + cross_width),
+            #     (end4[0] + cross_width, end4[1] + cross_width),
+            #     (end4[0] - cross_width, end4[1] - cross_width)
+            # ])
+
+            save_no_go_zones(no_go_zones)
+
  
   
     # Creating contour to track orange color 
@@ -623,18 +645,6 @@ def detect_ball_colors(image):
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
             print(f"(x={x}, y={y}) w={w} h={h} area={area}")
-            # orange_detected.append({'startpoint': (x, y), 'width': w, 'height': h, 'label': 'Orange'})
-                # Create a dictionary for each detected orange
-            # orange_data = {
-            #      'startpoint': (x, y),
-            #      'width': w,
-            #      'height': h,
-            #      'label': 'Orange',
-            #      'area': area  # Optionally store the area
-            # }
-        
-            #  # Append the dictionary to the list
-            # orange_detected.append(orange_data)
 
               
             cv2.putText(image, "Orange Colour", (x, y), 
@@ -670,178 +680,16 @@ def detect_ball_colors(image):
                         1.0, (255, 255, 255)) 
             
 
-    # # Creating contour to track blue color 
-    # contours, hierarchy = cv2.findContours(blue_mask, 
-    #                                        cv2.RETR_TREE, 
-    #                                        cv2.CHAIN_APPROX_SIMPLE) 
-    # for pic, contour in enumerate(contours): 
-    #     area = cv2.contourArea(contour) 
-    #     if(area > 300): 
-    #         x, y, w, h = cv2.boundingRect(contour) 
-    #         image = cv2.rectangle(image, (x, y), 
-    #                                    (x + w, y + h), 
-    #                                    (255, 85, 0), 2) 
-              
-    #         cv2.putText(image, "Blue Colour", (x, y), 
-    #                     cv2.FONT_HERSHEY_SIMPLEX, 
-    #                     1.0, (255, 85, 0)) 
-              
-
-
-    # # Creating contour to track green color 
-    # contours, hierarchy = cv2.findContours(green_mask, 
-    #                                        cv2.RETR_TREE, 
-    #                                        cv2.CHAIN_APPROX_SIMPLE) 
-    # for pic, contour in enumerate(contours): 
-    #     area = cv2.contourArea(contour) 
-    #     if(area > 300): 
-    #         x, y, w, h = cv2.boundingRect(contour) 
-    #         image = cv2.rectangle(image, (x, y), 
-    #                                    (x + w, y + h), 
-    #                                    (255, 255, 255), 2) 
-              
-    #         cv2.putText(image, "Blue Colour", (x, y), 
-    #                     cv2.FONT_HERSHEY_SIMPLEX, 
-    #                     1.0, (255, 2, 0)) 
-
-
-
-
 
     # Program Termination 
     cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
 
 
-    # return orange_detected, image
     return image
 
-    # if cv2.waitKey(10) & 0xFF == ord('q'): 
-    #     cap.release() 
-    #     cv2.destroyAllWindows() 
-    #     break  
-
-
-
-
-# def detect_ball_colorsVIDEO():
-#     # Capturing video through webcam 
-#     webcam = cv2.VideoCapture(0) 
-    
-#     # Start a while loop 
-#     while(1): 
-        
-#         # Reading the video from the 
-#         # webcam in image frames 
-#         _, image = webcam.read() 
-    
-#         # Convert the imageFrame in  
-#         # BGR(RGB color space) to  
-#         # HSV(hue-saturation-value) 
-#         # color space 
-#         hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-        
-#         # Set range for red color and  
-#         # define mask 
-#         red_lower = np.array([0, 113, 180], np.uint8) #HSV
-#         red_upper = np.array([9, 255, 255], np.uint8) #HSV
-#         red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
-    
-#         # Set range for orange color and  
-#         # define mask  
-#         orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-#         orange_upper = np.array([65, 211, 255], np.uint8) #HSV
-#         orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-    
-#         # Set range for white color and 
-#         # define mask 
-#         white_lower = np.array([6, 0, 191], np.uint8) #HSV
-#         white_upper = np.array([179, 42, 255], np.uint8) #HSV
-#         white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-    
-#         # Set range for blue color and 
-#         # define mask 
-#         blue_lower = np.array([95, 66, 141], np.uint8) #HSV
-#         blue_upper = np.array([113, 150, 205], np.uint8) #HSV
-#         blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-    
-#         # Morphological Transform, Dilation 
-#         # for each color and bitwise_and operator 
-#         # between imageFrame and mask determines 
-#         # to detect only that particular color 
-#         kernel = np.ones((5, 5), "uint8") 
-        
-#         # For red color 
-#         red_mask = cv2.dilate(red_mask, kernel) 
-#         res_red = cv2.bitwise_and(image, image, mask = red_mask) 
-        
-#         # For orange color 
-#         orange_mask = cv2.dilate(orange_mask, kernel) 
-#         res_orange = cv2.bitwise_and(image, image, mask = orange_mask) 
-        
-#         # For white color 
-#         white_mask = cv2.dilate(white_mask, kernel) 
-#         res_white = cv2.bitwise_and(image, image, mask = white_mask) 
-        
-#         # For blue color 
-#         blue_mask = cv2.dilate(blue_mask, kernel) 
-#         res_blue = cv2.bitwise_and(image, image, mask = blue_mask) 
-        
-#         # Creating contour to track red color 
-#         contours, hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-        
-#         for pic, contour in enumerate(contours): 
-#             area = cv2.contourArea(contour) 
-#             if(area > 300): 
-#                 x, y, w, h = cv2.boundingRect(contour) 
-#                 image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2) 
-#                 cv2.putText(image, "Red Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))     
-      
-#         # Creating contour to track orange color 
-#         contours, hierarchy = cv2.findContours(orange_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-        
-#         for pic, contour in enumerate(contours): 
-#             area = cv2.contourArea(contour) 
-#             if(area > 300): 
-#                 x, y, w, h = cv2.boundingRect(contour) 
-#                 image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)  
-#                 cv2.putText(image, "Orange Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255)) 
-      
-#         # Creating contour to track white color 
-#         contours, hierarchy = cv2.findContours(white_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
-#         for pic, contour in enumerate(contours): 
-#             area = cv2.contourArea(contour)
-        
-
-#         # Program Termination 
-#         cv2.imshow("Multiple Color Detection in Real-TIme", image) 
-#         if cv2.waitKey(10) & 0xFF == ord('q'): 
-#            webcam.release() 
-#            cv2.destroyAllWindows() 
-#            break
-
-
- 
-# def video():
-#     # Capturing video through webcam 
-#     webcam = cv2.VideoCapture(0) 
-    
-#     # Start a while loop 
-#     while(1): 
-        
-#         # Reading the video from the 
-#         # webcam in image frames 
-#         _, image = webcam.read() 
-
-#             # Program Termination 
-#         cv2.imshow("Multiple Color Detection in Real-TIme", image) 
-#         if cv2.waitKey(10) & 0xFF == ord('q'): 
-#            webcam.release() 
-#            cv2.destroyAllWindows() 
-#            break
-
-    
-
-
+def save_no_go_zones(zones, filename="no_go_zones.json"):
+    with open(filename, 'w') as file:
+        json.dump(zones, file)
 
 
 def blurred(image):
@@ -856,12 +704,6 @@ def blurred(image):
    denoised_image = cv2.fastNlMeansDenoisingColored(
      image, None, h, hForColorComponents, templateWindowSize, searchWindowSize
   )
-
-# Save or display the denoised image
-#cv2.imwrite('denoised_image.png', denoised_image)
-# cv2.imshow('Denoised Image', denoised_image)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
 
 
 def CannyEdgeGray(image):
