@@ -30,15 +30,18 @@ def get_car_data_from_json(file_path):
         raise ValueError("Invalid JSON structure.")
 
 def move_to_target(target_position):
+    # load car values into the car object
     car_file_path = 'car.json'
     car = get_car_data_from_json(car_file_path)
 
     # Extract the current position from the car object
     current_x, current_y = car.x, car.y
     
-    # Destructure the target position
+    # De-structure the target position
     target_x, target_y = target_position
-    
+    print(f"Target_x = {target_x}\nTarget_y = {target_y}")
+
+
     # Move in the y direction
     if current_y != target_y:
         if current_y < target_y: #vi skal altså op ad ^
@@ -101,3 +104,7 @@ def move_to_target(target_position):
     #nu er current_y = target_y, current_x = target_x
     publish_controller_data(0,0,0,1,0) #og så skal der nedsvælges
 
+
+#Eksempel på kald af funktion: 
+
+move_to_target((2, -5))
