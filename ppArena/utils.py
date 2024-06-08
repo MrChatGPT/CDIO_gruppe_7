@@ -512,7 +512,7 @@ def circle_detection(image):
             
             # Store the circles data
             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
-
+            save_balls(stored_circles)
     # with open('stored_circles.json', 'w') as file:
     #     json.dump(stored_circles, file, indent=4)
 
@@ -562,6 +562,17 @@ def circle_detection(image):
     # # Close the window when done
     # cv2.destroyAllWindows()
 
+
+def save_balls(circles, filename="balls.json"):
+    balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+    with open(filename, 'w') as file:
+        json.dump(balls, file, indent=4)
+        
+def load_balls(filename="balls.json"):
+    with open(filename, 'r') as file:
+        balls = json.load(file)
+    # Convert the list of lists back to a list of tuples
+    return [tuple(center) for center in balls]
 
 
 
@@ -620,8 +631,9 @@ def detect_ball_colors(image):
 
 
 
-    a=1 # boolean  flag (cause i dont know how to do it here)
     orange_detected = []
+    point_in_orange_region = False
+    px, py = 918, 1008
    
 
 
@@ -701,24 +713,23 @@ def detect_ball_colors(image):
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
             print(f"(x={x}, y={y}) w={w} h={h} area={area}")
-            # orange_detected.append({'startpoint': (x, y), 'width': w, 'height': h, 'label': 'Orange'})
-                # Create a dictionary for each detected orange
-            # orange_data = {
-            #      'startpoint': (x, y),
-            #      'width': w,
-            #      'height': h,
-            #      'label': 'Orange',
-            #      'area': area  # Optionally store the area
-            # }
-        
-            #  # Append the dictionary to the list
-            # orange_detected.append(orange_data)
 
               
             cv2.putText(image, "Orange Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX,  
                         1.0, (0, 165, 255)) 
             
+            # Check if the point (px, py) is inside this contour
+            dist = cv2.pointPolygonTest(contour, (px, py), False)
+            if dist >= 0:
+                point_in_orange_region = True
+                # break  # Exit the loop if the point is found in any contour
+           
+            if point_in_orange_region:
+                print(f"The point ({px}, {py}) is within an orange region.")
+            else:
+                print(f"The point ({px}, {py}) is not within any orange region.")
+
   
     # Creating contour to track white color 
     contours, hierarchy = cv2.findContours(white_mask, 
