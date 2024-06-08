@@ -7,11 +7,11 @@ import json
 
 class Car:
     def __init__(self, x, y, angle):
-        self.x = x
-        self.y = y
-        self.angle = angle
+        self.x = x #car.x
+        self.y = y #car.y
+        self.angle = angle #car.angle
 
-    def __repr__(self):
+    def __repr__(self): #hvis man skriver print(car), så:
         return f"Car(x={self.x}, y={self.y}, angle={self.angle})"
 
 def get_car_data_from_json(file_path):
@@ -29,15 +29,10 @@ def get_car_data_from_json(file_path):
     else:
         raise ValueError("Invalid JSON structure.")
 
-
-# Example list of objects including a cross, a car, and an egg
-
 def move_to_target(target_position):
-
-
     car_file_path = 'car.json'
     car = get_car_data_from_json(car_file_path)
-    
+
     # Extract the current position from the car object
     current_x, current_y = car.x, car.y
     
@@ -50,22 +45,22 @@ def move_to_target(target_position):
             #overvej at smid et threshold ind her
             if car.angle != 0:
                 if car.angle > 0:
-                    publish_controller_data(0,0,-0.1,0,0) #vi vender os mod venstre
+                    publish_controller_data(0,0,-0.15,0,0) #vi vender os mod venstre
                     return
                 if car.angle > 270:
-                    publish_controller_data(0,0,0.1,0,0) #vi vender os mod højre
+                    publish_controller_data(0,0,0.15,0,0) #vi vender os mod højre
                     return
-            publish_controller_data(0,0.1,0,0,0) #vi rykker 0.1 i y-retningen (opad)
+            publish_controller_data(0,0.15,0,0,0) #vi rykker 0.15 i y-retningen (opad)
             return
         else: #så skal vi altså nedad ˅
             if car.angle != 180:
                 if car.angle > 0:
-                    publish_controller_data(0,0,0.1,0,0) #vi vender tilføjer grader indtil vi er på 180
+                    publish_controller_data(0,0,0.15,0,0) #vi vender tilføjer grader indtil vi er på 180
                     return
                 if car.angle > 180:
-                    publish_controller_data(0,0,-0.1,0,0)#vi "fjerner" grader indtil vi er på 180
+                    publish_controller_data(0,0,-0.15,0,0)#vi "fjerner" grader indtil vi er på 180
                     return
-            publish_controller_data(0,0.1,0,0,0) #vi rykker 0.1 i y-retningen (opad)
+            publish_controller_data(0,0.15,0,0,0) #vi rykker 0.15 i y-retningen (opad)
             return
     
     # Move in the x direction
@@ -74,34 +69,34 @@ def move_to_target(target_position):
         if current_x > target_x: #så skal vi til venstre
             if car.angle != 270:
                 if car.angle == 0:
-                    publish_controller_data(0,0,-0.1,0,0) #hvis vi peger opad ved 0 grader, skal vi bare tilte mod venstre
+                    publish_controller_data(0,0,-0.15,0,0) #hvis vi peger opad ved 0 grader, skal vi bare tilte mod venstre
                     return
                 if car.angle > 270: #efter at have trukket én fra 0, lander vi på 359 grader
-                    publish_controller_data(0,0,-0.1,0,0) #Hvis vi er større end 270, skal vi bare blive ved med at tilte mod venstre
+                    publish_controller_data(0,0,-0.15,0,0) #Hvis vi er større end 270, skal vi bare blive ved med at tilte mod venstre
                     return
                 if car.angle == 180:
-                    publish_controller_data(0,0,0.1,0,0) #hvis vi allerede er ved 180, skal vi bare mod højre
+                    publish_controller_data(0,0,0.15,0,0) #hvis vi allerede er ved 180, skal vi bare mod højre
                     return    
                 if car.angle < 270:
-                    publish_controller_data(0,0,0.1,0,0) #Hvis vi er større end 180, skal vi fortsat mod højre
+                    publish_controller_data(0,0,0.15,0,0) #Hvis vi er større end 180, skal vi fortsat mod højre
                     return
-            publish_controller_data(0,0.1,0,0,0)
+            publish_controller_data(0,0.15,0,0,0)
             return
         else: #så skal vi til højre
             if car.angle != 90:
                 if car.angle == 180:
-                    publish_controller_data(0,0,-0.1,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
+                    publish_controller_data(0,0,-0.15,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
                     return    
                 if car.angle > 90:
-                    publish_controller_data(0,0,-0.1,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
+                    publish_controller_data(0,0,-0.15,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
                     return    
                 if car.angle == 0:
-                    publish_controller_data(0,0,0.1,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
+                    publish_controller_data(0,0,0.15,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
                     return
                 if car.angle < 90:
-                    publish_controller_data(0,0,0.1,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
+                    publish_controller_data(0,0,0.15,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
                     return
-            publish_controller_data(0,0.1,0,0,0)
+            publish_controller_data(0,0.15,0,0,0)
             return
     #nu er current_y = target_y, current_x = target_x
     publish_controller_data(0,0,0,1,0) #og så skal der nedsvælges
