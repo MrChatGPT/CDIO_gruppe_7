@@ -722,7 +722,7 @@ def detect_ball_colors(image):
                         cv2.FONT_HERSHEY_SIMPLEX,  
                         1.0, (0, 165, 255)) 
             orange_detected.append(contour)
-            check_point_in_orange_region(contours)
+            # check_point_in_orange_region(contours)
             # check_point_in_orange_region(px, py, contours)
             # # Check if the point (px, py) is inside this contour
             # dist = cv2.pointPolygonTest(contour, (px, py), False)
@@ -735,7 +735,7 @@ def detect_ball_colors(image):
             # else:
             #     print(f"The point ({px}, {py}) is not within any orange region.")
 
-  
+    check_point_in_orange_region(contours)
     # Creating contour to track white color 
     contours, hierarchy = cv2.findContours(white_mask, 
                                            cv2.RETR_TREE, 
