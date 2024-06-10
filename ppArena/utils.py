@@ -441,11 +441,26 @@ def save_balls(circles, filename="balls.json"):
     with open(filename, 'w') as file:
         json.dump(balls, file, indent=4)
 
+def saveOrange_balls(balls, filename="orangeballs.json"):
+    # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+    with open(filename, 'w') as file:
+        json.dump(balls, file, indent=4)
+
+def saveWhite_balls(balls, filename="whiteballs.json"):
+    # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+    with open(filename, 'w') as file:
+        json.dump(balls, file, indent=4)
+        
 def load_balls(filename="balls.json"):
     with open(filename, 'r') as file:
         balls = json.load(file)
     # Convert the list of lists back to a list of tuples
     return [tuple(center) for center in balls]
+
+def print_balls(filename="balls.json"):
+    balls = load_balls(filename)
+    for ball in balls:
+        print(ball)
 
 
 #TRUE
@@ -456,13 +471,7 @@ def detect_ball_colors(image):
   # Capturing video through webcam 
  #  webcam = cv2.VideoCapture(0) 
   
- # Start a while loop 
- #while(1): 
-      
-    # Reading the video from the 
-    # webcam in image frames 
-    # _, imageFrame = webcam.read() 
-  
+ 
     # Convert the imageFrame in  
     # BGR(RGB color space) to  
     # HSV(hue-saturation-value) 
@@ -502,12 +511,8 @@ def detect_ball_colors(image):
 
 
 
-
-    a=1 # boolean  flag (cause i dont know how to do it here)
     orange_detected = []
    
-
-
     ###########################################################
       
     # Morphological Transform, Dilation 
@@ -608,13 +613,16 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
 
               
             cv2.putText(image, "Orange Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX,  
                         1.0, (0, 165, 255)) 
-            
+            orange_detected.append(contour)
+
+    check_point_in_orange_region(contours)
+
   
     # Creating contour to track white color 
     contours, hierarchy = cv2.findContours(white_mask, 
@@ -650,6 +658,37 @@ def detect_ball_colors(image):
 
 
     return image
+
+def check_point_in_orange_region(contours):
+    # print_balls("balls.json")
+    
+    #To store balls in separate arrays
+    white_balls = []
+    orange_balls = []
+
+
+    # Check each ball coordinate
+    balls = load_balls("balls.json")
+    for px, py in balls:
+        point_in_orange_region = False
+        for contour in contours:
+            # Check if the point (px, py) is inside this contour
+            dist = cv2.pointPolygonTest(contour, (px, py), False)
+            if dist >= 0:
+                point_in_orange_region = True
+                break  # Exit the loop if the point is found in any contour
+
+        if point_in_orange_region:
+            print(f"The point ({px}, {py}) is within an orange region.")
+            orange_balls.append((px, py))
+        else:
+            print(f"The point ({px}, {py}) is not within any orange region.")
+            white_balls.append((px, py))
+
+
+    saveOrange_balls(orange_balls)
+    saveWhite_balls(white_balls)
+
 
 def save_no_go_zones(zones, filename="no_go_zones.json"):
     with open(filename, 'w') as file:
