@@ -442,8 +442,8 @@ def circle_detection(image):
     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
     ******minRadius= and maxRadius=: The minimum and maximum radius of the circles to be detected.
     """
-    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
-                               param1=50, param2=35, minRadius=10, maxRadius=20) #minRadius=5, maxRadius=20
+    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18,
+                               param1=50, param2=28, minRadius=10, maxRadius=17) #minRadius=5, maxRadius=20
   ##
      # List to store circle data
     stored_circles = []
@@ -462,6 +462,7 @@ def circle_detection(image):
             cv2.putText(image, 'Ball', (x - r, y - r),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
             
+            print(f"'center': {x, y}, 'radius': {r}")
             # Store the circles data
             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
             save_balls(stored_circles)
