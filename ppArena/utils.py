@@ -105,10 +105,14 @@ def getImage():
     # image= cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg')  #new pic with new car
     # image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') 
     # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') 
-   
+
+
+    image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg')
+
     # image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg
     # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') 
-    image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')
+    # image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')
+
 
 
     
@@ -443,7 +447,7 @@ def circle_detection(image):
     ******minRadius= and maxRadius=: The minimum and maximum radius of the circles to be detected.
     """
     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18,
-                               param1=50, param2=28, minRadius=10, maxRadius=17) #minRadius=5, maxRadius=20
+                               param1=50, param2=28, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20
   ##
      # List to store circle data
     stored_circles = []
@@ -635,7 +639,7 @@ def detect_ball_colors(image):
     #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 300): 
+        if(area > 5000): 
             x, y, w, h = cv2.boundingRect(contour) 
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h),  
@@ -649,6 +653,7 @@ def detect_ball_colors(image):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
                 image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                 # image = goal_draw(image, x, y)
+                
                 
               
             cv2.putText(image, "Red Colour utils", (x, y), 
@@ -722,7 +727,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (255, 255, 255), 2) 
-            # print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
+            print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
             if(area > 2000 and area < 4000): #before 2900
                 image = egg_draw(image,x,y,w,h,area)
@@ -830,7 +835,7 @@ def check_point_in_orange_region(contours):
                 point_in_orange_region = True
                 break  # Exit the loop if the point is found in any contour
         # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). NOT IN IF")
-        print(f"dist {dist}")
+        # print(f"dist {dist}")
         if point_in_orange_region:
             print(f"The point ({px}, {py}) is within an orange region.")
             orange_balls.append((px, py))
