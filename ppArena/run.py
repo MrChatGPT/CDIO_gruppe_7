@@ -69,15 +69,11 @@ is the same orange ball
 
 
 
-def wBabyCanny(image):
-     # image = perspectiveTrans(image) #cant remember the setup..
-    # image = detect_arena(image)  #detects arena dynanamically
+def transform_and_detect(image):
     # calibrate(image)
     image = transform(image)
     circle_detection(image) 
     image = detect_ball_colors(image)
-    #CannyEdgeGray(image)
-    #cv2.imshow('New image', image)
 
 def getVideo():
     stream_url = 'http://172.28.32.1:8080'
@@ -94,7 +90,7 @@ def getVideo():
             print("Failed to capture image")
             break
 
-        wBabyCanny(imageFrame)
+        transform_and_detect(imageFrame)
 
         # Display the resulting frame
         cv2.imshow("Multiple Color Detection in Real-Time", imageFrame)
@@ -171,7 +167,7 @@ i = 0
 try:
     while True:
         image = camera_handler._run_video()
-        wBabyCanny(image)
+        transform_and_detect(image)
         
         
 finally:
