@@ -35,4 +35,28 @@ The purpose of this section, is to give you a brief understanding of your life..
 `init()` - Initializes camara and manuallly find corners of arena
 
 ### livefeed.py
-Someone write something plz
+`def __init__(self):` - used as a "state" holder.
+
+`def start_video(self):` - Used to initialize the camera, and spawn a thread.
+
+`def capture_image(self):` - dead function, but can take a picture of the spawned window and save it to the current working directory.
+
+`def release_camera(self):` - Used to kill thread, and stop the camera.
+
+### algorithm.py (ibtiogpatricfunc.py)
+`def get_car_data_from_json(file_path):` - Opens the robot.json file and puts the information inside an object.
+
+`def move_to_target(target_position):` - Logic for moving the car giving a set of coordinates (x,y)
+
+`def LoadBalls(filename="balls.json"):` - Opens the balls.json file and puts the information inside a touple.
+
+`def LoadOrangeBall(filename="orangeball.json"):` - Opens the orangeball.json file and puts the information inside a touple (lonely one)
+
+`def LoadRobot(filename="robot.json"):` - Opens the robot.json file and puts the coordinates inside a touple. (discards angle/alpha, since we don't need it here) 
+
+`def Distance(p1, p2):` - The Pythagorean theorem.
+
+`def SortByDistance(RobotXY, BallsXY):` - sort closest to furthest 0...9 and append orange ball after sort. (this is the first algorithm)
+
+
+
