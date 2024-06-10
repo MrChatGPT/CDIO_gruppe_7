@@ -143,6 +143,7 @@ def wBabyCanny(image):
 
 
 # getVideo()
+
 image = blurred(image)
 basicDetectofImage(image)
 

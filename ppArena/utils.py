@@ -297,6 +297,31 @@ def line_draw(image, x, y, w, h, area):
     return image
 
 
+def line_drawForPat(image, x, y, w, h, area):
+    # Green color in BGR 
+    color = (0, 255, 0) 
+    
+    # Line thickness of 9 px 
+    thickness = 9
+    newx_start=x+(w//2)
+    newy_start=y+(h//2)
+
+    start_point = (newx_start, newy_start) 
+    # represents the top right corner of image 
+    end_point = (newx_start+50, newy_start-120) 
+    # Draw a diagonal green line with thickness of 9 px 
+    image = cv2.line(image, start_point, end_point, color, thickness) 
+
+
+
+
+
+  
+    return image
+
+
+
+
 
 
 
@@ -588,6 +613,13 @@ def detect_ball_colors(image):
     green_lower = np.array([72, 130, 187], np.uint8) #HSV   51,  87, 182
     green_upper = np.array([129, 241, 255], np.uint8) #HSV   89, 255 , 255
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+
+
+
+    yellow_lower = np.array([28,  82, 247], np.uint8) #HSV
+    yellow_upper = np.array([46, 172, 255], np.uint8) #HSV
+    yellow_mask = cv2.inRange(hsvFrame, yellow_lower, yellow_upper) 
+
     orange_detected = []
     # point_in_orange_region = False
     #px, py = 1302, 166
@@ -627,8 +659,13 @@ def detect_ball_colors(image):
                               mask = pink_mask) 
     # # For green color 
     green_mask = cv2.dilate(green_mask, kernel) 
-    res_blue = cv2.bitwise_and(image, image, 
+    res_green = cv2.bitwise_and(image, image, 
                                mask = green_mask) 
+    
+    # # For yellow color 
+    yellow_mask = cv2.dilate(yellow_mask, kernel) 
+    res_yellow = cv2.bitwise_and(image, image, 
+                               mask = yellow_mask) 
 
     # Creating contour to track red color 
     contours, hierarchy = cv2.findContours(red_mask, 
@@ -667,7 +704,7 @@ def detect_ball_colors(image):
       
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 300): 
+        if(area > 400 and area < 1000): 
             x, y, w, h = cv2.boundingRect(contour) 
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h), 
@@ -675,11 +712,11 @@ def detect_ball_colors(image):
             print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
 
 
-            if(area > 400 and area < 700):
-                 print(f"O ball")
+            # if(area > 400 and area < 700):
+            #      print(f"O ball")
 
-            if(area >2000 and area < 3000):
-                print(f"Car BUTT")
+            # if(area >2000 and area < 3000):
+            #     print(f"Car BUTT")
 
               
             cv2.putText(image, "Orange Colour", (x, y), 
@@ -800,6 +837,23 @@ def detect_ball_colors(image):
             cv2.putText(image, "Green Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
+            
+    # # Creating contour to track yellow color 
+    contours, hierarchy = cv2.findContours(yellow_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
+    for pic, contour in enumerate(contours): 
+        area = cv2.contourArea(contour) 
+        if(area > 500): 
+            x, y, w, h = cv2.boundingRect(contour) 
+            image = cv2.rectangle(image, (x, y), 
+                                       (x + w, y + h), 
+                                       (0, 0, 0), 2) 
+            print(f"(yellow x={x}, y={y}) w={w} h={h} area={area}")
+            line_drawForPat(image, x, y, w, h, area)
+            cv2.putText(image, "yellow Colour", (x, y), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        1.0, (0, 0, 0)) 
 
 
 
