@@ -43,7 +43,7 @@ The purpose of this section, is to give you a brief understanding of your life..
 
 `def release_camera(self):` - Used to kill thread, and stop the camera.
 
-### algorithm.py (ibtiogpatricfunc.py)
+### algorithm.py (Patric_algo\Patric_funk\ibtiogpatricfunc.py)
 `def get_car_data_from_json(file_path):` - Opens the robot.json file and puts the information inside an object.
 
 `def move_to_target(target_position):` - Logic for moving the car giving a set of coordinates (x,y)
