@@ -143,7 +143,7 @@ def move_to_target(target_position):
 
 # Function to read ball positions from a JSON file
 def LoadBalls(filename="balls.json"):
-    with open(filename, 'r') as file:
+    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
         data = json.load(file)
         
     # Convert the list of lists back to a list of tuples
@@ -154,7 +154,7 @@ def LoadBalls(filename="balls.json"):
 
 # Function to read ball positions from a JSON file
 def LoadOrangeBall(filename="orangeball.json"):
-    with open(filename, 'r') as file:
+    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
         data = json.load(file)
     
     # Extract the first element and convert it to a tuple
@@ -167,7 +167,7 @@ def LoadOrangeBall(filename="orangeball.json"):
 
 # Function to read ball positions from a JSON file
 def LoadRobot(filename="robot.json"):
-    with open(filename, 'r') as file:
+    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
         data = json.load(file)
     
     # Extract the first two values from the first element in the list
