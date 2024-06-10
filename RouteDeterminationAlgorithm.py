@@ -131,6 +131,8 @@ print("Sorted list:", SortedExample)
 FirstBallPosition = SortedExample[0]
 ProcessFirstBall(FirstBallPosition)
 
+# Patric's function
+move_to_target(FirstBallPosition)
 
 
 
