@@ -6,7 +6,11 @@ import cv2
 
 
 
+"""
+1. Download VLC
 
+
+"""
 
 stream_url = 'http://172.29.224.1:8080/'
 

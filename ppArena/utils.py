@@ -136,6 +136,12 @@ def getImage():
     # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
     return image
 
+
+
+
+
+
+
 #THE REAL FUNCTION
 # def arena_draw(image, x, y, w, h, area):
     # Start coordinate, here (x, y), represents the top left corner of rectangle 

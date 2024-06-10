@@ -2,7 +2,7 @@ from arena import *
 from matplotlib import pyplot as plt 
 from transform_arena import *
 
-image = getImage()
+#image = getImage()
 
 # cv2.imshow('Image', image)
 
@@ -110,8 +110,46 @@ def wBabyCanny(image):
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$#
 #################################################################################################
 
+
+
+
+
+
+def getVideo():
+    stream_url = 'http://172.29.224.1:8080/'
+
+    # Capturing video through webcam 
+    webcam = cv2.VideoCapture(stream_url)
+
+    # Start a while loop 
+    while True:
+        # Reading the video from the webcam in image frames 
+        ret, imageFrame = webcam.read()
+        
+        if not ret:
+            print("Failed to capture image")
+            break
+
+        basicDetectofImage(imageFrame)
+
+        # Display the resulting frame
+        cv2.imshow("Multiple Color Detection in Real-Time", imageFrame)
+
+        # Break the loop on 'q' key press
+        if cv2.waitKey(10) & 0xFF == ord('q'):
+            break
+
+    # Release the webcam and destroy all OpenCV windows
+    webcam.release()
+    cv2.destroyAllWindows()
+
+
+
+
+getVideo()
+
 # basicDetectofImage(image)
-getMeSomeBallInfo(image)
+#getMeSomeBallInfo(image)
 
 # goal_draw(image)
 
@@ -124,8 +162,8 @@ getMeSomeBallInfo(image)
 
 
 
-int
-while True:
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-cv2.destroyAllWindows()
+# int
+# while True:
+#     if cv2.waitKey(1) & 0xFF == ord('q'):
+#         break
+# cv2.destroyAllWindows()
