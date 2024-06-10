@@ -4,6 +4,7 @@
 import json
 from time import sleep
 import numpy as np 
+import os
 
 class Car:
     def __init__(self, x, y, angle):
@@ -32,7 +33,8 @@ def get_car_data_from_json(file_path):
 def move_to_target(target_position):
     # load car values into the car object
     car_file_path = 'robot.json'
-    car = get_car_data_from_json(car_file_path)
+    file_path = os.path.join(os.path.dirname(__file__), car_file_path)
+    car = get_car_data_from_json(file_path)
     print(car)
     # Extract the current position from the car object
     current_x, current_y = car.x, car.y
@@ -138,38 +140,41 @@ def move_to_target(target_position):
     sleep(0.5)
     publish_controller_data(0,0,0,0,0)
 
-move_to_target((0,3))
+
 # Function to read ball positions from a JSON file
 def LoadBalls(filename="balls.json"):
-    
     with open(filename, 'r') as file:
         data = json.load(file)
         
     # Convert the list of lists back to a list of tuples
-    BallsXY = [tuple(center) for center in data["BallsXY"]]
+    BallsXY = [tuple(center) for center in data]
     
     return BallsXY
 
 
 # Function to read ball positions from a JSON file
 def LoadOrangeBall(filename="orangeball.json"):
-    
     with open(filename, 'r') as file:
         data = json.load(file)
     
-    # Convert the list of lists back to a list of tuples
-    OrangeBallXY = tuple(data["OrangeBallXY"])
+    # Extract the first element and convert it to a tuple
+    if data and isinstance(data, list) and len(data) > 0:
+        OrangeBallXY = tuple(data[0])
+    else:
+        raise ValueError("Invalid JSON structure or data not found.")
     
     return OrangeBallXY
-
 
 # Function to read ball positions from a JSON file
 def LoadRobot(filename="robot.json"):
     with open(filename, 'r') as file:
         data = json.load(file)
     
-    # Extract the first two values from the list of values
-    RobotXY = tuple(data["RobotXY"][:2])
+    # Extract the first two values from the first element in the list
+    if data and isinstance(data, list) and len(data) > 0:
+        RobotXY = tuple(data[0][:2])
+    else:
+        raise ValueError("Invalid JSON structure or data not found.")
     
     return RobotXY
 
