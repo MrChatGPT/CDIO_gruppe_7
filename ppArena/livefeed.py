@@ -12,7 +12,7 @@ class CameraHandler:
     def start_video(self):
         # Initialize the camera
         print("Vi starter kamera")
-        self.cap = cv2.VideoCapture(0)  # 0 is the default camera
+        self.cap = cv2.VideoCapture(1)  # 0 is the default camera
 
         if not self.cap.isOpened():
             print("Error: Could not open camera.")
@@ -23,7 +23,7 @@ class CameraHandler:
         self.thread.start()
 
     def _run_video(self):
-        print("Video started. Press 'q' to stop.")
+        #print("Video started. Press 'q' to stop.")
         while self.running:
             # Capture frame-by-frame
             ret, frame = self.cap.read()
@@ -38,6 +38,7 @@ class CameraHandler:
             # Press 'q' on the keyboard to exit the video
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
+            return frame
 
         # Close the window when done
         cv2.destroyAllWindows()
@@ -54,16 +55,7 @@ class CameraHandler:
             print("Error: Could not read frame.")
             return
 
-        # Define the name of the image file
-        image_file = "captured_image.jpg"
-
-        # Check if the image already exists
-        if os.path.exists(image_file):
-            os.remove(image_file)  # Delete the existing image file
-
-        # Save the captured frame to the specified file
-        cv2.imwrite(image_file, frame)
-        print(f"Image saved as {image_file}")
+        return frame
 
     def release_camera(self):
         self.running = False
@@ -73,17 +65,4 @@ class CameraHandler:
             self.cap.release()
         print("Camera released.")
 
-# Create a CameraHandler instance
-camera_handler = CameraHandler()
 
-# Start video in a separate thread
-camera_handler.start_video()
-
-# Main loop to interact with the camera handler
-try:
-    while True:
-        camera_handler.capture_image()
-        time.sleep(0.5)
-finally:
-    # Ensure the camera is released properly
-    camera_handler.release_camera()

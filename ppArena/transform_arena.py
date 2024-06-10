@@ -39,7 +39,7 @@ def find_corners(img):
         if len(clicked_points) == 4 or key == ord('q'):
             break
 
-    cv2.destroyAllWindows()
+    cv2.destroyWindow('Image')
 
     if len(clicked_points) != 4:
         print("You fucked up son")
@@ -99,13 +99,13 @@ def transform(img):
     return transformed
 
 def calibrate(img):
-        backup = img.copy()
+        # backup = img.copy()
         find_corners(img)
-        while True:
-            calibration = input("Would you like to redo the calibration?[y/n]:")
-            if calibration == "y":
-                img = backup.copy()
-                find_corners(img)
-            else:
-                break
+        # while True:
+        #     calibration = input("Would you like to redo the calibration?[y/n]:")
+        #     if calibration == "y":
+        #         img = backup.copy()
+        #         find_corners(img)
+        #     else:
+        #         break
 

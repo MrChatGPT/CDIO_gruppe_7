@@ -1,5 +1,6 @@
 from arena import *
 from matplotlib import pyplot as plt 
+from livefeed import CameraHandler
 from transform_arena import *
 
 # image = getImage()
@@ -109,7 +110,7 @@ def getVideo():
 
 
 
-getVideo()
+# getVideo()
 
 #testcrosssearch(image)
 
@@ -160,3 +161,19 @@ getVideo()
 #     if cv2.waitKey(1) & 0xFF == ord('q'):
 #         break
 # cv2.destroyAllWindows()
+
+
+camera_handler = CameraHandler()
+
+# Start video in a separate thread
+camera_handler.start_video()
+i = 0
+try:
+    while True:
+        image = camera_handler._run_video()
+        wBabyCanny(image)
+        
+        
+finally:
+    # Ensure the camera is released properly
+    camera_handler.release_camera()

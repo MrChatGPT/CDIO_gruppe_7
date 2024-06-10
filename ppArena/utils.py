@@ -654,7 +654,6 @@ def detect_ball_colors(image):
 
 
     # Program Termination 
-    cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
 
 
     return image
@@ -679,10 +678,8 @@ def check_point_in_orange_region(contours):
                 break  # Exit the loop if the point is found in any contour
 
         if point_in_orange_region:
-            print(f"The point ({px}, {py}) is within an orange region.")
             orange_balls.append((px, py))
         else:
-            print(f"The point ({px}, {py}) is not within any orange region.")
             white_balls.append((px, py))
 
 
