@@ -143,13 +143,17 @@ def wBabyCanny(image):
 
 
 # getVideo()
-
+image = blurred(image)
 basicDetectofImage(image)
+
+# detect_ball_colors_testbaby2(image)
+
 #getMeSomeBallInfo(image)
 
 # goal_draw(image)
 
 # wBabyCanny(image)
+
 
 # image = detect_arena(image)
 # calibrateColors2(image)

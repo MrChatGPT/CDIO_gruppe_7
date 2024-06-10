@@ -107,11 +107,11 @@ def getImage():
     # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') 
 
 
-    image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg')
+    # image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg')
 
     # image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg
     # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') 
-    # image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')
+    image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')
 
 
 
@@ -430,7 +430,7 @@ def circle_detection(image):
     A higher value for standard deviation means more blur.
     """
     gray_blurred = cv2.GaussianBlur(gray, (9, 9), 0)  
-    cv2.imshow('Detected Balls', gray_blurred)
+    # cv2.imshow('Detected Balls', gray_blurred)
     
     # Perform Hough Circle Transform (Detect circles)
     """
@@ -672,7 +672,14 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y),  
                                        (x + w, y + h), 
                                        (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            print(f"(x={x}, y={y}) w={w} h={h} area={area}")
+            print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
+
+
+            if(area > 400 and area < 700):
+                 print(f"O ball")
+
+            if(area >2000 and area < 3000):
+                print(f"Car BUTT")
 
               
             cv2.putText(image, "Orange Colour", (x, y), 
@@ -722,7 +729,7 @@ def detect_ball_colors(image):
                                            cv2.CHAIN_APPROX_SIMPLE) 
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 300): 
+        if(area > 450): 
             x, y, w, h = cv2.boundingRect(contour) 
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
@@ -784,12 +791,12 @@ def detect_ball_colors(image):
                                            cv2.CHAIN_APPROX_SIMPLE) 
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 300): 
+        if(area > 500): 
             x, y, w, h = cv2.boundingRect(contour) 
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (0, 255, 0), 2) 
-              
+            print(f"(Green x={x}, y={y}) w={w} h={h} area={area}")
             cv2.putText(image, "Green Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
@@ -862,9 +869,10 @@ def blurred(image):
   )
 # Save or display the denoised image
 #cv2.imwrite('denoised_image.png', denoised_image)
-# cv2.imshow('Denoised Image', denoised_image)
+#    cv2.imshow('Denoised Image', denoised_image)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()
+   return denoised_image
 
 def CannyEdgeGray(image):
    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
@@ -883,3 +891,91 @@ def CannyEdgeGray(image):
    #cropped_image = edged[240:140, 168:167] # Slicing to crop the image
    # Display the cropped image
 #    cv2.imshow("cropped", cropped_image)
+
+
+
+
+
+def detect_ball_colors_testbaby(image):
+    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+
+    # Define HSV range for colors
+    white_lower = np.array([0, 0, 209], np.uint8)
+    white_upper = np.array([100, 75, 255], np.uint8)
+    
+    # Create mask for white color
+    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper)
+    
+    # Morphological Transform, Dilation 
+    kernel = np.ones((5, 5), "uint8")
+    white_mask = cv2.dilate(white_mask, kernel)
+
+    # Additional preprocessing to separate close objects
+    blurred = cv2.GaussianBlur(white_mask, (5, 5), 0)
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
+    # Use distance transform and watershed algorithm to separate objects
+    dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 3)
+    ret, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv2.subtract(thresh, sure_fg)
+    ret, markers = cv2.connectedComponents(sure_fg)
+    markers = markers + 1
+    markers[unknown == 255] = 0
+    markers = cv2.watershed(image, markers)
+    image[markers == -1] = [0, 0, 255]
+    
+    # Find contours
+    contours, hierarchy = cv2.findContours(white_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    for pic, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if(area > 100 and area < 3000):  # Adjust area thresholds as needed
+            x, y, w, h = cv2.boundingRect(contour)
+            image = cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 255), 2)
+            cv2.putText(image, "White Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+    
+    cv2.imshow("Multiple Color Detection in Real-Time", image)
+    
+def detect_ball_colors_testbaby2(image):
+    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+
+    # Define HSV range for colors
+    white_lower = np.array([0, 0, 209], np.uint8)
+    white_upper = np.array([100, 75, 255], np.uint8)
+    
+    # Create mask for white color
+    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper)
+    
+    # Morphological Transform, Erosion followed by Dilation
+    kernel = np.ones((9, 9), "uint8")
+    white_mask = cv2.erode(white_mask, kernel, iterations=1)
+    white_mask = cv2.dilate(white_mask, kernel, iterations=2)
+
+    # Additional preprocessing to separate close objects
+    blurred = cv2.GaussianBlur(white_mask, (5, 5), 0)
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
+    # Use distance transform and watershed algorithm to separate objects
+    dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
+    ret, sure_fg = cv2.threshold(dist_transform, 0.5 * dist_transform.max(), 255, 0)
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv2.subtract(thresh, sure_fg)
+    ret, markers = cv2.connectedComponents(sure_fg)
+    markers = markers + 1
+    markers[unknown == 255] = 0
+    markers = cv2.watershed(image, markers)
+    image[markers == -1] = [0, 0, 255]
+    
+    # Find contours
+    contours, hierarchy = cv2.findContours(white_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    for pic, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if(area > 100 and area < 3000):  # Adjust area thresholds as needed
+            x, y, w, h = cv2.boundingRect(contour)
+            image = cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 255), 2)
+            cv2.putText(image, "White Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+    
+    cv2.imshow("Multiple Color Detection in Real-Time", image)
+    return image
