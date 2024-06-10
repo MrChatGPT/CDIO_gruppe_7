@@ -646,7 +646,7 @@ def detect_ball_colors(image):
 
     orange_detected = []
     # point_in_orange_region = False
-    px, py = 1302, 166
+    #px, py = 1302, 166
    
 
 
