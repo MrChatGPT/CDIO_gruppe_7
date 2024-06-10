@@ -8,341 +8,12 @@ from turtle import up
 import cv2
 from cv2 import GaussianBlur
 import numpy as np
-# from config import *
 import random
 import imutils
 from imutils import paths
 import argparse
 from skimage import exposure
 import json
-
-#from arena import perspectiveTransDyn
-
-
-
-
-
-
-def calibrateColors(image):
-    """Function to calibrate the threshold values"""
-
-    print("Press 'w' to save white thresholds.")
-    print("Press 'r' to save red thresholds.")
-    print("Press 'q' to save quit.")
-
-    cv2.namedWindow('Threshold')
-
-    # Create trackbars for threshold change
-    cv2.createTrackbar('Lower Threshold', 'Threshold', 0, 255, lambda x: None)
-    cv2.createTrackbar('Upper Threshold', 'Threshold',
-                       255, 255, lambda x: None)
-
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-
-    while True:
-        # Get current positions of the trackbars
-        lower_thresh = cv2.getTrackbarPos('Lower Threshold', 'Threshold')
-        upper_thresh = cv2.getTrackbarPos('Upper Threshold', 'Threshold')
-
-        # Apply thresholding
-        _, thresh = cv2.threshold(
-            blurred, lower_thresh, upper_thresh, cv2.THRESH_BINARY_INV)
-
-        # Display imagesq
-        # cv2.imshow('Grayscale', gray)
-        # cv2.imshow('Blurred', blurred)
-        cv2.imshow('Threshold', thresh)
-        cv2.imshow('Original', image)
-
-        # Check for key presses
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('w'):
-            save_thresholds(lower_thresh, upper_thresh, 'white')
-            print('Saved white thresholds in config.py.')
-        elif key == ord('r'):
-            save_thresholds(lower_thresh, upper_thresh, 'red')
-            print('Saved red thresholds in config.py.')
-        elif key == ord('q'):
-            break
-
-    cv2.destroyAllWindows()
-
-
-
-
-
-def calibrateColors2(image):
-    """Function to calibrate the HSV threshold values for detecting colors, specifically orange."""
-
-    def nothing(x):
-        pass
-
-    cv2.namedWindow('HSV Calibration')
-
-    # Creating trackbars for each HSV component
-    cv2.createTrackbar('H Lower', 'HSV Calibration', 0, 179, nothing)
-    cv2.createTrackbar('S Lower', 'HSV Calibration', 0, 255, nothing)
-    cv2.createTrackbar('V Lower', 'HSV Calibration', 0, 255, nothing)
-    cv2.createTrackbar('H Upper', 'HSV Calibration', 179, 179, nothing)
-    cv2.createTrackbar('S Upper', 'HSV Calibration', 255, 255, nothing)
-    cv2.createTrackbar('V Upper', 'HSV Calibration', 255, 255, nothing)
-
-    # Convert image to HSV for better color segmentation
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    while True:
-        # Get current positions of the trackbars
-        h_lower = cv2.getTrackbarPos('H Lower', 'HSV Calibration')
-        s_lower = cv2.getTrackbarPos('S Lower', 'HSV Calibration')
-        v_lower = cv2.getTrackbarPos('V Lower', 'HSV Calibration')
-        h_upper = cv2.getTrackbarPos('H Upper', 'HSV Calibration')
-        s_upper = cv2.getTrackbarPos('S Upper', 'HSV Calibration')
-        v_upper = cv2.getTrackbarPos('V Upper', 'HSV Calibration')
-
-        # Create the HSV range based on trackbar positions
-        lower_hsv = np.array([h_lower, s_lower, v_lower], np.uint8)
-        upper_hsv = np.array([h_upper, s_upper, v_upper], np.uint8)
-
-        # Mask the image to only include colors within the specified range
-        mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
-        result = cv2.bitwise_and(image, image, mask=mask)
-
-        # Display the original and the result side by side
-        #cv2.imshow('Original', image)
-        cv2.imshow('HSV Calibration', result)
-
-        # Press 'q' to quit
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            print("Final HSV Lower:", lower_hsv)
-            print("Final HSV Upper:", upper_hsv)
-            break
-
-
-
-def getImage():
-    """This is just a dummy function. It will be replaced by the camera module."""
-    
-    # image = cv2.imread('test/images/WIN_20240403_10_40_59_Pro.jpg')
-    # image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
-    # image = cv2.imread('test/images/WIN_20240403_10_40_58_Pro.jpg') 
-    # image = cv2.imread('test/images/pic50upsidedown.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_43_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
-    # image = cv2.imread('test/images/pic50egghorizontal.jpg') 
-    # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    image = cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg') 
-    
-    return image
-
-#THE REAL FUNCTION
-# def arena_draw(image, x, y, w, h, area):
-    # Start coordinate, here (x, y), represents the top left corner of rectangle 
-    start_point = (x, y)
-    
-    # End coordinate, here (x+w, y+h), represents the bottom right corner of rectangle
-    end_point = (x+w, y+h)
-    
-    # Green color in BGR
-    color = (0, 255, 0)  # Using a standard green color; modify as needed
-    
-    # Line thickness of 2 px
-    thickness = 2
-    
-    # Using cv2.rectangle() method to draw a rectangle around the car
-    image = cv2.rectangle(image, start_point, end_point, color, thickness)
-    
-    # Optionally, add text label if needed
-    cv2.putText(image, 'arena', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
-    
-    return image
-
-
-#TESTING
-def goal_draw(image, x, y):
- 
-    
-    # Coordinates for the goal rectangle
-    ##LEFT GOAL
-    goal_x = x+20
-    goal_y = y+430
-    goal_w = 22
-    goal_h = 130
-  
-    start_point_goal = (goal_x, goal_y)
-    end_point_goal = (goal_x + goal_w, goal_y + goal_h)
-    color_goal = (0, 255, 0)
-    thickness_goal = 2
-    
-    image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
-    cv2.putText(image, 'L', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
-
-
-
-    # Coordinates for the goal rectangle
-    ##RIGHT GOAL
-    goal_x = x+1360
-    goal_y = y+470
-    goal_w = 22
-    goal_h = 75
-    
-
-
-    start_point_goal = (goal_x, goal_y)
-    end_point_goal = (goal_x + goal_w, goal_y + goal_h)
-    color_goal = (0, 255, 0)
-    thickness_goal = 2
-    
-    image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
-    cv2.putText(image, 'R', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
-
-    # # To display the image
-    # cv2.imshow('Result', image)
-    
-    return image
-
-
-
-
-
-#Used for the cross (and arena), but not limited to
-def square_draw(image, x, y, w, h, area):
-    # # Start coordinate, here (x, y)
-    # start_point = (x+60, y)
-    
-    # # End coordinate
-    # end_point = (x+60,y+h)
-    
-    # # Green color in BGR
-    # color = (0, 255, 0)  # Using a standard green color; modify as needed
-    
-    # # Line thickness of 2 px
-    # thickness = 2
-    
-    # # Using cv2.rectangle() method to draw a rectangle around the car
-    # image = cv2.line(image, start_point, end_point, color, thickness)
-    
-    # # Optionally, add text label if needed
-    # cv2.putText(image, 'cross', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
-    
-
-    # image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2) 
-
-
-    # print("before recreating the points")
-
-     # Recreate the rectangle points from x, y, w, h
-    rect_points = np.array([
-        [x, y],
-        [x + w, y],
-        [x, y + h],
-        [x + w, y + h]
-    ], dtype=np.float32)
-
-    # print(f"rect_points={rect_points}")
-    # print("after recreating the points")
-    # The points need to be ordered correctly for minAreaRect to work
-    rect_points = cv2.convexHull(rect_points)
-
-    # Find the minimum area rectangle
-    min_area_rect = cv2.minAreaRect(rect_points)
-
-    """ Cross
-    minimum area rectangle=((1100.0, 523.5), (167.0, 168.0), 90.0)
-    The first two numbers (1100.0, 523.5), shows the x and y-axis of the central point in the square.
-    """
-    # print(f"minimum area rectangle={min_area_rect}") 
-
-    # Convert the rectangle to box points (four corners)
-    """
-    Box prints out the the coordinates respectively:
-    box=[xTopleft,yTopleft],
-        [xTopright, yTopright],
-        [xBottomright, yBottomright],
-        [xBottomleft,yBottomleft]
-    """
-    box = cv2.boxPoints(min_area_rect)
-    # print(f"box={box}")
-    box = np.int0(box)
- 
-
-
-
-    return box, min_area_rect
-
-
-
-def line_draw(image, x, y, w, h, area):
-
-    # Green color in BGR 
-    color = (0, 255, 0) 
-    
-    # Line thickness of 9 px 
-    thickness = 9
- 
-
-
-    # represents the top left corner of image 
-    start_point = (x, y) 
-    # represents the top right corner of image 
-    end_point = (x+w, y) 
-    # Draw a diagonal green line with thickness of 9 px 
-    image = cv2.line(image, start_point, end_point, color, thickness) 
-
-
-
-
-    # represents the top left corner of image 
-    start_point = (x, y) 
-    # represents the bottom left corner of image 
-    end_point = (x, y+h) 
-    # Draw a diagonal green line
-    image = cv2.line(image, start_point, end_point, color, thickness) 
-
-
-
-    # represents the top right corner of image 
-    start_point = (x+w, y) 
-    # represents the bottom right corner of image 
-    end_point = (x+w, y+h) 
-    # Draw a diagonal green line
-    image = cv2.line(image, start_point, end_point, color, thickness) 
-
-    # represents the bottom left corner of image 
-    start_point = (x, y+h) 
-    # represents the bottom right corner of image 
-    end_point = (x+w, y+h) 
-    # Draw a diagonal green line
-    image = cv2.line(image, start_point, end_point, color, thickness) 
-
-    return image
-
-
-
-def car_draw(image, x, y, w, h, area):
-    # Start coordinate, here (x, y), represents the top left corner of rectangle 
-    start_point = (x, y)
-    
-    # End coordinate, here (x+w, y+h), represents the bottom right corner of rectangle
-    end_point = (x+w, y+h)
-    
-    # Green color in BGR
-    color = (0, 255, 0)  # Using a standard green color; modify as needed
-    
-    # Line thickness of 2 px
-    thickness = 2
-    
-    # Using cv2.rectangle() method to draw a rectangle around the car
-    image = cv2.rectangle(image, start_point, end_point, color, thickness)
-    
-    # Optionally, add text label if needed
-    cv2.putText(image, 'Car', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
-    
-    return image
-
 
 def egg_draw(image, x, y, w, h, area):
     #https://www.geeksforgeeks.org/python-opencv-cv2-ellipse-method/
@@ -352,7 +23,6 @@ def egg_draw(image, x, y, w, h, area):
     # Define axes length
     axesLength = (w//2, h//2)
  
-    
     # Ellipse parameters
     angle = 0
     startAngle = 0
@@ -427,12 +97,7 @@ def circle_detection(image):
             # Store the circles data
             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
 
-    # with open('stored_circles.json', 'w') as file:
-    #     json.dump(stored_circles, file, indent=4)
     save_balls(stored_circles)
-    hello = load_balls()
-    # Display the result
-    # cv2.imshow('Detected Balls', image)
     return image, stored_circles
 
 
@@ -470,7 +135,6 @@ def detect_ball_colors(image):
     # https://colorizer.org/
   # Capturing video through webcam 
  #  webcam = cv2.VideoCapture(0) 
-  
  
     # Convert the imageFrame in  
     # BGR(RGB color space) to  
@@ -498,7 +162,6 @@ def detect_ball_colors(image):
     white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
     white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-
     
 
     """
@@ -507,9 +170,6 @@ def detect_ball_colors(image):
     blue_lower = np.array([95, 66, 141], np.uint8) #HSV
     blue_upper = np.array([113, 150, 205], np.uint8) #HSV
     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-
-
-
 
     orange_detected = []
    
@@ -585,21 +245,13 @@ def detect_ball_colors(image):
             cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
             
             no_go_zones = []
-            cross_width = 10
             no_go_zones.append([
                 (end1, end2),
                 (end3, end4)
             ])
-            # no_go_zones.append([
-            #     (end3[0] - cross_width, end3[1] - cross_width),
-            #     (end3[0] + cross_width, end3[1] + cross_width),
-            #     (end4[0] + cross_width, end4[1] + cross_width),
-            #     (end4[0] - cross_width, end4[1] - cross_width)
-            # ])
 
             save_no_go_zones(no_go_zones)
 
- 
   
     # Creating contour to track orange color 
     contours, hierarchy = cv2.findContours(orange_mask, 
@@ -640,31 +292,16 @@ def detect_ball_colors(image):
             if(area > 2000 and area < 4000): #before 2900
                 image = egg_draw(image,x,y,w,h,area)
 
-            #If a big white object is detected with size of the car
-            if(area > 13000 and area < 22000):
-                image = car_draw(image,x,y,w,h,area)
-
-            #(x=638, y=683) w=31 h=80 area=813.5 small white square
-             
-              
             cv2.putText(image, "White Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (255, 255, 255)) 
             
-
-
-    # Program Termination 
-
-
     return image
 
 def check_point_in_orange_region(contours):
-    # print_balls("balls.json")
-    
     #To store balls in separate arrays
     white_balls = []
     orange_balls = []
-
 
     # Check each ball coordinate
     balls = load_balls("balls.json")
@@ -686,7 +323,6 @@ def check_point_in_orange_region(contours):
     saveOrange_balls(orange_balls)
     saveWhite_balls(white_balls)
 
-
 def save_no_go_zones(zones, filename="no_go_zones.json"):
     with open(filename, 'w') as file:
         json.dump(zones, file)
@@ -704,28 +340,3 @@ def blurred(image):
    denoised_image = cv2.fastNlMeansDenoisingColored(
      image, None, h, hForColorComponents, templateWindowSize, searchWindowSize
   )
-
-
-def CannyEdgeGray(image):
-   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
-   cv2.imshow("gray pic", gray) 
-   gray = cv2.bilateralFilter(gray, 11, 17, 17)
-   cv2.imshow("gray bilateral", gray) 
- #    cv2.imshow("Gray image", gray) 
-   gray = cv2.GaussianBlur(gray, (5, 5), 0)
- #    cv2.imshow("Gaussian Blur", gray) 
-
-#Original
-#    edged = cv2.Canny(gray, 35, 125)
-#    edged = cv2.Canny(gray,100, 200) #no cross to be seen
-#    edged = cv2.Canny(gray,0, 105, apertureSize=5)
-   edged = cv2.Canny(gray,0, 105)
-   cv2.imshow("Canny edge B/W detection", edged) 
-
-   #cropped_image = edged[240:140, 168:167] # Slicing to crop the image
-
-   # Display the cropped image
-#    cv2.imshow("cropped", cropped_image)
-
-
-
