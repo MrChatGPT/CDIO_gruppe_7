@@ -202,3 +202,16 @@ def CannyEdgeGray(image):
    #cropped_image = edged[240:140, 168:167] # Slicing to crop the image
 
    # Display the cropped image
+
+   def blurred(image):
+        
+   # Denoising parameters
+   h = 10  # filter strength for luminance component
+   hForColorComponents = h  # the same filter strength is often used for color
+   templateWindowSize = 7  # must be odd, larger values could remove details
+   searchWindowSize = 21  # must be odd, larger values are slower
+
+   # Apply fastNlMeansDenoisingColored
+   denoised_image = cv2.fastNlMeansDenoisingColored(
+     image, None, h, hForColorComponents, templateWindowSize, searchWindowSize
+  )

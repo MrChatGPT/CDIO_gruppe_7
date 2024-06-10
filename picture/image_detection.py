@@ -328,15 +328,3 @@ def save_no_go_zones(zones, filename="no_go_zones.json"):
         json.dump(zones, file)
 
 
-def blurred(image):
-        
-   # Denoising parameters
-   h = 10  # filter strength for luminance component
-   hForColorComponents = h  # the same filter strength is often used for color
-   templateWindowSize = 7  # must be odd, larger values could remove details
-   searchWindowSize = 21  # must be odd, larger values are slower
-
-   # Apply fastNlMeansDenoisingColored
-   denoised_image = cv2.fastNlMeansDenoisingColored(
-     image, None, h, hForColorComponents, templateWindowSize, searchWindowSize
-  )

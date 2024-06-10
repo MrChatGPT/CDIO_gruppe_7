@@ -70,11 +70,9 @@ def find_corners(img):
 
     #save for later use
     save_calibration_data('calibration_data.json', sorted_corners)
-    transform(img)
 
 def transform(img):
     # resulution (can be made smaller if we want to)
-    # the arena is 180 * 120, so we multiply by 5 for this nah we dont do that
     width, height = 1250, 900
 
     corners = load_calibration_data('calibration_data.json')
@@ -93,19 +91,4 @@ def transform(img):
     # transform
     transformed = cv2.warpPerspective(img, matrix, (width, height))
 
-    # cv2.imshow('Transformed Image', transformed)
-    # cv2.waitKey(2000)
-    # cv2.destroyAllWindows()
     return transformed
-
-def calibrate(img):
-        # backup = img.copy()
-        find_corners(img)
-        # while True:
-        #     calibration = input("Would you like to redo the calibration?[y/n]:")
-        #     if calibration == "y":
-        #         img = backup.copy()
-        #         find_corners(img)
-        #     else:
-        #         break
-
