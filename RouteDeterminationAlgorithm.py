@@ -36,18 +36,47 @@ import numpy as np
 
 
 # Function to read ball positions from a JSON file
-def LoadPositions(filename="balls.json"):
+
+def LoadBalls(filename="balls.json"):
+    
     with open(filename, 'r') as file:
         data = json.load(file)
-    # Convert lists to tuples
-    RobotXY = tuple(data["RobotXY"])
+        
+    # Convert the list of lists back to a list of tuples
     BallsXY = [tuple(center) for center in data["BallsXY"]]
-    OrangeBallXY = tuple(data["OrangeBallXY"])
-    return RobotXY, BallsXY, OrangeBallXY
+    
+    return BallsXY
 
+
+# Function to read ball positions from a JSON file
+
+def LoadOrangeBall(filename="orangeball.json"):
+    
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    
+    # Convert the list of lists back to a list of tuples
+    OrangeBallXY = tuple(data["OrangeBallXY"])
+    
+    return OrangeBallXY
+
+
+# Function to read ball positions from a JSON file
+
+def LoadRobot(filename="robot.json"):
+
+    with open(filename, 'r') as file:
+        data = json.load(file)
+
+    # Convert the list of lists back to a list of tuples
+    RobotXY = tuple(data["RobotXY"])
+    
+    return RobotXY
 
 # Loading the positions from the JSON file
-RobotXY, BallsXY, OrangeBallXY = LoadPositions()
+BallsXY = LoadBalls()
+OrangeBallXY = LoadOrangeBall() 
+RobotXY = LoadRobot() 
 
 
 # Function to calculate the distance between the Robot and the balls
