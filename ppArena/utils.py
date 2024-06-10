@@ -123,7 +123,8 @@ def calibrateColors2(image):
 
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
-    
+
+    image= cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg')  #new pic with new car
     # image = cv2.imread('test/images/WIN_20240403_10_40_59_Pro.jpg')
     # image = cv2.imread('test/images/WIN_20240403_10_39_46_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240403_10_40_38_Pro.jpg') #hvid nej
@@ -131,7 +132,7 @@ def getImage():
     # image = cv2.imread('test/images/pic50upsidedown.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_43_Pro.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') 
-    image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
+    # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
     # image = cv2.imread('test/images/pic50egghorizontal.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
     return image
@@ -647,8 +648,18 @@ def detect_ball_colors(image):
     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
 
 
+    # Set range for pink color and  
+    # define mask 
+    pink_lower = np.array([154,  62,  80], np.uint8) #HSV 
+    pink_upper = np.array([169, 105, 255], np.uint8) #HSV  
+    pink_mask = cv2.inRange(hsvFrame, pink_lower, pink_upper) 
 
 
+    # Set range for green color and  
+    # define mask 
+    green_lower = np.array([154,  62,  80], np.uint8) #HSV 
+    green_upper = np.array([169, 105, 255], np.uint8) #HSV  
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
 
     orange_detected = []
     # point_in_orange_region = False
@@ -684,6 +695,12 @@ def detect_ball_colors(image):
     res_blue = cv2.bitwise_and(image, image, 
                                mask = blue_mask) 
    
+
+    # For pink color 
+    pink_mask = cv2.dilate(pink_mask, kernel) 
+    res_pink = cv2.bitwise_and(image, image,  
+                              mask = pink_mask) 
+
     # # For green color 
     # green_mask = cv2.dilate(green_mask, kernel) 
     # res_blue = cv2.bitwise_and(image, image, 
@@ -752,6 +769,9 @@ def detect_ball_colors(image):
             #     print(f"The point ({px}, {py}) is not within any orange region.")
 
     check_point_in_orange_region(contours)
+
+
+
     # Creating contour to track white color 
     contours, hierarchy = cv2.findContours(white_mask, 
                                            cv2.RETR_TREE, 
@@ -779,6 +799,29 @@ def detect_ball_colors(image):
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (255, 255, 255)) 
             
+
+    
+    check_point_in_orange_region(contours)
+
+
+
+
+    # # Creating contour to track pink color 
+    contours, hierarchy = cv2.findContours(pink_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
+    for pic, contour in enumerate(contours): 
+        area = cv2.contourArea(contour) 
+        if(area > 200): 
+            x, y, w, h = cv2.boundingRect(contour) 
+            image = cv2.rectangle(image, (x, y), 
+                                       (x + w, y + h), 
+                                       (0, 0, 0), 2) 
+            print(f"(Pink objects: x={x}, y={y}) w={w} h={h} area={area}")
+              
+            cv2.putText(image, "Pink Colour", (x, y), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        1.0, (0, 0, 0)) 
 
     # # Creating contour to track blue color 
     # contours, hierarchy = cv2.findContours(blue_mask, 
