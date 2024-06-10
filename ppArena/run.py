@@ -71,7 +71,7 @@ is the same orange ball
 def wBabyCanny(image):
      # image = perspectiveTrans(image) #cant remember the setup..
     # image = detect_arena(image)  #detects arena dynanamically
-    calibrate(image)
+    # calibrate(image)
     image = transform(image)
     circle_detection(image) 
     image = detect_ball_colors(image)

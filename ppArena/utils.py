@@ -322,13 +322,6 @@ def line_draw(image, x, y, w, h, area):
 
 
 
-
-
-
-
-
-
-
 def car_draw(image, x, y, w, h, area):
     # Start coordinate, here (x, y), represents the top left corner of rectangle 
     start_point = (x, y)
