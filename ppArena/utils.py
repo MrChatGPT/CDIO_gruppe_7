@@ -134,7 +134,7 @@ def getImage():
     # image = cv2.imread('test/images/WIN_20240410_10_31_07_Pro.jpg') #orig pic with transfrom new
     # image = cv2.imread('test/images/pic50egghorizontal.jpg') 
     # image = cv2.imread('test/images/WIN_20240410_10_30_54_Pro.jpg') 
-    image = cv2.imread('test/images/WIN_20240610_09_33_12_Pro') 
+    image = cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg') 
     
     return image
 
