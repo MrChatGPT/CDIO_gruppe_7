@@ -308,7 +308,7 @@ def line_drawForPat(image, x, y, w, h, area):
 
     start_point = (newx_start, newy_start) 
     # represents the top right corner of image 
-    end_point = (newx_start+50, newy_start-120) 
+    end_point = (newx_start+50, newy_start-175) 
     # Draw a diagonal green line with thickness of 9 px 
     image = cv2.line(image, start_point, end_point, color, thickness) 
 
