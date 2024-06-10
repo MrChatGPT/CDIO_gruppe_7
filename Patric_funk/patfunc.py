@@ -4,6 +4,7 @@
 
 
 import json
+import sleep
 
 class Car:
     def __init__(self, x, y, angle):
@@ -49,21 +50,33 @@ def move_to_target(target_position):
             if car.angle != 0:
                 if car.angle > 0:
                     publish_controller_data(0,0,-0.15,0,0) #vi vender os mod venstre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
                 if car.angle > 270:
                     publish_controller_data(0,0,0.15,0,0) #vi vender os mod højre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
             publish_controller_data(0,0.15,0,0,0) #vi rykker 0.15 i y-retningen (opad)
+            sleep(0.5)
+            publish_controller_data(0,0,0,0,0)
             return
         else: #så skal vi altså nedad ˅
             if car.angle != 180:
                 if car.angle > 0:
                     publish_controller_data(0,0,0.15,0,0) #vi vender tilføjer grader indtil vi er på 180
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
                 if car.angle > 180:
                     publish_controller_data(0,0,-0.15,0,0)#vi "fjerner" grader indtil vi er på 180
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
             publish_controller_data(0,0.15,0,0,0) #vi rykker 0.15 i y-retningen (opad)
+            sleep(0.5)
+            publish_controller_data(0,0,0,0,0)
             return
     
     # Move in the x direction
@@ -73,38 +86,59 @@ def move_to_target(target_position):
             if car.angle != 270:
                 if car.angle == 0:
                     publish_controller_data(0,0,-0.15,0,0) #hvis vi peger opad ved 0 grader, skal vi bare tilte mod venstre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
                 if car.angle > 270: #efter at have trukket én fra 0, lander vi på 359 grader
                     publish_controller_data(0,0,-0.15,0,0) #Hvis vi er større end 270, skal vi bare blive ved med at tilte mod venstre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
                 if car.angle == 180:
                     publish_controller_data(0,0,0.15,0,0) #hvis vi allerede er ved 180, skal vi bare mod højre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return    
                 if car.angle < 270:
                     publish_controller_data(0,0,0.15,0,0) #Hvis vi er større end 180, skal vi fortsat mod højre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
             publish_controller_data(0,0.15,0,0,0)
+            sleep(0.5)
+            publish_controller_data(0,0,0,0,0)
             return
         else: #så skal vi til højre
             if car.angle != 90:
                 if car.angle == 180:
                     publish_controller_data(0,0,-0.15,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return    
                 if car.angle > 90:
                     publish_controller_data(0,0,-0.15,0,0) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return    
                 if car.angle == 0:
                     publish_controller_data(0,0,0.15,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
                 if car.angle < 90:
                     publish_controller_data(0,0,0.15,0,0) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
+                    sleep(0.5)
+                    publish_controller_data(0,0,0,0,0)
                     return
             publish_controller_data(0,0.15,0,0,0)
+            sleep(0.5)
+            publish_controller_data(0,0,0,0,0)
             return
     #nu er current_y = target_y, current_x = target_x
     publish_controller_data(0,0,0,1,0) #og så skal der nedsvælges
+    sleep(0.5)
+    publish_controller_data(0,0,0,0,0)
 
 
 #Eksempel på kald af funktion: 
-
-move_to_target((2, -5))
+#move_to_target((2, -5))
