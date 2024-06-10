@@ -1,19 +1,19 @@
 # Overview of the files and methods
 The purpose of this section, is to give you a brief understanding of your life..
 
-## Files
+# Files
 
-# home
+## home
 1. ***run.py*** - The main of the program  
 2. ***.gitignore*** - Blacklistes stuff we don't want to upload to github, like temporary files
 3. ***.json*** - different local json files that are created when the program runs
 
-# picture
+## picture
 1. ***image_detection.py*** all methods for detecting colors and shapes  
 2. ***livefeed.py*** initialize camara and gets image to python
 3. ***transform_arena.py*** used to make image correction, by transforming the perspective to some calibrated points.  
 
-# extra
+## extra
 ***test methods we might need later***
 
 
