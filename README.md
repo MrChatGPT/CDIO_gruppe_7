@@ -52,7 +52,7 @@ The purpose of this section, is to give you a brief understanding of your life..
 
 `def release_camera(self):` - Used to kill thread, and stop the camera.
 
-### algorithm.py (Patric_algo\Patric_funk\ibtiogpatricfunc.py)
+### algorithm.py
 `def LoadBalls(filename="balls.json"):` - Opens the balls.json file and puts the information inside a touple.
 
 `def LoadOrangeBall(filename="orangeball.json"):` - Opens the orangeball.json file and puts the information inside a touple (lonely one)
