@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 import json
-
+import os
 def rgb_to_hsv(rgb):
     color = np.uint8([[rgb]])
     hsv_color = cv2.cvtColor(color, cv2.COLOR_RGB2HSV)
@@ -10,7 +10,8 @@ def rgb_to_hsv(rgb):
 
 def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yellow_mask.jpg', green_mask_path='green_mask.jpg', center_weight=25):
     # Read the image
-    image = cv2.imread(image_path)
+    
+    image = cv2.imread(os.path.join(os.path.dirname(__file__), image_path))
     
     # Convert the image to HSV color space
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -87,11 +88,11 @@ def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yello
     cv2.line(image, green_centroid, yellow_centroid, (255, 0, 0), 2) # Direction line
     
     # Save the result
-    cv2.imwrite(output_path, image)
+    cv2.imwrite(os.path.join(os.path.dirname(__file__), output_path), image)
     
     # Write the results to a JSON file
     data = [[adjusted_center_x, adjusted_center_y, angle_deg]]
-    with open('robot.json', 'w') as json_file:
+    with open(os.path.join(os.path.dirname(__file__), 'robot.json'), 'w') as json_file:
         json.dump(data, json_file)
 
     return (adjusted_center_x, adjusted_center_y, angle_deg)
