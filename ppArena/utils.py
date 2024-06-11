@@ -107,12 +107,14 @@ def getImage():
     # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') 
 
 
-    # image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg')
+    # image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg') #miss 1 w
 
-    # image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg
+    image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg
     # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') 
-    image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')  #detects orange ball
-    # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  #No yellow
+    # image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')  #detects orange ball
+    # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  
+    # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') #miss 1 w
+   
    
 
 
@@ -495,8 +497,8 @@ def circle_detection(image):
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
             
             # Put text 'Ball' near the detected ball
-            cv2.putText(image, 'Ball', (x - r, y - r),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            # cv2.putText(image, 'Ball', (x - r, y - r),
+            #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
             
             print(f"'center': {x, y}, 'radius': {r}")
             # Store the circles data
@@ -651,9 +653,9 @@ def detect_ball_colors(image):
                                 mask = orange_mask) 
       
     # For white color 
-    white_mask = cv2.dilate(white_mask, kernel) 
-    res_white = cv2.bitwise_and(image, image, 
-                               mask = white_mask) 
+    # white_mask = cv2.dilate(white_mask, kernel) 
+    # res_white = cv2.bitwise_and(image, image, 
+    #                            mask = white_mask) 
     
     # For blue color 
     blue_mask = cv2.dilate(blue_mask, kernel) 
@@ -673,6 +675,16 @@ def detect_ball_colors(image):
     yellow_mask = cv2.dilate(yellow_mask, kernel) 
     res_yellow = cv2.bitwise_and(image, image, 
                                mask = yellow_mask) 
+    
+
+
+    # Morphological Transform, Erosion followed by Dilation
+    # kernel = np.ones((9, 9), "uint8")
+    kernel = np.ones((6, 6), "uint8")
+    white_mask = cv2.erode(white_mask, kernel, iterations=1)
+    white_mask = cv2.dilate(white_mask, kernel, iterations=2)
+
+ 
 
     # Creating contour to track red color 
     contours, hierarchy = cv2.findContours(red_mask, 
@@ -713,9 +725,9 @@ def detect_ball_colors(image):
         area = cv2.contourArea(contour) 
         if(area > 400 and area < 1000): 
             x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y),  
-                                       (x + w, y + h), 
-                                       (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
+            # image = cv2.rectangle(image, (x, y),  
+            #                            (x + w, y + h), 
+            #                            (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
             print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
 
 
@@ -768,6 +780,22 @@ def detect_ball_colors(image):
 
 
     # Creating contour to track white color 
+    # Additional preprocessing to separate close objects
+    blurred = cv2.GaussianBlur(white_mask, (5, 5), 0)
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
+    # Use distance transform and watershed algorithm to separate objects
+    dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
+    ret, sure_fg = cv2.threshold(dist_transform, 0.5 * dist_transform.max(), 255, 0)
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv2.subtract(thresh, sure_fg)
+    ret, markers = cv2.connectedComponents(sure_fg)
+    markers = markers + 1
+    markers[unknown == 255] = 0
+    markers = cv2.watershed(image, markers)
+    # image[markers == -1] = [0, 0, 255]
+
+
     contours, hierarchy = cv2.findContours(white_mask, 
                                            cv2.RETR_TREE, 
                                            cv2.CHAIN_APPROX_SIMPLE) 
@@ -775,9 +803,9 @@ def detect_ball_colors(image):
         area = cv2.contourArea(contour) 
         if(area > 450): 
             x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y), 
-                                       (x + w, y + h), 
-                                       (255, 255, 255), 2) 
+            # image = cv2.rectangle(image, (x, y), 
+            #                            (x + w, y + h), 
+            #                            (255, 255, 255), 2) 
             print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
             if(area > 2000 and area < 4000): #before 2900
@@ -1033,10 +1061,18 @@ def detect_ball_colors_testbaby2(image):
     
     for pic, contour in enumerate(contours):
         area = cv2.contourArea(contour)
-        if(area > 100 and area < 3000):  # Adjust area thresholds as needed
+        if(area > 2000 and area < 4000):  # Adjust area thresholds as needed
             x, y, w, h = cv2.boundingRect(contour)
             image = cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 255), 2)
-            cv2.putText(image, "White Colour", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+            cv2.putText(image, "White Colour looks like an egg", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255))
+
     
     cv2.imshow("Multiple Color Detection in Real-Time", image)
     return image
+
+
+
+# print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
+#             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
+#             if(area > 2000 and area < 4000): #before 2900
+#                 image = egg_draw(image,x,y,w,h,area)

@@ -37,6 +37,7 @@ image = getImage()
 def basicDetectofImage(image):
     circle_detection(image)  #THIS IS THE GOOD SHIT
     detect_ball_colors(image)
+    # circle_detection(image)  #THIS IS THE GOOD SHIT
 
 
 
@@ -144,12 +145,13 @@ def wBabyCanny(image):
 
 # getVideo()
 
-image = blurred(image)
-# basicDetectofImage(image)
+# image = blurred(image)
+basicDetectofImage(image)
 
 # detect_ball_colors_testbaby2(image)
 
-getMeSomeBallInfo(image)
+
+# getMeSomeBallInfo(image)
 
 # goal_draw(image)
 
