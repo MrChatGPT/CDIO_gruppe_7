@@ -2,13 +2,17 @@ import json
 from time import sleep
 import numpy as np 
 import os
-from algorithm import move_to_target
 
 
-    
 # Function to read ball positions from a JSON file
 def LoadBalls(filename="balls.json"):
-    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, filename)
+    
+    with open(json_file_path, 'r') as file:
         data = json.load(file)
         
     # Convert the list of lists back to a list of tuples
@@ -19,7 +23,13 @@ def LoadBalls(filename="balls.json"):
 
 # Function to read ball positions from a JSON file
 def LoadOrangeBall(filename="orangeball.json"):
-    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, filename)
+    
+    with open(json_file_path, 'r') as file:
         data = json.load(file)
     
     # Extract the first element and convert it to a tuple
@@ -32,7 +42,13 @@ def LoadOrangeBall(filename="orangeball.json"):
 
 # Function to read ball positions from a JSON file
 def LoadRobot(filename="robot.json"):
-    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, filename)
+    
+    with open(json_file_path, 'r') as file:
         data = json.load(file)
     
     # Extract the first two values from the first element in the list
@@ -42,11 +58,6 @@ def LoadRobot(filename="robot.json"):
         raise ValueError("Invalid JSON structure or data not found.")
     
     return RobotXY
-
-# Loading the positions from the JSON file
-BallsXY = LoadBalls()
-OrangeBallXY = LoadOrangeBall() 
-RobotXY = LoadRobot() 
 
 
 # Function to calculate the distance between the Robot and the balls
@@ -58,8 +69,8 @@ def Distance(p1, p2):
 # Function to sort the positions of the balls based on their distance from the Robot 
 # This function is based on the key function lambda, where the ist will be sorted in descending order
 
-def SortByDistance(RobotXY, BallsXY):
-    
+def SortByDistance(RobotXY=LoadRobot(), BallsXY=LoadBalls(), OrangeBallXY = LoadOrangeBall() ):
+       
     # Now we sort the balls based on their distance to the Robot
     # Here we use the lam
     SortedList = sorted(BallsXY, key=lambda ball: Distance(RobotXY, ball))
@@ -67,11 +78,12 @@ def SortByDistance(RobotXY, BallsXY):
     # Add the orange ball at the end
     SortedList.append(OrangeBallXY)
     
-    return SortedList
+    return SortedList[0]
 
 
-    # The values of the list
 
+
+# The values of the list
 #     SortedList = [
 #     (2, 3),     # Closest (Distance: 3.61)
 #     (1, 4),     # (Distance: 4.12)

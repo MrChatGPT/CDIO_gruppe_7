@@ -3,10 +3,6 @@ from time import sleep
 import numpy as np 
 import os
 
-#import mads' funktioner
-
-
-
 class Car:
     def __init__(self, x, y, angle):
         self.x = x #car.x
@@ -33,7 +29,12 @@ def get_car_data_from_json(file_path):
 
 def move_to_target(target_position):
     # load car values into the car object
-    car = get_car_data_from_json(os.path.join(os.path.dirname(__file__), 'robot.json'))
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, 'robot.json')
+    car = get_car_data_from_json(json_file_path)
     print(car)
     # Extract the current position from the car object
     current_x, current_y = car.x, car.y

@@ -40,8 +40,8 @@ try:
         # ---------------------------------------------------
         # Herfra mangles: 
         # algoritme som henter data fra .json filerne og så bevæger bilen
-        Sorted = SortByDistance(LoadRobot(), LoadBalls().copy())
-        move_to_target(Sorted[0])
+        move_to_target(SortByDistance())
+        
         
 finally:
     # Ensure the camera is released properly
