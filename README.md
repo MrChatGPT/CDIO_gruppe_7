@@ -11,7 +11,8 @@ The purpose of this section, is to give you a brief understanding of your life..
 ## picture directory
 1. ***image_detection.py*** all methods for detecting colors and shapes  
 2. ***livefeed.py*** initialize camara and gets image to python
-3. ***transform_arena.py*** used to make image correction, by transforming the perspective to some calibrated points.  
+3. ***transform_arena.py*** used to make image correction, by transforming the perspective to some calibrated points.
+4. ***algorithm.py*** used to create an algorithm and send car on it's way.
 
 ## extra directory
 ***test methods we might need later***
@@ -29,6 +30,11 @@ The purpose of this section, is to give you a brief understanding of your life..
 `def save_no_go_zones(zones, filename)` - Saves cross location to json
 
 `def check_point_in_orange_region(contours)` - Check if balls are orange
+
+`def find_car(image,output_path*,yellow_mask_path*,green_mask_path*,center_weight=25*):` - Returns a touple and creates a .json file with the cars center and angle. Everything marked with '*' is optional.
+
+`def rgb_to_hsv(rgb):` - Gets RGB colors as a numpy.array as input, and returns the hsv color, good for creating masks.
+
 
 ###  run.py
 `def transform_and_detect(image):` - Transforms image, and detects balls, cross and egg
