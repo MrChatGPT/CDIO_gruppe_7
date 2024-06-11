@@ -32,16 +32,14 @@ def get_car_data_from_json(file_path):
 
 def move_to_target(target_position):
     # load car values into the car object
-    car_file_path = 'robot.json'
-    file_path = os.path.join(os.path.dirname(__file__), car_file_path)
-    car = get_car_data_from_json(file_path)
-    print(car)
+    car = get_car_data_from_json(os.path.join(os.path.dirname(__file__), 'robot.json'))
+    #print(car)
     # Extract the current position from the car object
     current_x, current_y = car.x, car.y
     
     # De-structure the target position
     target_x, target_y = target_position
-    print(f"Target_x = {target_x}\nTarget_y = {target_y}")
+    #print(f"Target_x = {target_x}\nTarget_y = {target_y}")
 
     #Commands
     comstop = (0,0,0,0,0)
