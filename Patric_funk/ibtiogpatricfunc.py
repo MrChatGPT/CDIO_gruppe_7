@@ -32,8 +32,13 @@ def get_car_data_from_json(file_path):
 
 def move_to_target(target_position):
     # load car values into the car object
-    car = get_car_data_from_json(os.path.join(os.path.dirname(__file__), 'robot.json'))
-    #print(car)
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, 'robot.json')
+    car = get_car_data_from_json(json_file_path)
+    print(car)
     # Extract the current position from the car object
     current_x, current_y = car.x, car.y
     
@@ -146,7 +151,13 @@ def move_to_target(target_position):
 
 # Function to read ball positions from a JSON file
 def LoadBalls(filename="balls.json"):
-    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, filename)
+    
+    with open(json_file_path, 'r') as file:
         data = json.load(file)
         
     # Convert the list of lists back to a list of tuples
@@ -157,7 +168,13 @@ def LoadBalls(filename="balls.json"):
 
 # Function to read ball positions from a JSON file
 def LoadOrangeBall(filename="orangeball.json"):
-    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, filename)
+    
+    with open(json_file_path, 'r') as file:
         data = json.load(file)
     
     # Extract the first element and convert it to a tuple
@@ -170,7 +187,13 @@ def LoadOrangeBall(filename="orangeball.json"):
 
 # Function to read ball positions from a JSON file
 def LoadRobot(filename="robot.json"):
-    with open(os.path.join(os.path.dirname(__file__), filename), 'r') as file:
+    # Get the project's root directory
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+    # Construct the path to the robot.json file in the root directory
+    json_file_path = os.path.join(project_root, filename)
+    
+    with open(json_file_path, 'r') as file:
         data = json.load(file)
     
     # Extract the first two values from the first element in the list

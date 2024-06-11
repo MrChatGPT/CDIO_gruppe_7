@@ -93,7 +93,7 @@ def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yello
     
     # Write the results to a JSON file
     data = [[adjusted_center_x, adjusted_center_y, angle_deg]]
-    with open(os.path.join(os.path.dirname(__file__), 'robot.json'), 'w') as json_file:
+    with open('robot.json', 'w') as json_file:
         json.dump(data, json_file)
 
     return (adjusted_center_x, adjusted_center_y, angle_deg)
