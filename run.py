@@ -2,7 +2,9 @@ from matplotlib import pyplot as plt
 from picture.livefeed import *
 from picture.transform_arena import *
 from picture.image_detection import *
-#mangler at importere mads' funktioner
+from algorithm.algorithm import *
+from algorithm.move_to_target import *
+
 
 
 # run image recognition software
@@ -38,6 +40,8 @@ try:
         # ---------------------------------------------------
         # Herfra mangles: 
         # algoritme som henter data fra .json filerne og så bevæger bilen
+        Sorted = SortByDistance(LoadRobot(), LoadBalls().copy())
+        move_to_target(Sorted[0])
         
 finally:
     # Ensure the camera is released properly
