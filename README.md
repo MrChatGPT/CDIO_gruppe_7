@@ -40,8 +40,8 @@ The purpose of this section, is to give you a brief understanding of your life..
 
 
 ###  run.py
-`def transform_and_detect(image):` - Transforms image, and detects balls, cross and egg
-`init()` - Initializes camara and manuallly find corners of arena
+`def transform_and_detect(image):` - Transforms image, and detects balls, cross, egg, car
+`init()` - Initializes camara and user manually find corners of arena
 
 ### livefeed.py
 `def __init__(self):` - used as a "state" holder.
