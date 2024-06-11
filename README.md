@@ -3,21 +3,21 @@ The purpose of this section, is to give you a brief understanding of your life..
 
 # Files
 
-## home directory
+## Home directory
 1. ***run.py*** - The main of the program  
 2. ***.gitignore*** - Blacklistes stuff we don't want to upload to github, like temporary files
 3. ***.json*** - different local json files that are created when the program runs
 
-## picture directory
+## Picture directory
 1. ***image_detection.py*** all methods for detecting colors and shapes  
 2. ***livefeed.py*** initialize camara and gets image to python
 3. ***transform_arena.py*** used to make image correction, by transforming the perspective to some calibrated points.
 
-## algorithm directory
+## Algorithm directory
 1. ***algorithm.py*** used to create an algorithm and send car on it's way.
 2. ***move_to_target.py*** used to move the car based on the coordinates from algorithm.py.
 
-## extra directory
+## Extra directory
 ***test methods we might need later***
 
 
@@ -40,8 +40,8 @@ The purpose of this section, is to give you a brief understanding of your life..
 
 
 ###  run.py
-`def transform_and_detect(image):` - Transforms image, and detects balls, cross and egg
-`init()` - Initializes camara and manuallly find corners of arena
+`def transform_and_detect(image):` - Transforms image, and detects balls, cross, egg, car
+`init()` - Initializes camara and user manually find corners of arena
 
 ### livefeed.py
 `def __init__(self):` - used as a "state" holder.
