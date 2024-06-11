@@ -1,6 +1,7 @@
 from arena import *
 from matplotlib import pyplot as plt 
 from transform_arena import *
+from utils_balls import *
 
 image = getImage()
 
