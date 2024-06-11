@@ -54,13 +54,13 @@ def move_to_target(target_position):
         if current_y < target_y: #vi skal altså op ad ^
             #overvej at smid et threshold ind her
             if car.angle != 0:
-                if car.angle > 0:
-                    publish_controller_data(comtiltleft) #vi vender os mod venstre
+                if car.angle > 270:
+                    publish_controller_data(comtiltright) #vi vender os mod højre
                     sleep(0.5)
                     publish_controller_data(comstop)
                     return
-                if car.angle > 270:
-                    publish_controller_data(comtiltright) #vi vender os mod højre
+                if car.angle > 0:
+                    publish_controller_data(comtiltleft) #vi vender os mod venstre
                     sleep(0.5)
                     publish_controller_data(comstop)
                     return
@@ -70,13 +70,13 @@ def move_to_target(target_position):
             return
         else: #så skal vi altså nedad ˅
             if car.angle != 180:
-                if car.angle > 0:
-                    publish_controller_data(comtiltright) #vi vender tilføjer grader indtil vi er på 180
+                if car.angle > 180:
+                    publish_controller_data(comtiltleft)#vi "fjerner" grader indtil vi er på 180
                     sleep(0.5)
                     publish_controller_data(comstop)
                     return
-                if car.angle > 180:
-                    publish_controller_data(comtiltleft)#vi "fjerner" grader indtil vi er på 180
+                if car.angle > 0:
+                    publish_controller_data(comtiltright) #vi vender tilføjer grader indtil vi er på 180
                     sleep(0.5)
                     publish_controller_data(comstop)
                     return
