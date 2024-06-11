@@ -104,17 +104,17 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     # image= cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg')  #new pic with new car
-    # image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') #NOB
-    # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg')   #NOB
+    image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') #NOB
+    # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg')   #NOB OB
 
 
     # image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg') #miss 1 w
 
     # image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg   OB
-    # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') 
+    # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') #OB OB
     # image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')  #OB
-    # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  OB
-    image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') #miss 1 w NOB
+    # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  #OB OB
+    # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') #miss 1 w NOB NU OB
    
    
 
