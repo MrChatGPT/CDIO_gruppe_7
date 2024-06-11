@@ -111,7 +111,9 @@ def getImage():
 
     # image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg
     # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') 
-    image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')
+    image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')  #detects orange ball
+    # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  #No yellow
+   
 
 
 
@@ -297,27 +299,27 @@ def line_draw(image, x, y, w, h, area):
     return image
 
 
-def line_drawForPat(image, x, y, w, h, area):
-    # Green color in BGR 
-    color = (0, 255, 0) 
+# def line_drawForPat(image, x, y, w, h, area):
+#     # Green color in BGR 
+#     color = (0, 255, 0) 
     
-    # Line thickness of 9 px 
-    thickness = 9
-    newx_start=x+(w//2)
-    newy_start=y+(h//2)
+#     # Line thickness of 9 px 
+#     thickness = 9
+#     newx_start=x+(w//2)
+#     newy_start=y+(h//2)
 
-    start_point = (newx_start, newy_start) 
-    # represents the top right corner of image 
-    end_point = (newx_start+50, newy_start-175) 
-    # Draw a diagonal green line with thickness of 9 px 
-    image = cv2.line(image, start_point, end_point, color, thickness) 
+#     start_point = (newx_start, newy_start) 
+#     # represents the top right corner of image 
+#     end_point = (newx_start+50, newy_start-175) 
+#     # Draw a diagonal green line with thickness of 9 px 
+#     image = cv2.line(image, start_point, end_point, color, thickness) 
 
 
 
 
 
   
-    return image
+#     return image
 
 
 
@@ -329,26 +331,29 @@ def line_drawForPat(image, x, y, w, h, area):
 
 
 
-def car_draw(image, x, y, w, h, area):
-    # Start coordinate, here (x, y), represents the top left corner of rectangle 
-    start_point = (x, y)
+# def car_draw(image, x, y, w, h, area):
+#     # Start coordinate, here (x, y), represents the top left corner of rectangle 
+#     start_point = (x, y)
     
-    # End coordinate, here (x+w, y+h), represents the bottom right corner of rectangle
-    end_point = (x+w, y+h)
+#     # End coordinate, here (x+w, y+h), represents the bottom right corner of rectangle
+#     end_point = (x+w, y+h)
     
-    # Green color in BGR
-    color = (0, 255, 0)  # Using a standard green color; modify as needed
+#     # Green color in BGR
+#     color = (0, 255, 0)  # Using a standard green color; modify as needed
     
-    # Line thickness of 2 px
-    thickness = 2
+#     # Line thickness of 2 px
+#     thickness = 2
     
-    # Using cv2.rectangle() method to draw a rectangle around the car
-    image = cv2.rectangle(image, start_point, end_point, color, thickness)
+#     # Using cv2.rectangle() method to draw a rectangle around the car
+#     image = cv2.rectangle(image, start_point, end_point, color, thickness)
     
-    # Optionally, add text label if needed
-    cv2.putText(image, 'Car', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
+#     # Optionally, add text label if needed
+#     cv2.putText(image, 'Car', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
     
-    return image
+#     return image
+
+
+
 
 def egg_draw(image, x, y, w, h, area):
     #https://www.geeksforgeeks.org/python-opencv-cv2-ellipse-method/
@@ -471,8 +476,10 @@ def circle_detection(image):
     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
     ******minRadius= and maxRadius=: The minimum and maximum radius of the circles to be detected.
     """
-    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18,
-                               param1=50, param2=28, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20
+
+    #mindist=18
+    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
+                               param1=50, param2=24, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
   ##
      # List to store circle data
     stored_circles = []
@@ -483,7 +490,7 @@ def circle_detection(image):
             x, y, r = i[0], i[1], i[2]  # x, y center and radius of circle
             
             # Draw the outer circle
-            cv2.circle(image, (x, y), r, (0, 255, 0), 2)
+            cv2.circle(image, (x, y), r, (0, 255, 0), 1) #2
             # Draw the center of the circle
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
             
@@ -616,8 +623,8 @@ def detect_ball_colors(image):
 
 
 
-    yellow_lower = np.array([28,  82, 247], np.uint8) #HSV
-    yellow_upper = np.array([46, 172, 255], np.uint8) #HSV
+    yellow_lower = np.array([20, 131, 199], np.uint8) #HSV  28,  82, 247   # 20,  40, 247 # 20, 131, 199
+    yellow_upper = np.array([ 50, 202, 255], np.uint8) #HSV 46, 172, 255   #  27, 202, 255
     yellow_mask = cv2.inRange(hsvFrame, yellow_lower, yellow_upper) 
 
     orange_detected = []
@@ -844,13 +851,13 @@ def detect_ball_colors(image):
                                            cv2.CHAIN_APPROX_SIMPLE) 
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 500): 
+        if(area > 800): 
             x, y, w, h = cv2.boundingRect(contour) 
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (0, 0, 0), 2) 
             print(f"(yellow x={x}, y={y}) w={w} h={h} area={area}")
-            line_drawForPat(image, x, y, w, h, area)
+            # line_drawForPat(image, x, y, w, h, area)
             cv2.putText(image, "yellow Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 0, 0)) 
