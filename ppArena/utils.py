@@ -104,17 +104,17 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     # image= cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg')  #new pic with new car
-    # image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') 
-    image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') 
+    # image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') #NOB
+    # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg')   #NOB
 
 
     # image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg') #miss 1 w
 
     # image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg   OB
     # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') 
-    # image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')  #detects orange ball
-    # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  
-    # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') #miss 1 w
+    # image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')  #OB
+    # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  OB
+    image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg') #miss 1 w NOB
    
    
 
@@ -471,7 +471,7 @@ def detect_ball_colors(image):
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
     orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-    orange_upper = np.array([65, 211, 255], np.uint8) #HSV
+    orange_upper = np.array([65, 230, 255], np.uint8) #HSV 65, 211, 255
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
     """
@@ -582,11 +582,11 @@ def detect_ball_colors(image):
             # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
             if(area > 8000 and area < 15000):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
-                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+                # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                                         
             if(area > 1250000 and area < 1460000):
                 box, min_area_rect = square_draw(image,x,y,w,h,area)
-                image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+                # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                 # image = goal_draw(image, x, y)
                 
                 
@@ -602,26 +602,23 @@ def detect_ball_colors(image):
       
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 400 and area < 1000): 
+        if(area > 300):
             x, y, w, h = cv2.boundingRect(contour) 
-            # image = cv2.rectangle(image, (x, y),  
-            #                            (x + w, y + h), 
-            #                            (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
+            image = cv2.rectangle(image, (x, y),  
+                                       (x + w, y + h), 
+                                       (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
             print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
-
-
-            # if(area > 400 and area < 700):
-            #      print(f"O ball")
-
-            # if(area >2000 and area < 3000):
-            #     print(f"Car BUTT")
-
+            orange_detected.append(contour)
+            # check_point_in_orange_region(contours)
               
             cv2.putText(image, "Orange Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX,  
                         1.0, (0, 165, 255)) 
-            orange_detected.append(contour)
-    check_point_in_orange_region(contours)
+            # orange_detected.append(contour)
+    #check_point_in_orange_region(contours)
+    image, matched_circles = match_circles_and_contours(image, orange_detected)
+    check_point_in_orange_region(orange_detected)
+   
 
     # # Creating contour to track orange color 
     # contours, hierarchy = cv2.findContours(orange_mask, 
@@ -685,7 +682,7 @@ def detect_ball_colors(image):
             # image = cv2.rectangle(image, (x, y), 
             #                            (x + w, y + h), 
             #                            (255, 255, 255), 2) 
-            print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
+            # print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
             if(area > 2000 and area < 4000): #before 2900
                 image = egg_draw(image,x,y,w,h,area)
@@ -810,6 +807,9 @@ def blurred(image):
 # cv2.destroyAllWindows()
    return denoised_image
 
+
+
+
 def CannyEdgeGray(image):
    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
    cv2.imshow("gray pic", gray) 
@@ -829,8 +829,36 @@ def CannyEdgeGray(image):
 #    cv2.imshow("cropped", cropped_image)
 
 
+# def match_circles_and_contours(image, contours):
+#     # Check each ball coordinate
+#     balls = load_balls("balls.json")
+#     matched_circles = []
+#     for circle in circles:
+#         cx, cy, radius = circle['center'][0], circle['center'][1], circle['radius']
+#         for contour in contours:
+#             x, y, w, h = cv2.boundingRect(contour)
+#             if x <= cx <= x + w and y <= cy <= y + h:
+#                 matched_circles.append(circle)
+#                 cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)
+#                 cv2.putText(image, "Orange Colour", (x, y), 
+#                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255))
+#                 break
+#     return image, matched_circles
 
-
+def match_circles_and_contours(image, contours):
+    # Check each ball coordinate
+    balls = load_balls("balls.json")
+    matched_circles = []
+    for cx, cy in balls:
+        for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            if x <= cx <= x + w and y <= cy <= y + h:
+                matched_circles.append((cx, cy))
+                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)
+                cv2.putText(image, "Orange Colour", (x, y), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255))
+                print(f"we had a match at {cx},{cy}")
+    return image, matched_circles
 
 def detect_ball_colors_testbaby(image):
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 

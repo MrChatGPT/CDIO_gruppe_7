@@ -15,7 +15,7 @@ from imutils import paths
 import argparse
 from skimage import exposure
 import json
-from utils import *
+# from utils import *
 #from arena import perspectiveTransDyn
 
 
@@ -74,7 +74,7 @@ def circle_detection(image):
             # cv2.putText(image, 'Ball', (x - r, y - r),
             #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
             
-            print(f"'center': {x, y}, 'radius': {r}")
+            # print(f"'center': {x, y}, 'radius': {r}")
             # Store the circles data
             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
             save_balls(stored_circles)
