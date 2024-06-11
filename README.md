@@ -52,11 +52,7 @@ The purpose of this section, is to give you a brief understanding of your life..
 
 `def release_camera(self):` - Used to kill thread, and stop the camera.
 
-### algorithm.py (Patric_algo\Patric_funk\ibtiogpatricfunc.py)
-`def get_car_data_from_json(file_path):` - Opens the robot.json file and puts the information inside an object.
-
-`def move_to_target(target_position):` - Logic for moving the car giving a set of coordinates (x,y)
-
+### algorithm.py
 `def LoadBalls(filename="balls.json"):` - Opens the balls.json file and puts the information inside a touple.
 
 `def LoadOrangeBall(filename="orangeball.json"):` - Opens the orangeball.json file and puts the information inside a touple (lonely one)
@@ -67,6 +63,10 @@ The purpose of this section, is to give you a brief understanding of your life..
 
 `def SortByDistance(RobotXY, BallsXY):` - sort closest to furthest 0...9 and append orange ball after sort. (this is the first algorithm)
 
+### move_to_target.py
+`def get_car_data_from_json(file_path):` - Opens the robot.json file and puts the information inside an object.
+
+`def move_to_target(target_position):` - Logic for moving the car giving a set of coordinates (x,y)
 
 
 # Setup 
