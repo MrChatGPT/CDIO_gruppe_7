@@ -177,3 +177,38 @@ def check_point_in_orange_region(contours):
     # saveOrange_balls(orange_balls)
     # saveWhite_balls(white_balls)
 
+def egg_draw(image, x, y, w, h, area):
+    # Load the ball coordinates
+    balls = load_balls("balls.json")
+    
+    # Check if any ball coordinates are within the given area
+    if is_ball_in_area(balls, x, y, w, h):
+        return image  # Skip drawing the ellipse if a ball is found in the area
+
+    # Calculate center coordinates 
+    center_coordinates = (x + w//2, y + h//2)
+    
+    # Define axes length
+    axesLength = (w//2, h//2)
+    
+    # Ellipse parameters
+    angle = 0
+    startAngle = 0
+    endAngle = 360
+    
+    # Draw the ellipse on the image
+    image = cv2.ellipse(image, center_coordinates, axesLength, 
+                        angle, startAngle, endAngle, (0, 255, 0), 3)
+    
+    # Put text 'Egg' near the detected egg
+    cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+    
+    return image
+
+def is_ball_in_area(balls, x, y, w, h):
+    for (bx, by) in balls:
+        if x <= bx <= x + w and y <= by <= y + h:
+            return True
+    return False
+

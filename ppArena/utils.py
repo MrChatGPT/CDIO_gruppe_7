@@ -104,13 +104,13 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     # image= cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg')  #new pic with new car
-    image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') #NOB OB
+    # image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') #NOB OB
     # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg')   #NOB OB
 
 
     # image= cv2.imread('newcar/WIN_20240610_15_02_34_Pro.jpg') #miss 1 w
 
-    # image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg   OB
+    image= cv2.imread('newcar/WIN_20240610_14_26_12_Pro.jpg')  #willys egg   OB
     # image= cv2.imread('newcar/WIN_20240610_15_02_15_Pro.jpg') #OB OB
     # image= cv2.imread('newcar/WIN_20240610_15_02_09_Pro.jpg')  #OB
     # image= cv2.imread('newcar/WIN_20240610_15_03_30_Pro.jpg')  #OB OB
@@ -162,44 +162,44 @@ def getImage():
     return image
 
 #TESTING
-def goal_draw(image, x, y):
+# def goal_draw(image, x, y):
  
     
-    # Coordinates for the goal rectangle
-    ##LEFT GOAL
-    goal_x = x+20
-    goal_y = y+430
-    goal_w = 22
-    goal_h = 130
+#     # Coordinates for the goal rectangle
+#     ##LEFT GOAL
+#     goal_x = x+20
+#     goal_y = y+430
+#     goal_w = 22
+#     goal_h = 130
   
-    start_point_goal = (goal_x, goal_y)
-    end_point_goal = (goal_x + goal_w, goal_y + goal_h)
-    color_goal = (0, 255, 0)
-    thickness_goal = 2
+#     start_point_goal = (goal_x, goal_y)
+#     end_point_goal = (goal_x + goal_w, goal_y + goal_h)
+#     color_goal = (0, 255, 0)
+#     thickness_goal = 2
     
-    image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
-    cv2.putText(image, 'L', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
+#     image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
+#     cv2.putText(image, 'L', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
 
 
-    # Coordinates for the goal rectangle
-    ##RIGHT GOAL
-    goal_x = x+1360
-    goal_y = y+470
-    goal_w = 22
-    goal_h = 75
+#     # Coordinates for the goal rectangle
+#     ##RIGHT GOAL
+#     goal_x = x+1360
+#     goal_y = y+470
+#     goal_w = 22
+#     goal_h = 75
     
 
-    start_point_goal = (goal_x, goal_y)
-    end_point_goal = (goal_x + goal_w, goal_y + goal_h)
-    color_goal = (0, 255, 0)
-    thickness_goal = 2
+#     start_point_goal = (goal_x, goal_y)
+#     end_point_goal = (goal_x + goal_w, goal_y + goal_h)
+#     color_goal = (0, 255, 0)
+#     thickness_goal = 2
     
-    image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
-    cv2.putText(image, 'R', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
-    # # To display the image
-    # cv2.imshow('Result', image)
+#     image = cv2.rectangle(image, start_point_goal, end_point_goal, color_goal, thickness_goal)
+#     cv2.putText(image, 'R', (goal_x, goal_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_goal, thickness_goal)
+#     # # To display the image
+#     # cv2.imshow('Result', image)
     
-    return image
+#     return image
 
 
 
@@ -350,29 +350,64 @@ def line_draw(image, x, y, w, h, area):
 
 
 
-
-def egg_draw(image, x, y, w, h, area):
-    #https://www.geeksforgeeks.org/python-opencv-cv2-ellipse-method/
-    # Calculate center coordinates 
-    center_coordinates = (x + w//2, y + h//2)
+#ORIGINAL
+# def egg_draw(image, x, y, w, h, area):
+#     #https://www.geeksforgeeks.org/python-opencv-cv2-ellipse-method/
+#     # Calculate center coordinates 
+#     center_coordinates = (x + w//2, y + h//2)
     
-    # Define axes length
-    axesLength = (w//2, h//2)
+#     # Define axes length
+#     axesLength = (w//2, h//2)
  
     
-    # Ellipse parameters
-    angle = 0
-    startAngle = 0
-    endAngle = 360
+#     # Ellipse parameters
+#     angle = 0
+#     startAngle = 0
+#     endAngle = 360
     
-    # Draw the ellipse on the image
-    image = cv2.ellipse(image, center_coordinates, axesLength, 
-                        angle, startAngle, endAngle, (0, 255, 0), 3)
+#     # Draw the ellipse on the image
+#     image = cv2.ellipse(image, center_coordinates, axesLength, 
+#                         angle, startAngle, endAngle, (0, 255, 0), 3)
     
-    # Put text 'Egg' near the detected egg
-    cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
-    return image
+#     # Put text 'Egg' near the detected egg
+#     cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
+#                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+#     return image
+
+# def egg_draw(image, x, y, w, h, area):
+#     # Load the ball coordinates
+#     balls = load_balls(filename)
+    
+#     # Check if any ball coordinates are within the given area
+#     if is_ball_in_area(balls, x, y, w, h):
+#         return image  # Skip drawing the ellipse if a ball is found in the area
+
+#     # Calculate center coordinates 
+#     center_coordinates = (x + w//2, y + h//2)
+    
+#     # Define axes length
+#     axesLength = (w//2, h//2)
+    
+#     # Ellipse parameters
+#     angle = 0
+#     startAngle = 0
+#     endAngle = 360
+    
+#     # Draw the ellipse on the image
+#     image = cv2.ellipse(image, center_coordinates, axesLength, 
+#                         angle, startAngle, endAngle, (0, 255, 0), 3)
+    
+#     # Put text 'Egg' near the detected egg
+#     cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
+#                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+    
+#     return image
+
+# def is_ball_in_area(balls, x, y, w, h):
+#     for (bx, by) in balls:
+#         if x <= bx <= x + w and y <= by <= y + h:
+#             return True
+#     return False
 
 
 # ##Maybe "parse" the egg up in two circles. a small and a big one THIS IS NOT IN USE
@@ -565,6 +600,9 @@ def detect_ball_colors(image):
 
  
 
+
+
+
     # Creating contour to track red color 
     contours, hierarchy = cv2.findContours(red_mask, 
                                            cv2.RETR_TREE, 
@@ -576,18 +614,18 @@ def detect_ball_colors(image):
         area = cv2.contourArea(contour) 
         if(area > 5000): 
             x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y),  
-                                       (x + w, y + h),  
-                                       (0, 0, 255), 2) 
+            # image = cv2.rectangle(image, (x, y),  
+            #                            (x + w, y + h),  
+            #                            (0, 0, 255), 2) 
             # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            if(area > 8000 and area < 15000):
-                box, min_area_rect = square_draw(image,x,y,w,h,area)
-                # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            # if(area > 8000 and area < 15000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
                                         
-            if(area > 1250000 and area < 1460000):
-                box, min_area_rect = square_draw(image,x,y,w,h,area)
-                # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                # image = goal_draw(image, x, y)
+            # if(area > 1250000 and area < 1460000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            #     # image = goal_draw(image, x, y)
                 
                 
               
@@ -604,9 +642,9 @@ def detect_ball_colors(image):
         area = cv2.contourArea(contour) 
         if(area > 300):
             x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y),  
-                                       (x + w, y + h), 
-                                       (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
+            # image = cv2.rectangle(image, (x, y),  
+            #                            (x + w, y + h), 
+            #                            (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
             print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
             orange_detected.append(contour)
             # check_point_in_orange_region(contours)
@@ -657,12 +695,12 @@ def detect_ball_colors(image):
 
     # Creating contour to track white color 
     # Additional preprocessing to separate close objects
-    blurred = cv2.GaussianBlur(white_mask, (5, 5), 0)
+    blurred = cv2.GaussianBlur(white_mask, (5, 5), 0) 
     _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
     # Use distance transform and watershed algorithm to separate objects
     dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
-    ret, sure_fg = cv2.threshold(dist_transform, 0.5 * dist_transform.max(), 255, 0)
+    ret, sure_fg = cv2.threshold(dist_transform, 0.5 * dist_transform.max(), 255, 0)  #0.5*
     sure_fg = np.uint8(sure_fg)
     unknown = cv2.subtract(thresh, sure_fg)
     ret, markers = cv2.connectedComponents(sure_fg)
@@ -850,7 +888,7 @@ def match_circles_and_contours(image, contours):
     #To store balls in separate arrays
     white_balls = []
     orange_balls = []
-    
+
     # Check each ball coordinate
     balls = load_balls("balls.json")
     matched_circles = []
