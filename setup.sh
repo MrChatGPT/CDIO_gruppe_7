@@ -9,3 +9,5 @@ python -m pip install matplotlib==3.8.4
 python -m pip install pynput
 
 python -m pip install scikit-image
+
+python -m pip install paho-mqtt
