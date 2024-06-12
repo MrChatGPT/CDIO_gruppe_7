@@ -144,6 +144,10 @@ def print_balls(filename="balls.json"):
     for ball in balls:
         print(ball)
 
+def save_Egg(egg, filename="egg.json"):
+    with open(filename, 'w') as file:
+        json.dump(egg, file, indent=4)
+
 
 
 # Function to check if a point is within any detected orange region
@@ -199,6 +203,16 @@ def egg_draw(image, x, y, w, h, area):
     # Draw the ellipse on the image
     image = cv2.ellipse(image, center_coordinates, axesLength, 
                         angle, startAngle, endAngle, (0, 255, 0), 3)
+    print(f"center_coordinates{center_coordinates}, axesLength{axesLength}, angle{angle}, startAngle{startAngle}, endAngle{endAngle}  ")
+    # Create the dictionary
+    egg = {
+    "center_coordinates": center_coordinates,
+    "axesLength": axesLength,
+    "angle": angle,
+    "startAngle": startAngle,
+    "endAngle": endAngle
+    }
+    save_Egg(egg)
     
     # Put text 'Egg' near the detected egg
     cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
