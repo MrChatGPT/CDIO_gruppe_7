@@ -37,6 +37,7 @@ camera_handler = init()
 
 # run program
 try:
+    init_car()
     while True:
         image = camera_handler._run_video()
         transform_and_detect(image)

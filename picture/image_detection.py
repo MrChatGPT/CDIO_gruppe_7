@@ -4,7 +4,7 @@ import os
 from re import I
 from secrets import randbelow
 from tabnanny import verbose
-from turtle import up
+#from turtle import up
 import cv2
 from cv2 import GaussianBlur
 import numpy as np
