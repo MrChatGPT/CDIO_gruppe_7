@@ -1,3 +1,7 @@
+import cv2
+import numpy as np
+import os
+
 def goal_draw(image, x, y):
  
     # Coordinates for the goal rectangle

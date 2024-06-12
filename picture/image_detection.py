@@ -15,14 +15,138 @@ import argparse
 from skimage import exposure
 import json
 
+# def egg_draw(image, x, y, w, h, area):
+#     #https://www.geeksforgeeks.org/python-opencv-cv2-ellipse-method/
+#     # Calculate center coordinates 
+#     center_coordinates = (x + w//2, y + h//2)
+    
+#     # Define axes length
+#     axesLength = (w//2, h//2)
+ 
+#     # Ellipse parameters
+#     angle = 0
+#     startAngle = 0
+#     endAngle = 360
+    
+#     # Draw the ellipse on the image
+#     image = cv2.ellipse(image, center_coordinates, axesLength, 
+#                         angle, startAngle, endAngle, (0, 255, 0), 3)
+    
+#     # Put text 'Egg' near the detected egg
+#     cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
+#                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+#     return image
+
+
+# def circle_detection(image):
+#     # Convert to grayscale
+#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+#     # Apply a blur
+#     """ 
+#     *Parameter one, gray, is the source image converted to grayscale. 
+#     Making the algorithms that operate on the image computationally less intensive.
+
+#     **Parameter two and three is the kernel size. Which determines the width and height of the Gaussian filter. 
+#     A kernel size of (9, 9) means that the filter window is 9 pixels by 9 pixels. 
+#     The larger the kernel, the stronger the blur effect.
+    
+#     ***The standard deviation in the X and Y directions; when set to 0, it is calculated from the kernel size. 
+#     A higher value for standard deviation means more blur.
+#     """
+#     gray_blurred = cv2.GaussianBlur(gray, (9, 9), 0)  
+
+    
+#     # Perform Hough Circle Transform (Detect circles)
+#     """
+#     *cv2.HOUGH_GRADIENT, this method is the only one available for circle detection in OpenCV and uses the gradient information of the image.
+    
+#     **dp=1 means the accumulator has the same resolution as the input image. 
+#     If dp is greater, the accumulator resolution is reduced, and vice versa.
+   
+#     ***minDist=40: The minimum distance between the centers of detected circles.
+    
+#     ****param1=50: The higher threshold of the two passed to the Canny edge detector (the lower one is half of this). It's used in the edge detection stage.
+
+#     *****param2=30: The accumulator threshold for the circle centers at the detection stage. 
+#     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
+
+#     ******minRadius= and maxRadius=: The minimum and maximum radius of the circles to be detected.
+#     """
+#     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
+#                                param1=50, param2=28, minRadius=10, maxRadius=20) #minRadius=5, maxRadius=20
+
+#   ##
+#      # List to store circle data
+#     stored_circles = []
+#      # Filter out the circles that correspond to the ping pong balls
+#     if circles is not None:
+#         circles = np.uint16(np.around(circles))
+#         for i in circles[0, :]:
+#             x, y, r = i[0], i[1], i[2]  # x, y center and radius of circle
+            
+#             # Draw the outer circle
+#             cv2.circle(image, (x, y), r, (0, 255, 0), 2)
+#             # Draw the center of the circle
+#             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
+            
+#             # Put text 'Ball' near the detected ball
+#             cv2.putText(image, 'Ball', (x - r, y - r),
+#                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            
+#             # Store the circles data
+#             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
+
+#     save_balls(stored_circles)
+#     return image, stored_circles
+
+
+
+# Function to check if a point is within any detected orange region
+def check_point_in_orange_region(contours):
+    # print_balls("balls.json")
+    
+    # #To store balls in separate arrays
+    # white_balls = []
+    # orange_balls = []
+
+    # Check each ball coordinate
+    balls = load_balls("balls.json")
+    for px, py in balls:
+        point_in_orange_region = False
+        for contour in contours:
+            # Check if the point (px, py) is inside this contour
+            dist = cv2.pointPolygonTest(contour, (px, py), False)
+            if dist >= 0:
+                # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). IN IF")
+                point_in_orange_region = True
+                break  # Exit the loop if the point is found in any contour
+        # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). NOT IN IF")
+        # print(f"dist {dist}")
+    #     # if point_in_orange_region:
+    #     #     print(f"The point ({px}, {py}) is within an orange region.")
+    #     #     orange_balls.append((px, py))
+    #     # else:
+    #     #     print(f"The point ({px}, {py}) is not within any orange region.")
+    #     #     white_balls.append((px, py))
+
+    # saveOrange_balls(orange_balls)
+    # saveWhite_balls(white_balls)
+
 def egg_draw(image, x, y, w, h, area):
-    #https://www.geeksforgeeks.org/python-opencv-cv2-ellipse-method/
+    # Load the ball coordinates
+    balls = load_balls("balls.json")
+    
+    # Check if any ball coordinates are within the given area
+    if is_ball_in_area(balls, x, y, w, h):
+        return image  # Skip drawing the ellipse if a ball is found in the area
+
     # Calculate center coordinates 
     center_coordinates = (x + w//2, y + h//2)
     
     # Define axes length
     axesLength = (w//2, h//2)
- 
+    
     # Ellipse parameters
     angle = 0
     startAngle = 0
@@ -31,22 +155,37 @@ def egg_draw(image, x, y, w, h, area):
     # Draw the ellipse on the image
     image = cv2.ellipse(image, center_coordinates, axesLength, 
                         angle, startAngle, endAngle, (0, 255, 0), 3)
+    print(f"center_coordinates{center_coordinates}, axesLength{axesLength}, angle{angle}, startAngle{startAngle}, endAngle{endAngle}  ")
+    # Create the dictionary
+    egg = {
+    "center_coordinates": center_coordinates,
+    "axesLength": axesLength,
+    "angle": angle,
+    "startAngle": startAngle,
+    "endAngle": endAngle
+    }
+    save_Egg(egg)
     
     # Put text 'Egg' near the detected egg
     cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+    
     return image
+
+def is_ball_in_area(balls, x, y, w, h):
+    for (bx, by) in balls:
+        if x <= bx <= x + w and y <= by <= y + h:
+            return True
+    return False
 
 
 def circle_detection(image):
     # Convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
     # Apply a blur
     """ 
     *Parameter one, gray, is the source image converted to grayscale. 
     Making the algorithms that operate on the image computationally less intensive.
-
     **Parameter two and three is the kernel size. Which determines the width and height of the Gaussian filter. 
     A kernel size of (9, 9) means that the filter window is 9 pixels by 9 pixels. 
     The larger the kernel, the stronger the blur effect.
@@ -55,7 +194,7 @@ def circle_detection(image):
     A higher value for standard deviation means more blur.
     """
     gray_blurred = cv2.GaussianBlur(gray, (9, 9), 0)  
-
+    # cv2.imshow('Detected Balls', gray_blurred)
     
     # Perform Hough Circle Transform (Detect circles)
     """
@@ -67,15 +206,14 @@ def circle_detection(image):
     ***minDist=40: The minimum distance between the centers of detected circles.
     
     ****param1=50: The higher threshold of the two passed to the Canny edge detector (the lower one is half of this). It's used in the edge detection stage.
-
     *****param2=30: The accumulator threshold for the circle centers at the detection stage. 
     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
-
     ******minRadius= and maxRadius=: The minimum and maximum radius of the circles to be detected.
     """
-    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=40,
-                               param1=50, param2=28, minRadius=10, maxRadius=20) #minRadius=5, maxRadius=20
 
+    #mindist=18
+    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
+                               param1=50, param2=24, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
   ##
      # List to store circle data
     stored_circles = []
@@ -86,25 +224,558 @@ def circle_detection(image):
             x, y, r = i[0], i[1], i[2]  # x, y center and radius of circle
             
             # Draw the outer circle
-            cv2.circle(image, (x, y), r, (0, 255, 0), 2)
+            cv2.circle(image, (x, y), r, (0, 255, 0), 1) #2
             # Draw the center of the circle
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
             
             # Put text 'Ball' near the detected ball
-            cv2.putText(image, 'Ball', (x - r, y - r),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            # cv2.putText(image, 'Ball', (x - r, y - r),
+            #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
             
+            # print(f"'center': {x, y}, 'radius': {r}")
             # Store the circles data
             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
-
-    save_balls(stored_circles)
+            save_balls(stored_circles)
+    # with open('stored_circles.json', 'w') as file:
+    #     json.dump(stored_circles, file, indent=4)
+    # Display the result
+    # cv2.imshow('Detected Balls', image)
     return image, stored_circles
+    # return image
+  ##
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+
+    ################################
+
+    # # Convert to grayscale
+    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow('gray', gray)
+    # # Blur using 3 * 3 kernel
+    # gray_blurred = cv2.blur(gray, (3, 3))
+    # cv2.imshow('gray blurred', gray_blurred)
+    # # Apply Hough transform on the blurred image
+    # detected_circles = cv2.HoughCircles(gray_blurred,
+    #                                     cv2.HOUGH_GRADIENT, 1, 20,
+    #                                     param1=50, param2=30,
+    #                                     minRadius=1, maxRadius=40)
+    # # Draw circles that are detected
+    # if detected_circles is not None:
+    #     # Convert the circle parameters a, b and r to integers
+    #     detected_circles = np.uint16(np.around(detected_circles))
+    #     for pt in detected_circles[0, :]:
+    #         a, b, r = pt[0], pt[1], pt[2]
+    #         # Draw the circumference of the circle
+    #         cv2.circle(image, (a, b), r, (0, 255, 0), 2)
+    #         # Draw a small circle (of radius 1) to show the center
+    #         cv2.circle(image, (a, b), 1, (0, 0, 255), 3)
+    #         cv2.imshow("Detected Circle", image)
+    #         cv2.waitKey(0)
+    # # Close the window when done
+    # cv2.destroyAllWindows()
+
+
+def detect_ball_colors(image):
+    #https://www.geeksforgeeks.org/multiple-color-detection-in-real-time-using-python-opencv/
+    #https://colorpicker.me/#ffffff
+    # https://colorizer.org/
+  # Capturing video through webcam 
+ #  webcam = cv2.VideoCapture(0) 
+  
+ # Start a while loop 
+ #while(1): 
+      
+    # Reading the video from the 
+    # webcam in image frames 
+    # _, imageFrame = webcam.read() 
+  
+    # Convert the imageFrame in  
+    # BGR(RGB color space) to  
+    # HSV(hue-saturation-value) 
+    # color space 
+    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+    
+    # Set range for red color and  
+    # define mask 
+    red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
+    red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
+    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
+
+    orange_lower = np.array([11, 121, 215], np.uint8) #HSV
+    orange_upper = np.array([65, 230, 255], np.uint8) #HSV 65, 211, 255
+    orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
+
+    """
+    Attempt on the picture ending with 59, with both higher and lower values at the same time
+    BEST SO FAR
+    """
+    #ORIGINAL
+    white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
+    white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
+    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
+    
+    """
+    Attempt on the picture ending with 46
+    """
+    blue_lower = np.array([95, 66, 141], np.uint8) #HSV
+    blue_upper = np.array([113, 150, 205], np.uint8) #HSV
+    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+
+    # Set range for pink color and  
+    # define mask 
+    pink_lower = np.array([154,  62,  80], np.uint8) #HSV 
+    pink_upper = np.array([169, 105, 255], np.uint8) #HSV  
+    pink_mask = cv2.inRange(hsvFrame, pink_lower, pink_upper) 
+
+    # Set range for green color and  
+    # define mask 
+    green_lower = np.array([72, 130, 187], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([129, 241, 255], np.uint8) #HSV   89, 255 , 255
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+
+
+
+    yellow_lower = np.array([20, 131, 199], np.uint8) #HSV  28,  82, 247   # 20,  40, 247 # 20, 131, 199
+    yellow_upper = np.array([ 50, 202, 255], np.uint8) #HSV 46, 172, 255   #  27, 202, 255
+    yellow_mask = cv2.inRange(hsvFrame, yellow_lower, yellow_upper) 
+
+    orange_detected = []
+    # point_in_orange_region = False
+    #px, py = 1302, 166
+   
+
+    ###########################################################
+      
+    # Morphological Transform, Dilation 
+    # for each color and bitwise_and operator 
+    # between imageFrame and mask determines 
+    # to detect only that particular color 
+    kernel = np.ones((5, 5), "uint8") 
+      
+    # For red color 
+    red_mask = cv2.dilate(red_mask, kernel) 
+    res_red = cv2.bitwise_and(image, image,  
+                              mask = red_mask) 
+      
+    # For orange color 
+    orange_mask = cv2.dilate(orange_mask, kernel) 
+    res_orange = cv2.bitwise_and(image, image, 
+                                mask = orange_mask) 
+      
+    # For white color 
+    # white_mask = cv2.dilate(white_mask, kernel) 
+    # res_white = cv2.bitwise_and(image, image, 
+    #                            mask = white_mask) 
+    
+    # For blue color 
+    blue_mask = cv2.dilate(blue_mask, kernel) 
+    res_blue = cv2.bitwise_and(image, image, 
+                               mask = blue_mask) 
+   
+    # For pink color 
+    pink_mask = cv2.dilate(pink_mask, kernel) 
+    res_pink = cv2.bitwise_and(image, image,  
+                              mask = pink_mask) 
+    # # For green color 
+    green_mask = cv2.dilate(green_mask, kernel) 
+    res_green = cv2.bitwise_and(image, image, 
+                               mask = green_mask) 
+    
+    # # For yellow color 
+    yellow_mask = cv2.dilate(yellow_mask, kernel) 
+    res_yellow = cv2.bitwise_and(image, image, 
+                               mask = yellow_mask) 
+    
+
+
+    # Morphological Transform, Erosion followed by Dilation
+    # kernel = np.ones((9, 9), "uint8")
+    kernel = np.ones((6, 6), "uint8")
+    white_mask = cv2.erode(white_mask, kernel, iterations=1)
+    white_mask = cv2.dilate(white_mask, kernel, iterations=2)
+
+ 
+
+
+
+
+    # Creating contour to track red color 
+    contours, hierarchy = cv2.findContours(red_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
+      
+    #MAybe save the data, and when this function is almost done, fiind the median of the two values if any. Or just use the only one
+    #regarding the arena
+    for pic, contour in enumerate(contours): 
+        area = cv2.contourArea(contour) 
+        if(area > 5000): 
+            x, y, w, h = cv2.boundingRect(contour) 
+            # image = cv2.rectangle(image, (x, y),  
+            #                            (x + w, y + h),  
+            #                            (0, 0, 255), 2) 
+            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
+            # if(area > 8000 and area < 15000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+                                        
+            # if(area > 1250000 and area < 1460000):
+            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
+            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
+            #     # image = goal_draw(image, x, y)
+                
+                
+              
+            cv2.putText(image, "Red Colour utils", (x, y), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
+                        (0, 0, 255))     
+    
+    # Creating contour to track orange color 
+    contours, hierarchy = cv2.findContours(orange_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
+      
+    for pic, contour in enumerate(contours): 
+        area = cv2.contourArea(contour) 
+        if(area > 300):
+            x, y, w, h = cv2.boundingRect(contour) 
+            # image = cv2.rectangle(image, (x, y),  
+            #                            (x + w, y + h), 
+            #                            (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
+            print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
+            orange_detected.append(contour)
+            # check_point_in_orange_region(contours)
+              
+            cv2.putText(image, "Orange Colour", (x, y), 
+                        cv2.FONT_HERSHEY_SIMPLEX,  
+                        1.0, (0, 165, 255)) 
+            # orange_detected.append(contour)
+    #check_point_in_orange_region(contours)
+    image, matched_circles = match_circles_and_contours(image, orange_detected)
+    check_point_in_orange_region(orange_detected)
+   
+
+    # # Creating contour to track orange color 
+    # contours, hierarchy = cv2.findContours(orange_mask, 
+    #                                        cv2.RETR_TREE, 
+    #                                        cv2.CHAIN_APPROX_SIMPLE) 
+    
+
+    # for pic, contour in enumerate(contours): 
+    #     area = cv2.contourArea(contour) 
+    #     if(area > 300): 
+    #         x, y, w, h = cv2.boundingRect(contour) 
+    #         image = cv2.rectangle(image, (x, y),  
+    #                                    (x + w, y + h), 
+    #                                    (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
+    #         print(f"(orange x={x}, y={y}) w={w} h={h} area={area}")
+    #         orange_detected.append(contour)
+    #         # if(area > 400 and area < 800):
+    #         #      orange_detected.append(contour)
+            
+    #         if(area > 1000 and area < 1700 ):
+    #              print(f"(big orange object is detected")
+            
+              
+    #         cv2.putText(image, "Orange Colour", (x, y), 
+    #                  cv2.FONT_HERSHEY_SIMPLEX,  
+    #                  1.0, (0, 165, 255)) 
+            
+            
+    #         # orange_detected.append(contour)
+  
+    
+    # check_point_in_orange_region(contours)
+     
+    
+
+
+    # Creating contour to track white color 
+    # Additional preprocessing to separate close objects
+    blurred = cv2.GaussianBlur(white_mask, (5, 5), 0) 
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
+    # Use distance transform and watershed algorithm to separate objects
+    dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
+    ret, sure_fg = cv2.threshold(dist_transform, 0.5 * dist_transform.max(), 255, 0)  #0.5*
+    sure_fg = np.uint8(sure_fg)
+    unknown = cv2.subtract(thresh, sure_fg)
+    ret, markers = cv2.connectedComponents(sure_fg)
+    markers = markers + 1
+    markers[unknown == 255] = 0
+    markers = cv2.watershed(image, markers)
+    # image[markers == -1] = [0, 0, 255]
+
+
+    contours, hierarchy = cv2.findContours(white_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
+    for pic, contour in enumerate(contours): 
+        area = cv2.contourArea(contour) 
+        if(area > 450): 
+            x, y, w, h = cv2.boundingRect(contour) 
+            # image = cv2.rectangle(image, (x, y), 
+            #                            (x + w, y + h), 
+            #                            (255, 255, 255), 2) 
+            # print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
+            #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
+            if(area > 2000 and area < 4000): #before 2900
+                image = egg_draw(image,x,y,w,h,area)
+            # #If a big white object is detected with size of the car
+            # if(area > 13000 and area < 22000):
+            #     image = car_draw(image,x,y,w,h,area)
+            #(x=638, y=683) w=31 h=80 area=813.5 small white square
+             
+              
+            cv2.putText(image, "White Colour", (x, y), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        1.0, (255, 255, 255)) 
+            
+    
+
+
+
+    # # # Creating contour to track pink color 
+    # contours, hierarchy = cv2.findContours(pink_mask, 
+    #                                        cv2.RETR_TREE, 
+    #                                        cv2.CHAIN_APPROX_SIMPLE) 
+    # for pic, contour in enumerate(contours): 
+    #     area = cv2.contourArea(contour) 
+    #     if(area > 200): 
+    #         x, y, w, h = cv2.boundingRect(contour) 
+    #         image = cv2.rectangle(image, (x, y), 
+    #                                    (x + w, y + h), 
+    #                                    (0, 0, 0), 2) 
+    #         # print(f"(Pink objects: x={x}, y={y}) w={w} h={h} area={area}")
+              
+    #         cv2.putText(image, "Pink Colour", (x, y), 
+    #                     cv2.FONT_HERSHEY_SIMPLEX, 
+    #                     1.0, (0, 0, 0)) 
+    # # Creating contour to track blue color 
+    # contours, hierarchy = cv2.findContours(blue_mask, 
+    #                                        cv2.RETR_TREE, 
+    #                                        cv2.CHAIN_APPROX_SIMPLE) 
+    # for pic, contour in enumerate(contours): 
+    #     area = cv2.contourArea(contour) 
+    #     if(area > 300): 
+    #         x, y, w, h = cv2.boundingRect(contour) 
+    #         image = cv2.rectangle(image, (x, y), 
+    #                                    (x + w, y + h), 
+    #                                    (255, 85, 0), 2) 
+              
+    #         cv2.putText(image, "Blue Colour", (x, y), 
+    #                     cv2.FONT_HERSHEY_SIMPLEX, 
+    #                     1.0, (255, 85, 0)) 
+              
+
+    # # Creating contour to track green color 
+    contours, hierarchy = cv2.findContours(green_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
+    for pic, contour in enumerate(contours): 
+        area = cv2.contourArea(contour) 
+        if(area > 500): 
+            x, y, w, h = cv2.boundingRect(contour) 
+            image = cv2.rectangle(image, (x, y), 
+                                       (x + w, y + h), 
+                                       (0, 255, 0), 2) 
+            print(f"(Green x={x}, y={y}) w={w} h={h} area={area}")
+            cv2.putText(image, "Green Colour", (x, y), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        1.0, (0, 255, 0)) 
+            
+    # # Creating contour to track yellow color 
+    contours, hierarchy = cv2.findContours(yellow_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
+    for pic, contour in enumerate(contours): 
+        area = cv2.contourArea(contour) 
+        if(area > 800): 
+            x, y, w, h = cv2.boundingRect(contour) 
+            image = cv2.rectangle(image, (x, y), 
+                                       (x + w, y + h), 
+                                       (0, 0, 0), 2) 
+            print(f"(yellow x={x}, y={y}) w={w} h={h} area={area}")
+            # line_drawForPat(image, x, y, w, h, area)
+            cv2.putText(image, "yellow Colour", (x, y), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        1.0, (0, 0, 0)) 
+
+
+
+
+    # Program Termination 
+    cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
+
+    # return orange_detected, image
+    return image
+    # if cv2.waitKey(10) & 0xFF == ord('q'): 
+    #     cap.release() 
+    #     cv2.destroyAllWindows() 
+    #     break  
+
+
+
+
+def match_circles_and_contours(image, contours):
+
+    #To store balls in separate arrays
+    white_balls = []
+    orange_balls = []
+
+    # Check each ball coordinate
+    balls = load_balls("balls.json")
+    matched_circles = []
+    for cx, cy in balls:
+        for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            if x <= cx <= x + w and y <= cy <= y + h:
+                matched_circles.append((cx, cy))
+                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)
+                cv2.putText(image, "Orange Colour", (x, y), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255))
+                print(f"we had a match at {cx},{cy}")
+                orange_balls.append((cx, cy))
+            else:
+                white_balls.append((cx, cy))
+
+            
+    
+    
+    saveOrange_balls(orange_balls)
+    saveWhite_balls(white_balls)
+
+
+    return image, matched_circles
+
+
+# def circle_detection(image):
+#     # Convert to grayscale
+#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#     # Apply a blur
+#     """ 
+#     *Parameter one, gray, is the source image converted to grayscale. 
+#     Making the algorithms that operate on the image computationally less intensive.
+#     **Parameter two and three is the kernel size. Which determines the width and height of the Gaussian filter. 
+#     A kernel size of (9, 9) means that the filter window is 9 pixels by 9 pixels. 
+#     The larger the kernel, the stronger the blur effect.
+    
+#     ***The standard deviation in the X and Y directions; when set to 0, it is calculated from the kernel size. 
+#     A higher value for standard deviation means more blur.
+#     """
+#     gray_blurred = cv2.GaussianBlur(gray, (9, 9), 0)  
+#     # cv2.imshow('Detected Balls', gray_blurred)
+    
+#     # Perform Hough Circle Transform (Detect circles)
+#     """
+#     *cv2.HOUGH_GRADIENT, this method is the only one available for circle detection in OpenCV and uses the gradient information of the image.
+    
+#     **dp=1 means the accumulator has the same resolution as the input image. 
+#     If dp is greater, the accumulator resolution is reduced, and vice versa.
+   
+#     ***minDist=40: The minimum distance between the centers of detected circles.
+    
+#     ****param1=50: The higher threshold of the two passed to the Canny edge detector (the lower one is half of this). It's used in the edge detection stage.
+#     *****param2=30: The accumulator threshold for the circle centers at the detection stage. 
+#     The smaller it is, the more false circles may be detected. Circles with an accumulator value above this threshold are returned.
+#     ******minRadius= and maxRadius=: The minimum and maximum radius of the circles to be detected.
+#     """
+
+#     #mindist=18
+#     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
+#                                param1=50, param2=24, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
+#   ##
+#      # List to store circle data
+#     stored_circles = []
+#      # Filter out the circles that correspond to the ping pong balls
+#     if circles is not None:
+#         circles = np.uint16(np.around(circles))
+#         for i in circles[0, :]:
+#             x, y, r = i[0], i[1], i[2]  # x, y center and radius of circle
+            
+#             # Draw the outer circle
+#             cv2.circle(image, (x, y), r, (0, 255, 0), 1) #2
+#             # Draw the center of the circle
+#             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
+            
+#             # Put text 'Ball' near the detected ball
+#             # cv2.putText(image, 'Ball', (x - r, y - r),
+#             #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            
+#             # print(f"'center': {x, y}, 'radius': {r}")
+#             # Store the circles data
+#             stored_circles.append({'center': (x, y), 'radius': r, 'label': 'Ball'})
+#             save_balls(stored_circles)
+#     # with open('stored_circles.json', 'w') as file:
+#     #     json.dump(stored_circles, file, indent=4)
+#     # Display the result
+#     # cv2.imshow('Detected Balls', image)
+#     return image, stored_circles
+#     # return image
+#   ##
+#     #cv2.waitKey(0)
+#     #cv2.destroyAllWindows()
+
+#     ################################
+
+#     # # Convert to grayscale
+#     # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#     # cv2.imshow('gray', gray)
+#     # # Blur using 3 * 3 kernel
+#     # gray_blurred = cv2.blur(gray, (3, 3))
+#     # cv2.imshow('gray blurred', gray_blurred)
+#     # # Apply Hough transform on the blurred image
+#     # detected_circles = cv2.HoughCircles(gray_blurred,
+#     #                                     cv2.HOUGH_GRADIENT, 1, 20,
+#     #                                     param1=50, param2=30,
+#     #                                     minRadius=1, maxRadius=40)
+#     # # Draw circles that are detected
+#     # if detected_circles is not None:
+#     #     # Convert the circle parameters a, b and r to integers
+#     #     detected_circles = np.uint16(np.around(detected_circles))
+#     #     for pt in detected_circles[0, :]:
+#     #         a, b, r = pt[0], pt[1], pt[2]
+#     #         # Draw the circumference of the circle
+#     #         cv2.circle(image, (a, b), r, (0, 255, 0), 2)
+#     #         # Draw a small circle (of radius 1) to show the center
+#     #         cv2.circle(image, (a, b), 1, (0, 0, 255), 3)
+#     #         cv2.imshow("Detected Circle", image)
+#     #         cv2.waitKey(0)
+#     # # Close the window when done
+#     # cv2.destroyAllWindows()
+
+# def save_balls(circles, filename="balls.json"):
+#     balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+#     with open(filename, 'w') as file:
+#         json.dump(balls, file, indent=4)
+
+# def saveOrange_balls(balls, filename="orangeballs.json"):
+#     # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+#     with open(filename, 'w') as file:
+#         json.dump(balls, file, indent=4)
+
+# def saveWhite_balls(balls, filename="whiteballs.json"):
+#     # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
+#     with open(filename, 'w') as file:
+#         json.dump(balls, file, indent=4)
+        
+# def load_balls(filename="balls.json"):
+#     with open(filename, 'r') as file:
+#         balls = json.load(file)
+#     # Convert the list of lists back to a list of tuples
+#     return [tuple(center) for center in balls]
+
+# def print_balls(filename="balls.json"):
+#     balls = load_balls(filename)
+#     for ball in balls:
+#         print(ball)
+
 
 
 def save_balls(circles, filename="balls.json"):
     balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
     with open(filename, 'w') as file:
         json.dump(balls, file, indent=4)
+
 
 def saveOrange_balls(balls, filename="orangeballs.json"):
     # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
@@ -127,6 +798,9 @@ def print_balls(filename="balls.json"):
     for ball in balls:
         print(ball)
 
+def save_Egg(egg, filename="egg.json"):
+    with open(filename, 'w') as file:
+        json.dump(egg, file, indent=4)
 
 #TRUE
 def detect_ball_colors(image):
@@ -297,6 +971,8 @@ def detect_ball_colors(image):
                         1.0, (255, 255, 255)) 
             
     return image
+
+
 
 def check_point_in_orange_region(contours):
     #To store balls in separate arrays
