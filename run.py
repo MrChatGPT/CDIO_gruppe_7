@@ -48,7 +48,8 @@ def init():
 #     # Ensure the camera is released properly
 #     camera_handler.release_camera()
 
-image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
+# image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
+image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_15_02_15_Pro.jpg')
 transform_and_detect(image)
 
 int
