@@ -104,7 +104,7 @@ def calibrateColors2(image):
 def getImage():
     """This is just a dummy function. It will be replaced by the camera module."""
     # image= cv2.imread('test/images/WIN_20240610_09_33_12_Pro.jpg')  #new pic with new car
-    image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') #NOB
+    image= cv2.imread('test/images/WIN_20240610_14_19_28_Pro.jpg') #NOB OB
     # image= cv2.imread('newcar/WIN_20240610_15_04_20_Pro.jpg')   #NOB OB
 
 
@@ -846,6 +846,11 @@ def CannyEdgeGray(image):
 #     return image, matched_circles
 
 def match_circles_and_contours(image, contours):
+
+    #To store balls in separate arrays
+    white_balls = []
+    orange_balls = []
+    
     # Check each ball coordinate
     balls = load_balls("balls.json")
     matched_circles = []
@@ -858,7 +863,29 @@ def match_circles_and_contours(image, contours):
                 cv2.putText(image, "Orange Colour", (x, y), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255))
                 print(f"we had a match at {cx},{cy}")
+                orange_balls.append((cx, cy))
+            else:
+                white_balls.append((cx, cy))
+
+            
+    
+    
+    saveOrange_balls(orange_balls)
+    saveWhite_balls(white_balls)
+
+
     return image, matched_circles
+
+
+
+    # if point_in_orange_region:
+        #     print(f"The point ({px}, {py}) is within an orange region.")
+        #     orange_balls.append((px, py))
+        # else:
+        #     print(f"The point ({px}, {py}) is not within any orange region.")
+        #     white_balls.append((px, py))
+
+  
 
 def detect_ball_colors_testbaby(image):
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 

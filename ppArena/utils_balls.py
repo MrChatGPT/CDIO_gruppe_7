@@ -150,9 +150,9 @@ def print_balls(filename="balls.json"):
 def check_point_in_orange_region(contours):
     # print_balls("balls.json")
     
-    #To store balls in separate arrays
-    white_balls = []
-    orange_balls = []
+    # #To store balls in separate arrays
+    # white_balls = []
+    # orange_balls = []
 
     # Check each ball coordinate
     balls = load_balls("balls.json")
@@ -167,13 +167,13 @@ def check_point_in_orange_region(contours):
                 break  # Exit the loop if the point is found in any contour
         # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). NOT IN IF")
         # print(f"dist {dist}")
-        if point_in_orange_region:
-            print(f"The point ({px}, {py}) is within an orange region.")
-            orange_balls.append((px, py))
-        else:
-            print(f"The point ({px}, {py}) is not within any orange region.")
-            white_balls.append((px, py))
+    #     # if point_in_orange_region:
+    #     #     print(f"The point ({px}, {py}) is within an orange region.")
+    #     #     orange_balls.append((px, py))
+    #     # else:
+    #     #     print(f"The point ({px}, {py}) is not within any orange region.")
+    #     #     white_balls.append((px, py))
 
-    saveOrange_balls(orange_balls)
-    saveWhite_balls(white_balls)
+    # saveOrange_balls(orange_balls)
+    # saveWhite_balls(white_balls)
 
