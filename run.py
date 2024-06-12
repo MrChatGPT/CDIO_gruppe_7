@@ -1,4 +1,6 @@
 from matplotlib import pyplot as plt 
+from typing import Tuple, Optional
+
 from picture.livefeed import *
 from picture.transform_arena import *
 from picture.image_detection import *
@@ -8,8 +10,7 @@ from algorithm.utils import *
 from algorithm.control import *
 
 
-controller = MyController() 
-client = MQTTClient(client_id='controller',loop_method='start')
+
 
 # run image recognition software
 def transform_and_detect(image):
@@ -31,7 +32,7 @@ def init():
 
     # for arena transform calibration
     image = camera_handler._run_video()
-    #find_corners(image)
+    # find_corners(image)
     return camera_handler
 
 camera_handler = init()

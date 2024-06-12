@@ -6,6 +6,9 @@ from typing import Tuple, Optional
 # client = MQTTClient(client_id='controller',loop_method='start')
 # topic = 'robot/control'
 
+controller = MyController() 
+client = MQTTClient(client_id='controller',loop_method='start')
+
 def publish_controller_data(command: Optional[Tuple[float, float, float, int, int]] = None):
     '''
     This function will be called by the controller whenever it has new data to publish.
