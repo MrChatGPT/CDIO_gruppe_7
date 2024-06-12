@@ -51,40 +51,40 @@ def move_to_target(target_position):
     comforward = (0,0.15,0,0,0)
 
     # Move in the y direction
-    if current_y != target_y:
-        if current_y < target_y: #vi skal altså op ad ^
-            #overvej at smid et threshold ind her
-            if (car.angle <= 20) or (car.angle >= 340):
-                if car.angle > 270:
-                    publish_controller_data(comtiltright) #vi vender os mod højre
-                    sleep(0.2)
-                    publish_controller_data(comstop)
-                    return
-                if car.angle > 0:
-                    publish_controller_data(comtiltleft) #vi vender os mod venstre
-                    sleep(0.2)
-                    publish_controller_data(comstop)
-                    return
-            publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
+    threshhold = 20
+    if current_y < target_y - threshhold: #vi skal altså op ad ^
+        #overvej at smid et threshold ind her
+        if (car.angle <= 20) or (car.angle >= 340):
+            if car.angle > 270:
+                publish_controller_data(comtiltright) #vi vender os mod højre
+                sleep(0.2)
+                publish_controller_data(comstop)
+                return
+            if car.angle > 0:
+                publish_controller_data(comtiltleft) #vi vender os mod venstre
+                sleep(0.2)
+                publish_controller_data(comstop)
+                return
+        publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
+        sleep(0.2)
+        publish_controller_data(comstop)
+        return
+    elif current_y > target_y + threshhold: #vi skal altså op ad ^
+        
+        if car.angle > 180-threshhold:
+            publish_controller_data(comtiltleft)#vi "fjerner" grader indtil vi er på 180
             sleep(0.2)
             publish_controller_data(comstop)
             return
-        else: #så skal vi altså nedad ˅
-            if car.angle != 180:
-                if car.angle > 180:
-                    publish_controller_data(comtiltleft)#vi "fjerner" grader indtil vi er på 180
-                    sleep(0.2)
-                    publish_controller_data(comstop)
-                    return
-                if car.angle > 0:
-                    publish_controller_data(comtiltright) #vi vender tilføjer grader indtil vi er på 180
-                    sleep(0.2)
-                    publish_controller_data(comstop)
-                    return
-            publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
+        elif car.angle > 0+threshhold:
+            publish_controller_data(comtiltright) #vi vender tilføjer grader indtil vi er på 180
             sleep(0.2)
             publish_controller_data(comstop)
             return
+        publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
+        sleep(0.2)
+        publish_controller_data(comstop)
+        return
     
     # Move in the x direction
     # nu er vores angle enten 0 eller 180:
