@@ -2,10 +2,9 @@
 from time import sleep
 from utils import MQTTClient, MyController
 from typing import Tuple, Optional
-
-controller = MyController() 
-client = MQTTClient(client_id='controller',loop_method='start')
-topic = 'robot/control'
+# controller = MyController() 
+# client = MQTTClient(client_id='controller',loop_method='start')
+# topic = 'robot/control'
 
 def publish_controller_data(command: Optional[Tuple[float, float, float, int, int]] = None):
     '''
@@ -29,7 +28,7 @@ def publish_controller_data(command: Optional[Tuple[float, float, float, int, in
         #print(controller.R3_value, controller.L3_value)
         
         if new_message != last_message: # Only publish if message changed.
-            client.publish(topic, new_message)
+            client.publish('robot/control', new_message)
             last_message = new_message
 
     if command is not None:
@@ -39,9 +38,11 @@ def publish_controller_data(command: Optional[Tuple[float, float, float, int, in
     return publish
 
 
+
+
+
+
 controller.new_data_callback = publish_controller_data()
-
-
 if __name__ == "__main__":
     controller.start()  
     client.connect()

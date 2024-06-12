@@ -4,8 +4,11 @@ from picture.transform_arena import *
 from picture.image_detection import *
 from algorithm.algorithm import *
 from algorithm.move_to_target import *
+from algorithm.utils import *
 
 
+controller = MyController() 
+client = MQTTClient(client_id='controller',loop_method='start')
 
 # run image recognition software
 def transform_and_detect(image):
@@ -14,6 +17,8 @@ def transform_and_detect(image):
     image = detect_ball_colors(image)
     car = find_car(image,center_weight=150)
     
+def init_car():      
+    client.connect()
 
 
 # initialize program

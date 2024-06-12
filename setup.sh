@@ -11,3 +11,5 @@ python3 -m pip install pynput
 python3 -m pip install scikit-image
 
 python3 -m pip install paho-mqtt
+
+python3 -m pip install tk
