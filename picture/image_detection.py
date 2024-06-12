@@ -332,10 +332,8 @@ def rgb_to_hsv(rgb):
     hsv_color = cv2.cvtColor(color, cv2.COLOR_RGB2HSV)
     return hsv_color[0][0]
 
-def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yellow_mask.jpg', green_mask_path='green_mask.jpg', center_weight=25):
+def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mask.jpg', green_mask_path='green_mask.jpg', center_weight=25):
     # Read the image
-    
-    image = cv2.imread(os.path.join(os.path.dirname(__file__), image_path))
     
     # Convert the image to HSV color space
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -377,8 +375,9 @@ def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yello
     green_centroid = find_centroid(contours_green)
     
     if yellow_centroid is None or green_centroid is None:
-        raise ValueError("Could not find the required yellow or green regions in the image.")
-    
+        print("car is goone")
+        return
+        
     # Calculate the center of the car
     center_x = (yellow_centroid[0] + green_centroid[0]) // 2
     center_y = (yellow_centroid[1] + green_centroid[1]) // 2
@@ -416,8 +415,8 @@ def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yello
     
     # Write the results to a JSON file
     data = [[adjusted_center_x, adjusted_center_y, angle_deg]]
-    with open(os.path.join(os.path.dirname(__file__), 'robot.json'), 'w') as json_file:
+    with open('robot.json', 'w') as json_file:
         json.dump(data, json_file)
-
+    
     return (adjusted_center_x, adjusted_center_y, angle_deg)
 
