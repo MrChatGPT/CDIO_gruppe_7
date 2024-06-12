@@ -2,6 +2,7 @@ import json
 from time import sleep
 import numpy as np 
 import os
+import control as cnt
 
 class Car:
     def __init__(self, x, y, angle):
@@ -55,34 +56,34 @@ def move_to_target(target_position):
             #overvej at smid et threshold ind her
             if car.angle != 0:
                 if car.angle > 270:
-                    publish_controller_data(comtiltright) #vi vender os mod højre
+                    cnt.publish_controller_data(comtiltright) #vi vender os mod højre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
                 if car.angle > 0:
-                    publish_controller_data(comtiltleft) #vi vender os mod venstre
+                    cnt.publish_controller_data(comtiltleft) #vi vender os mod venstre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
-            publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
+            cnt.publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
             sleep(0.5)
-            publish_controller_data(comstop)
+            cnt.publish_controller_data(comstop)
             return
         else: #så skal vi altså nedad ˅
             if car.angle != 180:
                 if car.angle > 180:
-                    publish_controller_data(comtiltleft)#vi "fjerner" grader indtil vi er på 180
+                    cnt.publish_controller_data(comtiltleft)#vi "fjerner" grader indtil vi er på 180
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
                 if car.angle > 0:
-                    publish_controller_data(comtiltright) #vi vender tilføjer grader indtil vi er på 180
+                    cnt.publish_controller_data(comtiltright) #vi vender tilføjer grader indtil vi er på 180
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
-            publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
+            cnt.publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
             sleep(0.5)
-            publish_controller_data(comstop)
+            cnt.publish_controller_data(comstop)
             return
     
     # Move in the x direction
@@ -91,56 +92,56 @@ def move_to_target(target_position):
         if current_x > target_x: #så skal vi til venstre
             if car.angle != 270:
                 if car.angle == 0:
-                    publish_controller_data(comtiltleft) #hvis vi peger opad ved 0 grader, skal vi bare tilte mod venstre
+                    cnt.publish_controller_data(comtiltleft) #hvis vi peger opad ved 0 grader, skal vi bare tilte mod venstre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
                 if car.angle > 270: #efter at have trukket én fra 0, lander vi på 359 grader
-                    publish_controller_data(comtiltleft) #Hvis vi er større end 270, skal vi bare blive ved med at tilte mod venstre
+                    cnt.publish_controller_data(comtiltleft) #Hvis vi er større end 270, skal vi bare blive ved med at tilte mod venstre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
                 if car.angle == 180:
-                    publish_controller_data(comtiltright) #hvis vi allerede er ved 180, skal vi bare mod højre
+                    cnt.publish_controller_data(comtiltright) #hvis vi allerede er ved 180, skal vi bare mod højre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return    
                 if car.angle < 270:
-                    publish_controller_data(comtiltright) #Hvis vi er større end 180, skal vi fortsat mod højre
+                    cnt.publish_controller_data(comtiltright) #Hvis vi er større end 180, skal vi fortsat mod højre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
-            publish_controller_data(comforward)
+            cnt.publish_controller_data(comforward)
             sleep(0.5)
-            publish_controller_data(comstop)
+            cnt.publish_controller_data(comstop)
             return
         else: #så skal vi til højre
             if car.angle != 90:
                 if car.angle == 180:
-                    publish_controller_data(comtiltleft) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
+                    cnt.publish_controller_data(comtiltleft) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return    
                 if car.angle > 90:
-                    publish_controller_data(comtiltleft) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
+                    cnt.publish_controller_data(comtiltleft) #hvis vi peger med næsen nedad, skal vi tilte med bilens venstre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return    
                 if car.angle == 0:
-                    publish_controller_data(comtiltright) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
+                    cnt.publish_controller_data(comtiltright) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
                 if car.angle < 90:
-                    publish_controller_data(comtiltright) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
+                    cnt.publish_controller_data(comtiltright) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
                     sleep(0.5)
-                    publish_controller_data(comstop)
+                    cnt.publish_controller_data(comstop)
                     return
-            publish_controller_data(comforward)
+            cnt.publish_controller_data(comforward)
             sleep(0.5)
-            publish_controller_data(comstop)
+            cnt.publish_controller_data(comstop)
             return
     #nu er current_y = target_y, current_x = target_x
-    publish_controller_data(0,0,0,1,0) #og så skal der nedsvælges
+    cnt.publish_controller_data(0,0,0,1,0) #og så skal der nedsvælges
     sleep(0.5)
-    publish_controller_data(comstop)
+    cnt.publish_controller_data(comstop)

@@ -4,18 +4,18 @@ import threading
 import sys
 import paho.mqtt.client as mqtt
 import uuid
-from pyPS4Controller.controller import Controller 
+#from pyPS4Controller.controller import Controller 
 import math
 import json
 
-class MyController(Controller):
+class MyController():
     '''
     This class is used to define the controller object. It inherits from the Controller class in the pyPS4Controller library.
     The default location of the controller interface is /dev/input/js0.
     '''
     def __init__(self, interface="/dev/input/js0",event_format="3Bh2b", connecting_using_ds4drv=False, **kwargs):
-        super().__init__(interface=interface,
-                         connecting_using_ds4drv=connecting_using_ds4drv,event_format=event_format, **kwargs)
+        #super().__init__(interface=interface,
+        #                 connecting_using_ds4drv=connecting_using_ds4drv,event_format=event_format, **kwargs)
         self.R3_value = [0, 0]
         self.L3_value = 0
         self.R1_value = 0
@@ -158,7 +158,7 @@ class MyController(Controller):
         return wheel_speeds
 
 class MQTTClient:
-    def __init__(self, broker_url='localhost', broker_port=1883, topics=None, client_id=None, loop_method="start"):
+    def __init__(self, broker_url='192.168.1.101', broker_port=1883, topics=None, client_id=None, loop_method="start"):
         self.broker_url = broker_url
         self.broker_port = broker_port
         self.subscribe_topics = topics if topics is not None else []  # Ensure topics is always a list

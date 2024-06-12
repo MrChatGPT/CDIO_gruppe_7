@@ -2,8 +2,8 @@ from matplotlib import pyplot as plt
 from picture.livefeed import *
 from picture.transform_arena import *
 from picture.image_detection import *
-# from algorithm.algorithm import *
-# from algorithm.move_to_target import *
+from algorithm.algorithm import *
+from algorithm.move_to_target import *
 
 
 
@@ -40,7 +40,7 @@ try:
         # ---------------------------------------------------
         # Herfra mangles: 
         # algoritme som henter data fra .json filerne og så bevæger bilen
-        # move_to_target(SortByDistance())
+        move_to_target(SortByDistance())
         
         
 finally:
