@@ -5,6 +5,7 @@ from picture.image_detection import *
 from algorithm.algorithm import *
 from algorithm.move_to_target import *
 from algorithm.utils import *
+from algorithm.control import *
 
 
 controller = MyController() 

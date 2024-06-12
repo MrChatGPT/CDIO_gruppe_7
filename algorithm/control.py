@@ -1,6 +1,6 @@
 
 from time import sleep
-from utils import MQTTClient, MyController
+from algorithm.utils import MQTTClient, MyController
 from typing import Tuple, Optional
 # controller = MyController() 
 # client = MQTTClient(client_id='controller',loop_method='start')
@@ -42,7 +42,7 @@ def publish_controller_data(command: Optional[Tuple[float, float, float, int, in
 
 
 
-controller.new_data_callback = publish_controller_data()
+#controller.new_data_callback = publish_controller_data()
 if __name__ == "__main__":
     controller.start()  
     client.connect()

@@ -22,7 +22,7 @@ def LoadBalls(filename="balls.json"):
 
 
 # Function to read ball positions from a JSON file
-def LoadOrangeBall(filename="orangeball.json"):
+def LoadOrangeBall(filename="orangeballs.json"):
     # Get the project's root directory
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
