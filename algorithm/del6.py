@@ -24,7 +24,7 @@ class Car:
         self.angle = (self.angle + self.rotation_direction) % 360  # Change direction based on rotation_direction
         print(f"Current angle: {self.angle}")  # Print the current angle
         self.update_position()
-        self.canvas.after(1500, self.rotate)
+        self.canvas.after(2000, self.rotate)
 
     def update_position(self):
         rad_angle = radians(self.angle)
@@ -210,8 +210,8 @@ def draw_car(canvas, car):
 def move_to_target(car, target_position, green_dot_y_range, canvas):
     current_x, current_y = car.x, car.y
     target_x, target_y = target_position
-    # target_x += 150
-    # target_y -= 30
+    target_x += 10
+    target_y -= 50
 
     comstop = (0, 0)
     comtiltleft = (0, -5)
@@ -244,9 +244,10 @@ def move_to_target(car, target_position, green_dot_y_range, canvas):
     if abs(dx) <= threshhold and abs(dy) <= threshhold and abs(angle_diff) < 10:
         car.is_rotating = False
         print(f"Stopping, within threshold and aligned. dx: {dx}, dy: {dy}, angle_diff: {angle_diff}")
+        car.angle=0
         return comstop  # The car is close to the target position and aligned
     else:
-        if abs(angle_diff) < 10:  # If the angle difference is small, move forward
+        if abs(angle_diff) < 20:  # If the angle difference is small, move forward
             car.is_rotating = False
             print(f"Moving forward, angle diff is {angle_diff}")
             return comforward
@@ -321,7 +322,7 @@ def rotate_car():
 
     coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
     
-    targetX, targetY = 200, 600
+    targetX, targetY = 200, 300
     canvas.create_oval(targetX-10, targetY-10, targetX+10, targetY+10, outline="black", width=2, fill='pink')
     
     # Define the y-range for the green dots
