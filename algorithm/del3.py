@@ -147,10 +147,6 @@ def runSim():
 
 ##########################################
 
-import tkinter as tk
-from math import radians, cos, sin
-from random import randint
-
 class Car:
     def __init__(self, canvas, x, y, angle):
         self.canvas = canvas
@@ -166,8 +162,7 @@ class Car:
 
     def rotate(self):
         if self.turn > 0:
-            self.angle = (self.angle + 1) % 360  # Change to positive to rotate the opposite way
-            print(f"Current angle: {self.angle}")  # Print the current angle
+            self.angle = (self.angle - 1) % 360
             self.turn -= 1
             self.update_position()
             self.canvas.after(100, self.rotate)
@@ -216,24 +211,6 @@ class Car:
                            for x, y in sensor_positions]
         for sensor, pos in zip(self.sensors, rotated_sensors):
             self.canvas.coords(sensor, pos[0] - 5, pos[1] - 5, pos[0] + 5, pos[1] + 5)
-
-def update_mouse_coordinates(event, label):
-    label.config(text=f"Mouse Coordinates: x={event.x}, y={event.y}")
-
-def draw_car(canvas, car):
-    car.shape = canvas.create_polygon(car.x - 50, car.y - 50, car.x + 50, car.y - 50,
-                                      car.x + 50, car.y + 50, car.x - 50, car.y + 50,
-                                      outline="black", width=2, fill='darkgrey')
-    car.wheels = [
-        canvas.create_oval(car.x - 60, car.y - 60, car.x - 40, car.y - 40, outline="black", width=2, fill='black'),
-        canvas.create_oval(car.x + 40, car.y - 60, car.x + 60, car.y - 40, outline="black", width=2, fill='black'),
-        canvas.create_oval(car.x - 60, car.y + 40, car.x - 40, car.y + 60, outline="black", width=2, fill='black'),
-        canvas.create_oval(car.x + 40, car.y + 40, car.x + 60, car.y + 60, outline="black", width=2, fill='black')
-    ]
-    car.sensors = [
-        canvas.create_oval(car.x + 25, car.y + 40, car.x + 35, car.y + 50, outline="black", width=2, fill='green'),
-        canvas.create_oval(car.x + 70, car.y + 40, car.x + 80, car.y + 50, outline="black", width=2, fill='green')
-    ]
 
 def rotate_car():
     window = tk.Tk()
