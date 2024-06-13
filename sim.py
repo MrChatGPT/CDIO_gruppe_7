@@ -2,7 +2,8 @@ import tkinter as tk
 
 def draw_rectangle(canvas):
     # Draw a red rectangle
-    canvas.create_rectangle(50, 50, 1200, 850, outline="red", width=4)
+    # 1250, 900
+    canvas.create_rectangle(10, 10, 1250, 900, outline="red", width=10)
 
     # Calculate the center of the canvas
     center_x = 1250 // 2
@@ -10,8 +11,8 @@ def draw_rectangle(canvas):
 
     # Draw a centered red cross
     cross_size = 40  # size of the cross
-    canvas.create_line(center_x - cross_size, center_y, center_x + cross_size, center_y, fill="red", width=4)
-    canvas.create_line(center_x, center_y - cross_size, center_x, center_y + cross_size, fill="red", width=4)
+    canvas.create_line(center_x - cross_size, center_y, center_x + cross_size, center_y, fill="red", width=5)
+    canvas.create_line(center_x, center_y - cross_size, center_x, center_y + cross_size, fill="red", width=5)
 
 def draw_car(canvas, car):
     beginx, beginy, carx, cary = car['position']
@@ -45,20 +46,35 @@ def move_car(canvas, car, dx, dy):
     # Update car's position
     car['position'] = (car['position'][0] + dx, car['position'][1] + dy, car['position'][2] + dx, car['position'][3] + dy)
 
-def animate_car(canvas, car, targetX, targetY):
+def animate_car(canvas, car, targetX, targetY, coord_label):
     currentX = car['position'][0]
     currentY = car['position'][1]
+    car_width = car['position'][2] - car['position'][0]
+    car_height = car['position'][3] - car['position'][1]
+    sensor_offset_x = 95
+    sensor_offset_y1 = 30
+    sensor_offset_y2 = 75
+    
+    sensor1_x = currentX + sensor_offset_x
+    sensor1_y = currentY + sensor_offset_y1
+    sensor2_x = currentX + sensor_offset_x
+    sensor2_y = currentY + sensor_offset_y2
     
     # Calculate the distance to move
-    dx = 5 if currentX < targetX else -5
-    dy = 5 if currentY < targetY else -5
+    dx = 5 if sensor1_x < targetX else -5
+    dy = 5 if sensor1_y < targetY else -5
     
-    if (abs(currentX - targetX) > abs(dx)) or (abs(currentY - targetY) > abs(dy)):
+    if (abs(sensor1_x - targetX) > abs(dx)) or (abs(sensor1_y - targetY) > abs(dy)):
         move_car(canvas, car, dx, dy)
-        canvas.after(100, animate_car, canvas, car, targetX, targetY)
+        # Update the coordinates label
+        coord_label.config(text=f"Car Coordinates: x={car['position'][0]}, y={car['position'][1]}")
+        canvas.after(100, animate_car, canvas, car, targetX, targetY, coord_label)
     else:
         # Move the car to the exact target position if close enough
-        move_car(canvas, car, targetX - currentX, targetY - currentY)
+        final_dx = targetX - sensor1_x
+        final_dy = targetY - sensor1_y
+        move_car(canvas, car, final_dx, final_dy)
+        coord_label.config(text=f"Car Coordinates: x={car['position'][0]}, y={car['position'][1]}")
 
 def runSim():
     # Create a new window
@@ -66,7 +82,7 @@ def runSim():
     window.title("Rectangle Drawing")
 
     # Create a canvas widget 1250, 900
-    canvas = tk.Canvas(window, width=1250, height=900, bg='lightgrey')
+    canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
     canvas.pack()
 
     draw_rectangle(canvas)
@@ -74,9 +90,14 @@ def runSim():
     car = {'position': (100, 100, 200, 200)}
     draw_car(canvas, car)
 
+    # Create a label to display the car coordinates
+    coord_label = tk.Label(window, text="Car Coordinates: x=100, y=100")
+    coord_label.pack()
+
     # Start the animation towards a target position (e.g., 800, 600)
     targetX, targetY = 800, 600
-    animate_car(canvas, car, targetX, targetY)
+    canvas.create_oval(targetX, targetY, targetX, targetY, outline="black", width=20, fill='pink')
+    animate_car(canvas, car, targetX, targetY, coord_label)
 
     # Run the Tkinter event loop
     window.mainloop()
