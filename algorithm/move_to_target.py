@@ -3,6 +3,7 @@ from time import sleep
 import numpy as np 
 import os
 from algorithm.control import publish_controller_data
+import sim 
 
 class Car:
     def __init__(self, x, y, angle):
@@ -45,11 +46,17 @@ def move_to_target(target_position):
     #print(f"Target_x = {target_x}\nTarget_y = {target_y}")
 
     #Commands
-    comstop = (0,0,0,0,0)
-    comtiltleft = (0,0,-0.15,0,0)
-    comtiltright = (0,0,0.15,0,0)
-    comforward = (0,0.15,0,0,0)
-    comswallow = (0,0,0,1,0)
+    # comstop = (0,0,0,0,0)
+    # comtiltleft = (0,0,-0.15,0,0)
+    # comtiltright = (0,0,0.15,0,0)
+    # comforward = (0,0.15,0,0,0)
+    # comswallow = (0,0,0,1,0)
+
+    comstop = (0,0)
+    comtiltleft = (0,-0.15)
+    comtiltright = (0,0.15)
+    comforward = (0.15,0)
+    comswallow = (0,0,0,1,0) #?
 
     # Move in the y direction
     threshhold = 20
@@ -58,15 +65,17 @@ def move_to_target(target_position):
     #vi skal altså op ad /\ (robot y er mindre end target, altså er robot tættere på 0,0)
         if not((car.angle < 0+threshhold) or (car.angle > 360-threshhold)): #angle ligger ikke(mellem 340 og 20 grader (cirka 0)) 
             if car.angle > 180:
-                publish_controller_data(comtiltright) #vi vender os mod højre
+                return comtiltright
+                # publish_controller_data(comtiltright) #vi vender os mod højre
                 sleep(0.2)
-                publish_controller_data(comstop)
-                return
+                # publish_controller_data(comstop)
+                # return
             else:
-                publish_controller_data(comtiltleft) #vi vender os mod venstre
-                sleep(0.2)
-                publish_controller_data(comstop)
-                return
+                return comtiltleft
+                # publish_controller_data(comtiltleft) #vi vender os mod venstre
+                # sleep(0.2)
+                # publish_controller_data(comstop)
+                # return
         publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
         sleep(0.2)
         publish_controller_data(comstop)
