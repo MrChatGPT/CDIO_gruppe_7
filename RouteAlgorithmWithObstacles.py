@@ -58,7 +58,7 @@ def LoadCoordinates(filename):
     return coordinates
 
 
-# Function to read obstacle coordinates from a JSON file
+# Function to read obstacle coordinates from a json file
 def LoadObstacles(filename="no_go_zones.json"):
     with open(filename, 'r') as file:
         data = json.load(file)
@@ -67,7 +67,7 @@ def LoadObstacles(filename="no_go_zones.json"):
     return obstacles
 
 
-# Load the coordinates from the JSON files
+# Load the coordinates from the json files
 BallsXY = LoadCoordinates("whiteballs.json")
 OrangeBallXY = LoadCoordinates("orangeballs.json")[0]  # Only one orange ball, take the first element
 RobotXY = LoadCoordinates("robot.json")[0][:2]  # Only one robot, take the first element
