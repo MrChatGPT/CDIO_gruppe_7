@@ -1,18 +1,11 @@
-from calendar import c
 import math
 import os
-from re import I
-from secrets import randbelow
-from tabnanny import verbose
-from turtle import up
 import cv2
 from cv2 import GaussianBlur
 import numpy as np
 import random
 import imutils
-from imutils import paths
 import argparse
-from skimage import exposure
 import json
 
 
@@ -277,10 +270,7 @@ def detect_ball_colors(image):
     res_orange = cv2.bitwise_and(image, image, 
                                 mask = orange_mask) 
       
-    # For white color 
-    # white_mask = cv2.dilate(white_mask, kernel) 
-    # res_white = cv2.bitwise_and(image, image, 
-    #                            mask = white_mask) 
+
     
     # For blue color 
     blue_mask = cv2.dilate(blue_mask, kernel) 
@@ -369,38 +359,6 @@ def detect_ball_colors(image):
     check_point_in_orange_region(orange_detected)
    
 
-    # # Creating contour to track orange color 
-    # contours, hierarchy = cv2.findContours(orange_mask, 
-    #                                        cv2.RETR_TREE, 
-    #                                        cv2.CHAIN_APPROX_SIMPLE) 
-    
-
-    # for pic, contour in enumerate(contours): 
-    #     area = cv2.contourArea(contour) 
-    #     if(area > 300): 
-    #         x, y, w, h = cv2.boundingRect(contour) 
-    #         image = cv2.rectangle(image, (x, y),  
-    #                                    (x + w, y + h), 
-    #                                    (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-    #         print(f"(orange x={x}, y={y}) w={w} h={h} area={area}")
-    #         orange_detected.append(contour)
-    #         # if(area > 400 and area < 800):
-    #         #      orange_detected.append(contour)
-            
-    #         if(area > 1000 and area < 1700 ):
-    #              print(f"(big orange object is detected")
-            
-              
-    #         cv2.putText(image, "Orange Colour", (x, y), 
-    #                  cv2.FONT_HERSHEY_SIMPLEX,  
-    #                  1.0, (0, 165, 255)) 
-            
-            
-    #         # orange_detected.append(contour)
-  
-    
-    # check_point_in_orange_region(contours)
-     
     
 
 
@@ -519,7 +477,7 @@ def detect_ball_colors(image):
 
 
     # Program Termination 
-    cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
+    # cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
 
     # return orange_detected, image
     return image
@@ -595,176 +553,6 @@ def print_balls(filename="balls.json"):
 def save_Egg(egg, filename="egg.json"):
     with open(filename, 'w') as file:
         json.dump(egg, file, indent=4)
-
-#TRUE
-def detect_ball_colors(image):
-    #https://www.geeksforgeeks.org/multiple-color-detection-in-real-time-using-python-opencv/
-    #https://colorpicker.me/#ffffff
-    # https://colorizer.org/
-  # Capturing video through webcam 
- #  webcam = cv2.VideoCapture(0) 
- 
-    # Convert the imageFrame in  
-    # BGR(RGB color space) to  
-    # HSV(hue-saturation-value) 
-    # color space 
-    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    
-    # Set range for red color and  
-    # define mask 
-    red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
-    red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
-    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
-
-
-    orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-    orange_upper = np.array([65, 211, 255], np.uint8) #HSV
-    orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-
-
-    """
-    Attempt on the picture ending with 59, with both higher and lower values at the same time
-    BEST SO FAR
-    """
-    #ORIGINAL
-    white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
-    white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
-    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-    
-
-    """
-    Attempt on the picture ending with 46
-    """
-    blue_lower = np.array([95, 66, 141], np.uint8) #HSV
-    blue_upper = np.array([113, 150, 205], np.uint8) #HSV
-    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-
-    orange_detected = []
-   
-    ###########################################################
-      
-    # Morphological Transform, Dilation 
-    # for each color and bitwise_and operator 
-    # between imageFrame and mask determines 
-    # to detect only that particular color 
-    kernel = np.ones((5, 5), "uint8") 
-      
-    # For red color 
-    red_mask = cv2.dilate(red_mask, kernel) 
-    res_red = cv2.bitwise_and(image, image,  
-                              mask = red_mask) 
-      
-    # For orange color 
-    orange_mask = cv2.dilate(orange_mask, kernel) 
-    res_orange = cv2.bitwise_and(image, image, 
-                                mask = orange_mask) 
-      
-    # For white color 
-    white_mask = cv2.dilate(white_mask, kernel) 
-    res_white = cv2.bitwise_and(image, image, 
-                               mask = white_mask) 
-    
-    # For blue color 
-    blue_mask = cv2.dilate(blue_mask, kernel) 
-    res_blue = cv2.bitwise_and(image, image, 
-                               mask = blue_mask) 
-   
-    # # For green color 
-    # green_mask = cv2.dilate(green_mask, kernel) 
-    # res_blue = cv2.bitwise_and(image, image, 
-    #                            mask = green_mask) 
-
-
-    # Creating contour to track red color 
-    contours, hierarchy = cv2.findContours(red_mask, 
-                                           cv2.RETR_TREE, 
-                                           cv2.CHAIN_APPROX_SIMPLE) 
-      
-    #MAybe save the data, and when this function is almost done, fiind the median of the two values if any. Or just use the only one
-    #regarding the arena
-    for pic, contour in enumerate(contours): 
-        area = cv2.contourArea(contour) 
-        if area > 6000 and area < 8000: # area of cross is aprox 7000
-            rect = cv2.minAreaRect(contour)
-            box = cv2.boxPoints(rect)
-            box = np.int0(box)
-            
-            center = (int(rect[0][0]), int(rect[0][1]))
-            size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
-            angle = rect[2] + 45
-            
-            # Create a rotation matrix
-            M = cv2.getRotationMatrix2D(center, angle, 1.0)
-            
-            # Calculate the end points of the cross lines
-            end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
-                    int(center[1] + size[0] * np.sin(np.radians(angle))))
-            end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
-                    int(center[1] - size[0] * np.sin(np.radians(angle))))
-            end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
-                    int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
-            end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
-                    int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
-            
-            # Draw the cross
-            cv2.line(image, end1, end2, (0, 0, 255), 2)
-            cv2.line(image, end3, end4, (0, 0, 255), 2)
-            
-            cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
-            
-            no_go_zones = []
-            no_go_zones.append([
-                (end1, end2),
-                (end3, end4)
-            ])
-
-            save_no_go_zones(no_go_zones)
-
-  
-    # Creating contour to track orange color 
-    contours, hierarchy = cv2.findContours(orange_mask, 
-                                           cv2.RETR_TREE, 
-                                           cv2.CHAIN_APPROX_SIMPLE) 
-      
-    for pic, contour in enumerate(contours): 
-        area = cv2.contourArea(contour) 
-        if(area > 300): 
-            x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y),  
-                                       (x + w, y + h), 
-                                       (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}")
-
-              
-            cv2.putText(image, "Orange Colour", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX,  
-                        1.0, (0, 165, 255)) 
-            orange_detected.append(contour)
-
-    check_point_in_orange_region(contours)
-
-  
-    # Creating contour to track white color 
-    contours, hierarchy = cv2.findContours(white_mask, 
-                                           cv2.RETR_TREE, 
-                                           cv2.CHAIN_APPROX_SIMPLE) 
-    for pic, contour in enumerate(contours): 
-        area = cv2.contourArea(contour) 
-        if(area > 300): 
-            x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y), 
-                                       (x + w, y + h), 
-                                       (255, 255, 255), 2) 
-            # print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
-            #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
-            if(area > 2000 and area < 4000): #before 2900
-                image = egg_draw(image,x,y,w,h,area)
-
-            cv2.putText(image, "White Colour", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        1.0, (255, 255, 255)) 
-            
-    return image
 
 
 
