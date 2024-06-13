@@ -15,12 +15,13 @@ class Car:
         self.tkimage = None
         self.canvas_obj = None
         self.rotation_direction = 1  # 1 for clockwise, -1 for counterclockwise
+        self.is_rotating = False  # Flag to control rotation
 
     def rotate(self):
         self.angle = (self.angle + self.rotation_direction) % 360  # Change direction based on rotation_direction
         print(f"Current angle: {self.angle}")  # Print the current angle
         self.update_position()
-        self.canvas.after(100, self.rotate)
+        self.canvas.after(1000, self.rotate)
 
     def update_position(self):
         rad_angle = radians(self.angle)
@@ -74,7 +75,6 @@ def update_mouse_coordinates(event, label):
 
 
 
-
 def draw_car(canvas, car):
     car.shape = canvas.create_polygon(car.x - 50, car.y - 50, car.x + 50, car.y - 50,
                                       car.x + 50, car.y + 50, car.x - 50, car.y + 50,
@@ -119,6 +119,7 @@ def move_to_target(car, target_position, green_dot_y_range):
     # print(f"car angle{angle_deg}")
 
     if green_dot_y_range[0] <= current_y <= green_dot_y_range[1] and abs(dx) <= threshhold:
+        car.is_rotating = False  # Stop rotating
         return comstop  # The car is within the range of the green dots and close to the target x
 
 
@@ -127,20 +128,34 @@ def move_to_target(car, target_position, green_dot_y_range):
 
   
     if abs(dx) > abs(dy):
+        print(f"dx is bigger than dy")
         # Move in the x direction
         if dx > 0:
-            return (5, 0)  # Move right
             car.rotation_direction = 1
+            car.is_rotating = True  # Flag to control rotation
+            print(f"rotate clockwise")
+            return (5, 0)  # Move right
+            
         
         else:
-            return (-5, 0)  # Move left
             car.rotation_direction = -1
+            car.is_rotating = True  # Flag to control rotation
+            print(f"rotate anti-clockwise")
+            return (-5, 0)  # Move left
+            
     else:
+        print(f"stop rotating")
         # Move in the y direction
         if dy > 0:
+            car.rotation_direction = 0
+            car.is_rotating = False  # Stop rotating
             return (0, 5)  # Move down
+            
         else:
+            car.rotation_direction = 0
+            car.is_rotating = False  # Stop rotating
             return (0, -5)  # Move up
+        
 
 
 
@@ -188,7 +203,7 @@ def animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range):
     move_car(canvas, car, command)
     coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
     if command != (0, 0):
-        canvas.after(100, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
+        canvas.after(250, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range) #100
 
 def rotate_car():
     window = tk.Tk()
@@ -205,7 +220,7 @@ def rotate_car():
 
     coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
     
-    targetX, targetY = 800, 600
+    targetX, targetY = 800, 100
     canvas.create_oval(targetX-10, targetY-10, targetX+10, targetY+10, outline="black", width=2, fill='pink')
     
     # Define the y-range for the green dots
