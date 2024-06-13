@@ -712,6 +712,7 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     # Ensure we have exactly one back contour and two front contours
     if len(front_contours) != 2:
         print("car is goone")
+        return
         #raise ValueError("Could not find the required front squares and back rectangle in the image.")
     
     # Calculate the center of the bounding box for all contours

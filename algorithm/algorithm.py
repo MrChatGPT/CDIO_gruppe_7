@@ -77,6 +77,7 @@ def SortByDistance(RobotXY=LoadRobot(), BallsXY=LoadBalls(), OrangeBallXY = Load
     
     # Add the orange ball at the end
     SortedList.append(OrangeBallXY)
+    print(f"Shortest ball coordinat: [{SortedList[0]}]")
     return SortedList[0]
 
 
