@@ -37,7 +37,7 @@ def draw_rectangle(canvas):
 # draw_rectangle()
 
 
-def draw_car(canvas):
+def draw_car(canvas, car):
     # Create a new window
     # window = tk.Tk()
     # window.title("Robot Car Simulation")
@@ -46,13 +46,18 @@ def draw_car(canvas):
     # canvas = tk.Canvas(window, width=800, height=600, bg='lightgrey')
     # canvas.pack()
 
-    beginx = 100
-    beginy = 100
-    carx = 200
-    cary = 200
-    # Draw the base of the car
-    canvas.create_rectangle(beginx, beginy, carx, cary, outline="black", width=2, fill='darkgrey')
+    # beginx = 100
+    # beginy = 100
+    # carx = 200
+    # cary = 200
+    # # Draw the base of the car
+    # canvas.create_rectangle(beginx, beginy, carx, cary, outline="black", width=2, fill='darkgrey')
    
+
+    beginx, beginy, carx, cary = car['position']
+    # Draw the base of the car
+    car['base'] = canvas.create_rectangle(beginx, beginy, carx, cary, outline="black", width=2, fill='darkgrey')
+    
 
     # Draw the wheels
     wheel_radius = 10
@@ -72,7 +77,7 @@ def draw_car(canvas):
     # canvas.create_line(400, 200, 400, 400, fill="black", width=2) # Some wires or connectors
     # canvas.create_line(300, 200, 300, 400, fill="black", width=2)
 
-    # # Draw some small circles (representing sensors or other components)
+    # # Draw some small circles
     sensor_positions = [(195, 130), (195, 175)]
     for (x, y) in sensor_positions:
         canvas.create_oval(x - 5, y - 5, x + 5, y + 5, outline="black", width=2, fill='green')
@@ -93,7 +98,12 @@ def runSim():
     canvas.pack()
 
     draw_rectangle(canvas)
-    draw_car(canvas)
+
+    car = {'position': (100, 100, 200, 200)}
+    draw_car(canvas, car)
+
+
+    # draw_car(canvas)
 
     # Run the Tkinter event loop
     window.mainloop()
