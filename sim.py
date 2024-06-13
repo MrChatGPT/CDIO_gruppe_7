@@ -2,7 +2,6 @@ import tkinter as tk
 
 def draw_rectangle(canvas):
     # Draw a red rectangle
-    # 1250, 900
     canvas.create_rectangle(10, 10, 1250, 900, outline="red", width=10)
 
     # Calculate the center of the canvas
@@ -76,6 +75,9 @@ def animate_car(canvas, car, targetX, targetY, coord_label):
         move_car(canvas, car, final_dx, final_dy)
         coord_label.config(text=f"Car Coordinates: x={car['position'][0]}, y={car['position'][1]}")
 
+def update_mouse_coordinates(event, coord_label):
+    coord_label.config(text=f"Mouse Coordinates: x={event.x}, y={event.y}")
+
 def runSim():
     # Create a new window
     window = tk.Tk()
@@ -94,9 +96,12 @@ def runSim():
     coord_label = tk.Label(window, text="Car Coordinates: x=100, y=100")
     coord_label.pack()
 
+    # Bind mouse motion to update coordinates
+    canvas.bind('<Motion>', lambda event: update_mouse_coordinates(event, coord_label))
+
     # Start the animation towards a target position (e.g., 800, 600)
     targetX, targetY = 800, 600
-    canvas.create_oval(targetX, targetY, targetX, targetY, outline="black", width=20, fill='pink')
+    canvas.create_oval(targetX-10, targetY-10, targetX+10, targetY+10, outline="black", width=2, fill='pink')
     animate_car(canvas, car, targetX, targetY, coord_label)
 
     # Run the Tkinter event loop
