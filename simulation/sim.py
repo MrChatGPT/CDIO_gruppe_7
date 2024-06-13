@@ -51,7 +51,7 @@ def draw_car(canvas):
     carx = 200
     cary = 200
     # Draw the base of the car
-    canvas.create_rectangle(beginx, beginy, carx, cary, outline="black", width=2, fill='pink')
+    canvas.create_rectangle(beginx, beginy, carx, cary, outline="black", width=2, fill='darkgrey')
    
 
     # Draw the wheels
@@ -73,9 +73,9 @@ def draw_car(canvas):
     # canvas.create_line(300, 200, 300, 400, fill="black", width=2)
 
     # # Draw some small circles (representing sensors or other components)
-    # sensor_positions = [(320, 270), (480, 330), (350, 370)]
-    # for (x, y) in sensor_positions:
-    #     canvas.create_oval(x - 5, y - 5, x + 5, y + 5, outline="black", width=2, fill='white')
+    sensor_positions = [(195, 130), (195, 175)]
+    for (x, y) in sensor_positions:
+        canvas.create_oval(x - 5, y - 5, x + 5, y + 5, outline="black", width=2, fill='green')
 
 
 
@@ -89,7 +89,7 @@ def runSim():
     window.title("Rectangle Drawing")
 
     # Create a canvas widget 1250, 900
-    canvas = tk.Canvas(window, width=1250, height=900, bg='grey')
+    canvas = tk.Canvas(window, width=1250, height=900, bg='lightgrey')
     canvas.pack()
 
     draw_rectangle(canvas)
