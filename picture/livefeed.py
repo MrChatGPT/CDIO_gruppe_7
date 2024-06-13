@@ -43,20 +43,6 @@ class CameraHandler:
         # Close the window when done
         cv2.destroyAllWindows()
 
-    def capture_image(self):
-        if self.cap is None or not self.cap.isOpened():
-            print("Error: Camera is not initialized.")
-            return
-
-        # Capture a single frame
-        ret, frame = self.cap.read()
-
-        if not ret:
-            print("Error: Could not read frame.")
-            return
-
-        return frame
-
     def release_camera(self):
         self.running = False
         if self.thread is not None:

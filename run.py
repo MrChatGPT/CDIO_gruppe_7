@@ -13,19 +13,13 @@ from algorithm.control import *
 
 
 # run image recognition software
-def transform_and_detect(image):
-    image = transform(image)
-    circle_detection(image) 
-    image = detect_ball_colors(image)
-    car = find_car(image,center_weight=150)
+# def transform_and_detect(image):
     
-def init_car():      
-    client.connect()
-
-
+    
 # initialize program
 def init():
     camera_handler = CameraHandler()
+    client.connect()
 
     # Start video in a separate thread
     camera_handler.start_video()
@@ -38,19 +32,51 @@ def init():
 camera_handler = init()
 
 # run program
-try:
-    init_car()
+# try:
+#     image = camera_handler._run_video()
+#     image = transform(image)
+#     circle_detection(image) 
+#     image = detect_ball_colors(image)
+#     while True:
+#         image = camera_handler._run_video()
+#         image = transform(image)
+        
+#         car = find_car(image)
+#         #---- her forventes der at være 4 json filer: -------
+#         # nogo_zones, ping_pong_balls, orange_ball og robot
+#         # ---------------------------------------------------
+#         # Herfra mangles: 
+#         # algoritme som henter data fra .json filerne og så bevæger bilen
+#         move_to_target(SortByDistance())
+        
+        
+# finally:
+#     # Ensure the camera is released properly
+#     camera_handler.release_camera()
+#     comstop = (0,0,0,0,0)
+#     publish_controller_data(comstop)
+    
+try:   
     while True:
+        check = 0
+        print(f"Check value (0 for new ball positions, else 1): {check}")
         image = camera_handler._run_video()
-        transform_and_detect(image)
-        #---- her forventes der at være 4 json filer: -------
-        # nogo_zones, ping_pong_balls, orange_ball og robot
-        # ---------------------------------------------------
-        # Herfra mangles: 
-        # algoritme som henter data fra .json filerne og så bevæger bilen
-        move_to_target(SortByDistance())
-        
-        
+        image = transform(image)
+        circle_detection(image) 
+        image = detect_ball_colors(image)
+        while not check:
+            image = camera_handler._run_video()
+            image = transform(image)
+            
+            car = find_car(image)
+            #---- her forventes der at være 4 json filer: -------
+            # nogo_zones, ping_pong_balls, orange_ball og robot
+            # ---------------------------------------------------
+            # Herfra mangles: 
+            # algoritme som henter data fra .json filerne og så bevæger bilen
+            check = move_to_target(SortByDistance())       
 finally:
     # Ensure the camera is released properly
     camera_handler.release_camera()
+    comstop = (0,0,0,0,0)
+    publish_controller_data(comstop)        
