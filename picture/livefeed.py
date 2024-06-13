@@ -12,7 +12,7 @@ class CameraHandler:
     def start_video(self):
         # Initialize the camera
         print("Vi starter kamera")
-        self.cap = cv2.VideoCapture(1)  # 0 is the default camera
+        self.cap = cv2.VideoCapture(2)  # 0 is the default camera
 
         if not self.cap.isOpened():
             print("Error: Could not open camera.")

@@ -4,7 +4,7 @@ from picture.transform_arena import *
 from picture.image_detection import *
 # from algorithm.algorithm import *
 # from algorithm.move_to_target import *
-
+import time
 
 
 # run image recognition software
@@ -22,10 +22,10 @@ def init():
 
     # Start video in a separate thread
     camera_handler.start_video()
-
+    time.sleep(1)
     # for arena transform calibration
     image = camera_handler._run_video()
-    #find_corners(image)
+    find_corners(image)
     return camera_handler
 
 camera_handler = init()
