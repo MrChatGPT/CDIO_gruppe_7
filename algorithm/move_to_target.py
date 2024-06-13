@@ -146,7 +146,6 @@ def runSim():
 
 
 ##########################################
-
 import tkinter as tk
 from math import radians, cos, sin
 from random import randint
@@ -157,7 +156,7 @@ class Car:
         self.x = x
         self.y = y
         self.angle = angle
-        self.turn = 0
+        self.turn = 1  # Set turn to a high value to rotate indefinitely
         self.shape = None
         self.wheels = []
         self.sensors = []
@@ -165,12 +164,10 @@ class Car:
         self.canvas_obj = None
 
     def rotate(self):
-        if self.turn > 0:
-            self.angle = (self.angle + 1) % 360  # Change to positive to rotate the opposite way
-            print(f"Current angle: {self.angle}")  # Print the current angle
-            self.turn -= 1
-            self.update_position()
-            self.canvas.after(100, self.rotate)
+        self.angle = (self.angle + 1) % 360  # Change to positive to rotate the opposite way
+        print(f"Current angle: {self.angle}")  # Print the current angle
+        self.update_position()
+        self.canvas.after(1000, self.rotate)
 
     def update_position(self):
         rad_angle = radians(self.angle)
@@ -244,7 +241,6 @@ def rotate_car():
     car = Car(canvas, 200, 200, 0)
     draw_car(canvas, car)
 
-    car.turn = randint(30, 360)
     car.rotate()
 
     coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
