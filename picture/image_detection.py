@@ -237,10 +237,10 @@ def detect_ball_colors(image):
 
     # Set range for green color and  
     # define mask 
-    green_lower = np.array([72, 130, 187], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([129, 241, 255], np.uint8) #HSV   89, 255 , 255
+    green_lower = np.array([24, 71, 174], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([100, 180, 240], np.uint8) #HSV   89, 255 , 255
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
-
+    cv2.imwrite('green_mask.jpg', green_mask)    
 
 
     yellow_lower = np.array([20, 131, 199], np.uint8) #HSV  28,  82, 247   # 20,  40, 247 # 20, 131, 199
@@ -459,7 +459,7 @@ def detect_ball_colors(image):
 
 
 
-            
+
 
 
     # # Creating contour to track yellow color 
