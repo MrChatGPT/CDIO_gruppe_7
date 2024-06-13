@@ -158,7 +158,7 @@ class MyController(Controller):
         return wheel_speeds
 
 class MQTTClient:
-    def __init__(self, broker_url='localhost', broker_port=1883, topics=None, client_id=None, loop_method="start"):
+    def __init__(self, broker_url='192.168.1.101', broker_port=1883, topics=None, client_id=None, loop_method="start"):
         self.broker_url = broker_url
         self.broker_port = broker_port
         self.subscribe_topics = topics if topics is not None else []  # Ensure topics is always a list

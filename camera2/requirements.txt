@@ -1,4 +1,3 @@
-pyPS4Controller
 paho-mqtt
 numpy
 opencv-python==4.9.0.80

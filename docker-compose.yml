@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mosquitto_broker_app:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    volumes:
+      - ./control/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    network_mode: host
+
+  control_app:
+    build: ./control # Specifies the directory containing the Dockerfile
+    container_name: control
+    devices:
+      - "/dev/input/js0:/dev/input/js0" # Grants the container access to the PlayStation controller
+
+    volumes:
+      - "./control:/app" # Mounts the current directory to /app in the container
+    network_mode: host # Uses the host network stack for the container
+    working_dir: /app # Sets the working directory to /app inside the container
+    command: python3 control.py # Runs the manual_control.py scripti
+
+  
+  cam2_app:
+    build: ./camera2 # Specifies the directory containing the Dockerfile
+    container_name: cam2
+    devices:
+      - "/dev/video0:/dev/video0" # Grants the container access to the camera
+    volumes:
+      - "./camera2:/app" # Mounts the current directory to /app in the container
+    network_mode: host # Uses the host network stack for the container
+    working_dir: /app # Sets the working directory to /app inside the container
+    command: python3 cam2.py # Runs the manual_control.py scripti
