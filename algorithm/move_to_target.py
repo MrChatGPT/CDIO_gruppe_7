@@ -85,8 +85,8 @@ def move_to_target(target_position):
     # Move in the x direction
     # nu er vores angle cirka 0 eller cirka 180: (340-20 eller 160-200)
 
-    if current_x-125 > target_x+threshhold: #så skal vi til venstre
-        if not((car.angle < 290) and (car.angle > 250)): #hvis car.angle ikke(er mellem 250 og 290 (cirka 270))
+    if current_x > target_x+threshhold: #så skal vi til venstre
+        if not((car.angle < 90+threshhold) or (car.angle > 90-threshhold)):
             publish_controller_data(comtiltleft) #hvis vi peger opad ved 0 grader, skal vi bare tilte mod venstre
             sleep(0.2)
             publish_controller_data(comstop)
@@ -96,8 +96,8 @@ def move_to_target(target_position):
         publish_controller_data(comstop)
         return 0
     #så skal vi til højre
-    elif current_x+125 < target_x-threshhold:
-        if not((car.angle < 90+threshhold) and (car.angle > 90-threshhold)): #hvis vi car.angle ikke(er mellem 110 og 70 (cirka 90))
+    elif current_x < target_x-threshhold:
+        if not((car.angle < 270+threshhold) or (car.angle > 270-threshhold)): #hvis car.angle ikke(er mellem 250 og 290 (cirka 270))
             publish_controller_data(comtiltright) #hvis vi peger med næsen opad, skal vi tilte mod bilens højre
             sleep(0.2)
             publish_controller_data(comstop)
