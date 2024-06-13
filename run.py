@@ -68,7 +68,7 @@ try:
             image = camera_handler._run_video()
             image = transform(image)
             
-            car = find_car(image)
+            car = find_carv2(image)
             #---- her forventes der at være 4 json filer: -------
             # nogo_zones, ping_pong_balls, orange_ball og robot
             # ---------------------------------------------------

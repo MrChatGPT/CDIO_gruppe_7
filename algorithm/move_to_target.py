@@ -31,6 +31,7 @@ def get_car_data_from_json(file_path):
 def move_to_target(target_position):
     # load car values into the car object
     # Get the project's root directory
+    
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
     # Construct the path to the robot.json file in the root directory
@@ -42,7 +43,7 @@ def move_to_target(target_position):
     # De-structure the target position
     target_x, target_y = target_position
     #print(f"Target_x = {target_x}\nTarget_y = {target_y}")
-
+    print(f"Desired position: {target_position}\nMy position: {current_x,current_y}, angle: {car.angle}")
     #Commands
     comstop = (0,0,0,0,0)
     comtiltleft = (0,0,-0.15,0,0)
@@ -74,6 +75,8 @@ def move_to_target(target_position):
             sleep(0.2)
             publish_controller_data(comstop)
             return 0
+        print("We should move farwards 78")
+        
         publish_controller_data(comforward) #vi rykker 0.15 i y-retningen (opad)
         sleep(0.2)
         publish_controller_data(comstop)

@@ -312,50 +312,50 @@ def detect_ball_colors(image):
     #MAybe save the data, and when this function is almost done, fiind the median of the two values if any. Or just use the only one
     #regarding the arena
     for pic, contour in enumerate(contours): 
-    area = cv2.contourArea(contour) 
-    if area > 5000: 
-        x, y, w, h = cv2.boundingRect(contour) 
-        if area > 6000 and area < 8000:  # area of cross is aprox 7000
-            rect = cv2.minAreaRect(contour)
-            box = cv2.boxPoints(rect)
-            box = np.int0(box)
-            
-            center = (int(rect[0][0]), int(rect[0][1]))
-            size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
-            angle = rect[2] + 45
-            
-            # Create a rotation matrix
-            M = cv2.getRotationMatrix2D(center, angle, 1.0)
-            
-            # Calculate the end points of the cross lines
-            end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
-                    int(center[1] + size[0] * np.sin(np.radians(angle))))
-            end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
-                    int(center[1] - size[0] * np.sin(np.radians(angle))))
-            end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
-                    int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
-            end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
-                    int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
-            
-            # Draw the cross
-            cv2.line(image, end1, end2, (0, 0, 255), 2)
-            cv2.line(image, end3, end4, (0, 0, 255), 2)
-            
-            cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
-            
-            no_go_zones = []
-            no_go_zones.append([
-                (end1, end2),
-                (end3, end4)
-            ])
-
-            save_no_go_zones(no_go_zones)
-
+        area = cv2.contourArea(contour) 
+        if area > 5000: 
+            x, y, w, h = cv2.boundingRect(contour) 
+            if area > 6000 and area < 8000:  # area of cross is aprox 7000
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
                 
-              
-            cv2.putText(image, "Red Colour utils", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
-                        (0, 0, 255))     
+                center = (int(rect[0][0]), int(rect[0][1]))
+                size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
+                angle = rect[2] + 45
+                
+                # Create a rotation matrix
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                
+                # Calculate the end points of the cross lines
+                end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
+                        int(center[1] + size[0] * np.sin(np.radians(angle))))
+                end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
+                        int(center[1] - size[0] * np.sin(np.radians(angle))))
+                end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
+                end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
+                
+                # Draw the cross
+                cv2.line(image, end1, end2, (0, 0, 255), 2)
+                cv2.line(image, end3, end4, (0, 0, 255), 2)
+                
+                cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+                
+                no_go_zones = []
+                no_go_zones.append([
+                    (end1, end2),
+                    (end3, end4)
+                ])
+
+                save_no_go_zones(no_go_zones)
+
+                    
+                
+                cv2.putText(image, "Red Colour utils", (x, y), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
+                            (0, 0, 255))     
     
     # Creating contour to track orange color 
     contours, hierarchy = cv2.findContours(orange_mask, 
@@ -695,23 +695,24 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     # Filter out very small contours (noise)
     min_contour_area = 100  # Adjust this threshold as needed
     valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
-    
     for contour in valid_contours:
         area = cv2.contourArea(contour)
         #print(f"Contour area: {area}")  # Debug: Print contour area
-        if area > max_area:
-            max_area = area
+        #Vi får 3 tal, i en vilkårlig rækkefølge. de to små skal appendes til front, den største skal være lig back_contour
+        if area > 4000:
             back_contour = contour
         else:
             front_contours.append(contour)
+        
     
     # Debug: Log the largest contour area and number of front contours
     #print(f"Largest contour area (back contour): {max_area}")
     #print(f"Number of front contours: {len(front_contours)}")
     
     # Ensure we have exactly one back contour and two front contours
-    if back_contour is None or len(front_contours) != 2:
-        raise ValueError("Could not find the required front squares and back rectangle in the image.")
+    if len(front_contours) != 2:
+        print("car is goone")
+        #raise ValueError("Could not find the required front squares and back rectangle in the image.")
     
     # Calculate the center of the bounding box for all contours
     min_x, min_y = float('inf'), float('inf')
@@ -750,13 +751,13 @@ def find_carv2(image, output_image_path='output_image.jpg'):
    
     
     # Draw the centroids, car center, and direction arrow on the image for visualization
-    #cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
-    #cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
-    #cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
-    #cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
+    cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
+    cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
+    cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
+    cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
     
     # Save the result
-    #cv2.imwrite(output_image_path, image)
+    cv2.imwrite(output_image_path, image)
     #print(f"Center location: {center_x, center_y}\n Angle: {angle_deg}")
      # Save the data to robot.json
     data = [[center_x, center_y, angle_deg]]
