@@ -56,8 +56,9 @@ image = cv2.imread('extra/test/images/WIN_20240613_12_27_17_Pro.jpg')
 transform_and_detect(image)
 #calibrateColors2(image)
 
-int
-while True:
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-cv2.destroyAllWindows()
+try:
+    while True:
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+finally:
+    cv2.destroyAllWindows()
