@@ -1,6 +1,6 @@
 import json
-from time import sleep
 import numpy as np
+import math
 import os
 import tkinter as tk
 
@@ -27,9 +27,11 @@ def get_car_data_from_json(file_path):
     else:
         raise ValueError("Invalid JSON structure.")
 
-def move_to_target(car, target_position):
+def move_to_target(car, target_position, green_dot_y_range):
     current_x, current_y = car.x, car.y
     target_x, target_y = target_position
+    target_x -= 50
+    target_y -= 100
 
     comstop = (0, 0)
     comtiltleft = (0, -5)
@@ -42,8 +44,18 @@ def move_to_target(car, target_position):
     dx = target_x - current_x
     dy = target_y - current_y
 
-    if abs(dx) <= threshhold and abs(dy) <= threshhold:
-        return comstop  # The car is within the threshold of the target
+    # Calculate the angle to the target
+    angle_rad = math.atan2(-dy, dx)  # Invert y to account for image coordinate system
+    angle_deg = math.degrees(angle_rad) + 90
+    if angle_deg < 0:
+        angle_deg += 360
+    angle_deg = int(round(angle_deg))
+
+    # Update the car's angle
+    car.angle = angle_deg
+    print(f"car angle{angle_deg}")
+    if green_dot_y_range[0] <= current_y <= green_dot_y_range[1] and abs(dx) <= threshhold:
+        return comstop  # The car is within the range of the green dots and close to the target x
 
     if abs(dx) > abs(dy):
         # Move in the x direction
@@ -78,7 +90,7 @@ def draw_car(canvas, car):
     ]
     
     car.wheels = [canvas.create_oval(pos, outline="black", width=2, fill='black') for pos in wheel_positions]
-    sensor_positions = [(beginx + 95, beginy + 30), (beginx + 95, beginy + 75)]
+    sensor_positions = [(beginx + 30, beginy + 95), (beginx + 75, beginy + 95)]
     car.sensors = [canvas.create_oval(x - 5, y - 5, x + 5, y + 5, outline="black", width=2, fill='green') for x, y in sensor_positions]
 
 def move_car(canvas, car, command):
@@ -91,12 +103,12 @@ def move_car(canvas, car, command):
     car.x += dx
     car.y += dy
 
-def animate_car(canvas, car, targetX, targetY, coord_label):
-    command = move_to_target(car, (targetX, targetY))
+def animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range):
+    command = move_to_target(car, (targetX, targetY), green_dot_y_range)
     move_car(canvas, car, command)
-    coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}")
+    coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
     if command != (0, 0):
-        canvas.after(100, animate_car, canvas, car, targetX, targetY, coord_label)
+        canvas.after(100, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
 
 def update_mouse_coordinates(event, coord_label):
     coord_label.config(text=f"Mouse Coordinates: x={event.x}, y={event.y}")
@@ -118,10 +130,12 @@ def runSim():
 
     targetX, targetY = 800, 600
     canvas.create_oval(targetX-10, targetY-10, targetX+10, targetY+10, outline="black", width=2, fill='pink')
-    animate_car(canvas, car, targetX, targetY, coord_label)
+    
+    # Define the y-range for the green dots
+    green_dot_y_range = (car.y + 30, car.y + 75)
+    
+    animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range)
 
     window.mainloop()
 
 runSim()
-
-    
