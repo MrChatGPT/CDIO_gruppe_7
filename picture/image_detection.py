@@ -672,3 +672,101 @@ def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mas
     
     return (adjusted_center_x, adjusted_center_y, angle_deg)
 
+def find_carv2(image, output_image_path='output_image.jpg'):
+    # Read the mask image
+    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+    green_lower = np.array([24, 71, 174], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([100, 180, 240], np.uint8) #HSV   89, 255 , 255
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+    
+    # Find contours in the mask
+    contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Debug: Draw all contours to visualize
+    debug_image = cv2.cvtColor(green_mask, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
+    cv2.imwrite("debug_all_contours.jpg", debug_image)
+    
+    # Separate contours into front (squares) and back (rectangle)
+    front_contours = []
+    back_contour = None
+    max_area = 0
+    
+    # Filter out very small contours (noise)
+    min_contour_area = 100  # Adjust this threshold as needed
+    valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
+    
+    for contour in valid_contours:
+        area = cv2.contourArea(contour)
+        #print(f"Contour area: {area}")  # Debug: Print contour area
+        if area > max_area:
+            max_area = area
+            back_contour = contour
+        else:
+            front_contours.append(contour)
+    
+    # Debug: Log the largest contour area and number of front contours
+    #print(f"Largest contour area (back contour): {max_area}")
+    #print(f"Number of front contours: {len(front_contours)}")
+    
+    # Ensure we have exactly one back contour and two front contours
+    if back_contour is None or len(front_contours) != 2:
+        raise ValueError("Could not find the required front squares and back rectangle in the image.")
+    
+    # Calculate the center of the bounding box for all contours
+    min_x, min_y = float('inf'), float('inf')
+    max_x, max_y = float('-inf'), float('-inf')
+    for contour in valid_contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        min_x = min(min_x, x)
+        min_y = min(min_y, y)
+        max_x = max(max_x, x + w)
+        max_y = max(max_y, y + h)
+    
+    # Calculate the center of the bounding box
+    center_x = (min_x + max_x) // 2
+    center_y = (min_y + max_y) // 2
+    
+    # Calculate the centroid of the back (rectangle)
+    M = cv2.moments(back_contour)
+    back_x = int(M['m10'] / M['m00'])
+    back_y = int(M['m01'] / M['m00'])
+    
+    # Calculate the centroid of the front (average of two squares)
+    front_x = 0
+    front_y = 0
+    for contour in front_contours:
+        M = cv2.moments(contour)
+        front_x += int(M['m10'] / M['m00'])
+        front_y += int(M['m01'] / M['m00'])
+    front_x //= 2
+    front_y //= 2
+    
+    # Calculate the angle
+    # The angle is calculated with respect to the vertical direction (up is 180 degrees, down is 0 degrees)
+    angle_rad = math.atan2(front_x - back_x, back_y - front_y)
+    angle_deg = (math.degrees(angle_rad) + 180) % 360
+    
+   
+    
+    # Draw the centroids, car center, and direction arrow on the image for visualization
+    #cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
+    #cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
+    #cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
+    #cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
+    
+    # Save the result
+    #cv2.imwrite(output_image_path, image)
+    #print(f"Center location: {center_x, center_y}\n Angle: {angle_deg}")
+     # Save the data to robot.json
+    data = [[center_x, center_y, angle_deg]]
+    with open('robot.json', 'w') as json_file:
+        json.dump(data, json_file)
+
+    return (center_x, center_y, angle_deg)
+
+# Example usage
+# Assuming you have an image (mask) loaded as `image`
+# image = cv2.imread('path_to_image.png', cv2.IMREAD_GRAYSCALE)
+# center_x, center_y, angle_deg = find_carv2(image)
+# print(f'The center of the combined shapes is at: ({center_x}, {center_y}) with angle: {angle_deg} degrees')
