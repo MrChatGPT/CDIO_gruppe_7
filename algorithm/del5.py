@@ -2,6 +2,8 @@ import tkinter as tk
 from math import radians, cos, sin
 from random import randint
 import time
+import numpy as np
+import math
 
 class Car:
     def __init__(self, canvas, x, y, angle):
@@ -111,65 +113,120 @@ def move_to_target(car, target_position, green_dot_y_range, canvas):
     if green_dot_y_range[0] <= current_y <= green_dot_y_range[1] and abs(dx) <= threshhold:
         car.is_rotating = False  # Stop rotating
         return comstop  # The car is within the range of the green dots and close to the target x
+    
 
-    if current_y + 125 < target_y - threshhold:  # If our y is sharply less than the target y - 20
-        if not((car.angle < 0 + threshhold) or (car.angle > 360 - threshhold)):  # Angle is not between 340 and 20 degrees
-            print("desired angle: 340-20, actual:", car.angle)
-            car.rotation_direction = 0
-            car.is_rotating = True  # Start rotating
-            # move_car(canvas, car, comtiltright)
-            # time.sleep(0.2)
-            return comtiltright
-        print("We shall move forwards")
-        car.rotation_direction = 0
-        car.is_rotating = False  # Stop rotating
-        # move_car(canvas, car, comforward)
-        # time.sleep(0.2)
-        return comforward
-    elif current_y - 125 > target_y + threshhold:  # If our y is sharply greater than the target y + 20
-        if not((car.angle > 180 - threshhold) or (car.angle < 180 + threshhold)):  # Angle is not between 170 and 190 degrees
-            print("desired angle: 170-190, actual:", car.angle)
-            car.rotation_direction = 1
-            car.is_rotating = True  # Start rotating
-            # move_car(canvas, car, comtiltright)
-            # time.sleep(0.2)
-            car.is_rotating = False  # Stop rotating
-            return comtiltright
-        print("We should move forwards")
-        car.rotation_direction = 0
-        car.is_rotating = False  # Stop rotating
-        # move_car(canvas, car, comforward)
-        # time.sleep(0.2)
-        return comforward
+     # Calculate the angle to the target
+    desired_angle = math.atan2(dy, dx) * (180 / math.pi)  # Convert radians to degrees
+    if desired_angle < 0:
+        desired_angle += 360
 
-    if current_x > target_x + threshhold:  # Move left
-        if not((car.angle < 90 + threshhold) or (car.angle > 90 - threshhold)):  # Angle is not between 70 and 110 degrees
-            car.rotation_direction = 1
-            car.is_rotating = True  # Start rotating
-            # move_car(canvas, car, comtiltleft)
-            # time.sleep(0.2)
-            car.is_rotating = False  # Stop rotating
-            return comtiltleft
-        car.rotation_direction = 0
-        car.is_rotating = False  # Stop rotating
-        # move_car(canvas, car, comforward)
-        # time.sleep(0.2)
-        return comforward
-    elif current_x < target_x - threshhold:  # Move right
-        if not((car.angle < 270 + threshhold) or (car.angle > 270 - threshhold)):  # Angle is not between 250 and 290 degrees
-            car.rotation_direction = 1
-            car.is_rotating = True  # Start rotating
-            # move_car(canvas, car, comtiltright)
-            # time.sleep(0.2)
-            car.is_rotating = False  # Stop rotating
-            return comtiltright
-        car.rotation_direction = 0
-        car.is_rotating = False  # Stop rotating
-        # move_car(canvas, car, comforward)
-        # time.sleep(0.2)
-        return comforward
+    current_angle = car.angle  # Assuming car.angle is in degrees
 
-    return comstop
+    print(f"Current position: ({current_x}, {current_y}), Target position: ({target_x}, {target_y})")
+    print(f"Current angle: {current_angle}, Desired angle: {desired_angle}")
+
+    if green_dot_y_range[0] <= current_y <= green_dot_y_range[1] and abs(dx) <= threshhold:
+        car.is_rotating = False  # Stop rotating
+        return comstop  # The car is within the range of the green dots and close to the target x
+    
+    angle_diff = (desired_angle - current_angle + 360) % 360
+    if angle_diff > 180:
+        angle_diff -= 360
+
+    # Determine the movement based on the angle difference
+    if abs(angle_diff) < 10:  # If the angle difference is small, move forward
+        car.is_rotating = False
+        return comforward if dx > 0 else comtiltleft
+    else:
+        car.is_rotating = True
+        if angle_diff > 0:
+            car.rotation_direction = 1
+            return comtiltright  # Rotate clockwise
+        else:
+            car.rotation_direction = -1
+            return comtiltleft  # Rotate anti-clockwise
+
+
+    # if (current_x and target_x) == 1:
+    #     angle = car.angle
+    #     i
+
+    
+    # if abs(dx) > abs(dy):
+    #     print(f"dx is bigger than dy")
+    #     # Move in the x direction
+
+    #     if dx > 0:
+    #         car.rotation_direction = 1
+    #         car.is_rotating = True  # Flag to control rotation
+    #         print(f"rotate clockwise")
+    #         return (5, 0)  # Move right
+            
+        
+    #     else:
+    #         car.rotation_direction = -1
+    #         car.is_rotating = True  # Flag to control rotation
+    #         print(f"rotate anti-clockwise")
+    #         return (-5, 0)  # Move left
+
+    # if current_y + 125 < target_y - threshhold:  # If our y is sharply less than the target y - 20
+    #     if not((car.angle < 0 + threshhold) or (car.angle > 360 - threshhold)):  # Angle is not between 340 and 20 degrees
+    #         print("desired angle: 340-20, actual:", car.angle)
+    #         car.rotation_direction = 0
+    #         car.is_rotating = True  # Start rotating
+    #         # move_car(canvas, car, comtiltright)
+    #         # time.sleep(0.2)
+    #         return comtiltright
+    #     print("We shall move forwards")
+    #     car.rotation_direction = 0
+    #     car.is_rotating = False  # Stop rotating
+    #     # move_car(canvas, car, comforward)
+    #     # time.sleep(0.2)
+    #     return comforward
+    # elif current_y - 125 > target_y + threshhold:  # If our y is sharply greater than the target y + 20
+    #     if not((car.angle > 180 - threshhold) or (car.angle < 180 + threshhold)):  # Angle is not between 170 and 190 degrees
+    #         print("desired angle: 170-190, actual:", car.angle)
+    #         car.rotation_direction = 1
+    #         car.is_rotating = True  # Start rotating
+    #         # move_car(canvas, car, comtiltright)
+    #         # time.sleep(0.2)
+    #         car.is_rotating = False  # Stop rotating
+    #         return comtiltright
+    #     print("We should move forwards")
+    #     car.rotation_direction = 0
+    #     car.is_rotating = False  # Stop rotating
+    #     # move_car(canvas, car, comforward)
+    #     # time.sleep(0.2)
+    #     return comforward
+
+    # if current_x > target_x + threshhold:  # Move left
+    #     if not((car.angle < 90 + threshhold) or (car.angle > 90 - threshhold)):  # Angle is not between 70 and 110 degrees
+    #         car.rotation_direction = 1
+    #         car.is_rotating = True  # Start rotating
+    #         # move_car(canvas, car, comtiltleft)
+    #         # time.sleep(0.2)
+    #         car.is_rotating = False  # Stop rotating
+    #         return comtiltleft
+    #     car.rotation_direction = 0
+    #     car.is_rotating = False  # Stop rotating
+    #     # move_car(canvas, car, comforward)
+    #     # time.sleep(0.2)
+    #     return comforward
+    # elif current_x < target_x - threshhold:  # Move right
+    #     if not((car.angle < 270 + threshhold) or (car.angle > 270 - threshhold)):  # Angle is not between 250 and 290 degrees
+    #         car.rotation_direction = 1
+    #         car.is_rotating = True  # Start rotating
+    #         # move_car(canvas, car, comtiltright)
+    #         # time.sleep(0.2)
+    #         car.is_rotating = False  # Stop rotating
+    #         return comtiltright
+    #     car.rotation_direction = 0
+    #     car.is_rotating = False  # Stop rotating
+    #     # move_car(canvas, car, comforward)
+    #     # time.sleep(0.2)
+    #     return comforward
+
+    # return comstop
 
 
 
