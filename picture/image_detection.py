@@ -477,7 +477,7 @@ def detect_ball_colors(image):
 
 
     # Program Termination 
-    cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
+    # cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
 
     # return orange_detected, image
     return image
