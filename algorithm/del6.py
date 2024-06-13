@@ -210,8 +210,8 @@ def draw_car(canvas, car):
 def move_to_target(car, target_position, green_dot_y_range, canvas):
     current_x, current_y = car.x, car.y
     target_x, target_y = target_position
-    target_x -= 50
-    target_y -= 10
+    # target_x += 150
+    # target_y -= 30
 
     comstop = (0, 0)
     comtiltleft = (0, -5)
