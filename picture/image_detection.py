@@ -12,6 +12,7 @@ import json
 
 # Function to check if a point is within any detected orange region
 def check_point_in_orange_region(contours):
+    # print_balls("balls.json")
     
     # #To store balls in separate arrays
     # white_balls = []
@@ -25,7 +26,7 @@ def check_point_in_orange_region(contours):
             # Check if the point (px, py) is inside this contour
             dist = cv2.pointPolygonTest(contour, (px, py), False)
             if dist >= 0:
-                # (f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). IN IF")
+                # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). IN IF")
                 point_in_orange_region = True
                 break  # Exit the loop if the point is found in any contour
         # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). NOT IN IF")
@@ -311,26 +312,49 @@ def detect_ball_colors(image):
     #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 5000): 
+        if area > 5000: 
             x, y, w, h = cv2.boundingRect(contour) 
-            # image = cv2.rectangle(image, (x, y),  
-            #                            (x + w, y + h),  
-            #                            (0, 0, 255), 2) 
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            # if(area > 8000 and area < 15000):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                                        
-            # if(area > 1250000 and area < 1460000):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-            #     # image = goal_draw(image, x, y)
+            if area > 6000 and area < 8000:  # area of cross is aprox 7000
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
                 
+                center = (int(rect[0][0]), int(rect[0][1]))
+                size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
+                angle = rect[2] + 45
                 
-              
-            cv2.putText(image, "Red Colour utils", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
-                        (0, 0, 255))     
+                # Create a rotation matrix
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                
+                # Calculate the end points of the cross lines
+                end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
+                        int(center[1] + size[0] * np.sin(np.radians(angle))))
+                end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
+                        int(center[1] - size[0] * np.sin(np.radians(angle))))
+                end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
+                end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
+                
+                # Draw the cross
+                cv2.line(image, end1, end2, (0, 0, 255), 2)
+                cv2.line(image, end3, end4, (0, 0, 255), 2)
+                
+                cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+                
+                no_go_zones = []
+                no_go_zones.append([
+                    (end1, end2),
+                    (end3, end4)
+                ])
+
+                save_no_go_zones(no_go_zones)
+
+                    
+                
+                cv2.putText(image, "Red Colour utils", (x, y), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
+                            (0, 0, 255))     
     
     # Creating contour to track orange color 
     contours, hierarchy = cv2.findContours(orange_mask, 
@@ -403,39 +427,6 @@ def detect_ball_colors(image):
     
 
 
-
-    # # # Creating contour to track pink color 
-    # contours, hierarchy = cv2.findContours(pink_mask, 
-    #                                        cv2.RETR_TREE, 
-    #                                        cv2.CHAIN_APPROX_SIMPLE) 
-    # for pic, contour in enumerate(contours): 
-    #     area = cv2.contourArea(contour) 
-    #     if(area > 200): 
-    #         x, y, w, h = cv2.boundingRect(contour) 
-    #         image = cv2.rectangle(image, (x, y), 
-    #                                    (x + w, y + h), 
-    #                                    (0, 0, 0), 2) 
-    #         # print(f"(Pink objects: x={x}, y={y}) w={w} h={h} area={area}")
-              
-    #         cv2.putText(image, "Pink Colour", (x, y), 
-    #                     cv2.FONT_HERSHEY_SIMPLEX, 
-    #                     1.0, (0, 0, 0)) 
-    # # Creating contour to track blue color 
-    # contours, hierarchy = cv2.findContours(blue_mask, 
-    #                                        cv2.RETR_TREE, 
-    #                                        cv2.CHAIN_APPROX_SIMPLE) 
-    # for pic, contour in enumerate(contours): 
-    #     area = cv2.contourArea(contour) 
-    #     if(area > 300): 
-    #         x, y, w, h = cv2.boundingRect(contour) 
-    #         image = cv2.rectangle(image, (x, y), 
-    #                                    (x + w, y + h), 
-    #                                    (255, 85, 0), 2) 
-              
-    #         cv2.putText(image, "Blue Colour", (x, y), 
-    #                     cv2.FONT_HERSHEY_SIMPLEX, 
-    #                     1.0, (255, 85, 0)) 
-              
 
     # # Creating contour to track green color 
     contours, hierarchy = cv2.findContours(green_mask, 
@@ -547,6 +538,10 @@ def print_balls(filename="balls.json"):
 def save_Egg(egg, filename="egg.json"):
     with open(filename, 'w') as file:
         json.dump(egg, file, indent=4)
+
+def save_no_go_zones(zones, filename="no_go_zones.json"):
+    with open(filename, 'w') as file:
+        json.dump(zones, file)
 
 
 
