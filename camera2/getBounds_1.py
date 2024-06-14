@@ -54,11 +54,17 @@ def mask_dark_matte_gray_with_contours(image):
     # Destroy all windows
     cv2.destroyAllWindows()
 
+def grab_first_frame(video_source):
+    cap = cv2.VideoCapture(video_source)
+    ret, frame = cap.read()
+    cap.release()
+    return frame if ret else None
+
 # Example usage:
-# Load an image
-imagePath = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/testImg1.jpg"
+video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/seme.mp4"
+first_frame = grab_first_frame(video_path)
 
-image = cv2.imread(imagePath)
-
-# Apply the function
-mask_dark_matte_gray_with_contours(image)
+if first_frame is not None:
+    mask_dark_matte_gray_with_contours(first_frame)
+else:
+    print(f"Error: Unable to grab the first frame from {video_path}")

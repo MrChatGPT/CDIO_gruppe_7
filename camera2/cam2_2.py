@@ -2,9 +2,17 @@ import cv2
 import numpy as np
 from scipy.optimize import minimize
 
+def nothing(x):
+    pass
+
 class Camera2:
-    def __init__(self, hsv_thresholds):
-        self.hsv_lower, self.hsv_upper = hsv_thresholds
+    def __init__(self):
+        # Initialize with default HSV thresholds
+        self.hsv_lower_orange = np.array([0, 130, 196])
+        self.hsv_upper_orange = np.array([9, 255, 255])
+        self.hsv_lower_white = np.array([0, 0, 233])
+        self.hsv_upper_white = np.array([180, 58, 255])
+        
         self.morph_points = None
         self.morphed_image = None
         self.cross_lines = None
@@ -13,19 +21,17 @@ class Camera2:
         self.last_cross_angle = 0  # Initialize the last found rotation angle
 
     def preprocess_mask(self, mask, kernel_size_open=(5, 5), kernel_size_close=(5, 5)):
-        kernel_open = np.ones(kernel_size_open, np.uint8)
-        kernel_close = np.ones(kernel_size_close, np.uint8)
-
-        # Opening to remove small noise
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open)
-        # Closing to close small gaps
-        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close)
-
+        # This function is left empty on purpose. It does not appear to be necessary to process the mask.
         return mask
 
-    def mask_and_find_contours(self, image):
+    def mask_and_find_contours(self, image, color='orange'):
+        if color == 'orange':
+            hsv_lower, hsv_upper = self.hsv_lower_orange, self.hsv_upper_orange
+        else:
+            hsv_lower, hsv_upper = self.hsv_lower_white, self.hsv_upper_white
+        
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, self.hsv_lower, self.hsv_upper)
+        mask = cv2.inRange(hsv, hsv_lower, hsv_upper)
         processed_mask = self.preprocess_mask(mask)
         contours, hierarchy = cv2.findContours(processed_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         hierarchy = hierarchy[0] if hierarchy is not None else []
@@ -96,16 +102,12 @@ class Camera2:
             return []
 
         hsv = cv2.cvtColor(self.morphed_image, cv2.COLOR_BGR2HSV)
-        white_lower = np.array([0, 0, 245])
-        white_upper = np.array([180, 54, 255])
+        white_lower = self.hsv_lower_white
+        white_upper = self.hsv_upper_white
         mask = cv2.inRange(hsv, white_lower, white_upper)
 
         # Use different kernel sizes for opening and closing in white ball preprocessing
-        mask = self.preprocess_mask(mask, kernel_size_open=(5, 5), kernel_size_close=(5, 5))
-
-        # Additional erosion to separate touching blobs
-        kernel_erode = np.ones((5, 5), np.uint8)
-        mask = cv2.erode(mask, kernel_erode, iterations=2)
+        mask = self.preprocess_mask(mask)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -142,8 +144,8 @@ class Camera2:
                 cy = int(M['m01'] / M['m00']) if M['m00'] != 0 else 0
                 self.white_ball_centers.append((cx, cy))
 
-    def start(self, image):
-        processed_mask, contours, hierarchy = self.mask_and_find_contours(image)
+    def process_frame(self, frame):
+        processed_mask, contours, hierarchy = self.mask_and_find_contours(frame, color='orange')
 
         # Sort contours by length
         sorted_contours = self.sort_contours_by_length(contours)
@@ -154,13 +156,11 @@ class Camera2:
             cross_contour = sorted_contours[2]
 
             if arena_contour is not None:
-                print("Found the top contour.")
-                
                 corners = self.find_sharpest_corners(processed_mask, arena_contour, num_corners=4)
 
                 if corners is not None and len(corners) == 4:
                     corners = np.array([corner.ravel() for corner in corners], dtype="float32")
-                    warped_image, M = self.four_point_transform(image, corners)
+                    warped_image, M = self.four_point_transform(frame, corners)
 
                     if cross_contour is not None:
                         cross_contour_points = np.array(cross_contour, dtype='float32')
@@ -194,27 +194,121 @@ class Camera2:
         else:
             print("Not enough contours found.")
 
-        return None
+        return frame
 
+    def start_video_stream(self, video_source):
+        cap = cv2.VideoCapture(video_source)
 
-# Main part to test the Camera2 class
-if __name__ == "__main__":
-    hsv_thresholds = (np.array([0, 99, 201]), np.array([180, 255, 255]))
-    camera = Camera2(hsv_thresholds)
-    
-    imagePath = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/testImg1.jpg"
-    image = cv2.imread(imagePath)
+        if not cap.isOpened():
+            print(f"Error: Unable to open video source {video_source}")
+            return
 
-    if image is None:
-        print(f"Error: Unable to load image from {imagePath}")
-    else:
-        result_image = camera.start(image)
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("Error: Unable to read frame from video source")
+                break
 
-        if result_image is not None:
-            cv2.imshow('Warped Image with Transformed Contour and Rotated Cross', result_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            processed_frame = self.process_frame(frame)
 
+            # Display the original frame with contours and the processed frame separately
+            cv2.imshow('Processed Frame', processed_frame)
+
+            # Step through frames by pressing any key
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def calibrate_color(self, color):
+        cap = cv2.VideoCapture(video_path)
+
+        if not cap.isOpened():
+            print(f"Error: Unable to open video source {video_path}")
+            return
+
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: Unable to read frame from video source")
+            return
+
+        # Create a window
+        cv2.namedWindow('Calibration')
+
+        # Initialize trackbars
+        if color == 'white':
+            h_lower, s_lower, v_lower = self.hsv_lower_white
+            h_upper, s_upper, v_upper = self.hsv_upper_white
         else:
-            print("Image processing failed.")
+            h_lower, s_lower, v_lower = self.hsv_lower_orange
+            h_upper, s_upper, v_upper = self.hsv_upper_orange
 
+        cv2.createTrackbar('H Lower', 'Calibration', h_lower, 180, nothing)
+        cv2.createTrackbar('S Lower', 'Calibration', s_lower, 255, nothing)
+        cv2.createTrackbar('V Lower', 'Calibration', v_lower, 255, nothing)
+        cv2.createTrackbar('H Upper', 'Calibration', h_upper, 180, nothing)
+        cv2.createTrackbar('S Upper', 'Calibration', s_upper, 255, nothing)
+        cv2.createTrackbar('V Upper', 'Calibration', v_upper, 255, nothing)
+
+        while True:
+            # Get the current positions of the trackbars
+            h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
+            s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
+            v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
+            h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
+            s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
+            v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
+
+            # Define the HSV range based on the trackbar positions
+            lower_hsv = np.array([h_lower, s_lower, v_lower])
+            upper_hsv = np.array([h_upper, s_upper, v_upper])
+
+            # Convert the frame to HSV
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+            # Create a mask based on the HSV range
+            mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+
+            # Find contours
+            contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+            # Draw the contours on the original frame
+            contour_image = frame.copy()
+            cv2.drawContours(contour_image, contours, -1, (0, 255, 0), 2)
+
+            # Display the original frame, the binary mask, and the contour image
+            cv2.imshow('Original Frame', frame)
+            cv2.imshow('Binary Mask', mask)
+            cv2.imshow('Contours', contour_image)
+
+            # Press 's' to save the current settings
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('s'):
+                if color == 'white':
+                    self.hsv_lower_white = lower_hsv
+                    self.hsv_upper_white = upper_hsv
+                else:
+                    self.hsv_lower_orange = lower_hsv
+                    self.hsv_upper_orange = upper_hsv
+                break
+
+            # Press 'q' to quit without saving
+            elif key == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+# Main part to test the Camera2 class with video stream and calibration
+if __name__ == "__main__":
+    camera = Camera2()
+    video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/seme.mp4"
+
+    # Uncomment the line below to calibrate the white color
+    camera.calibrate_color('white')
+
+    # Uncomment the line below to calibrate the orange color
+    # camera.calibrate_color('orange')
+
+    camera.start_video_stream(video_path)

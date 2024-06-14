@@ -13,13 +13,16 @@ class Camera2:
         self.last_cross_angle = 0  # Initialize the last found rotation angle
 
     def preprocess_mask(self, mask, kernel_size_open=(5, 5), kernel_size_close=(5, 5)):
-        kernel_open = np.ones(kernel_size_open, np.uint8)
-        kernel_close = np.ones(kernel_size_close, np.uint8)
+        
+        # This function is left empty on purpose. It does not appear to be necessary the process the mask.
+        
+        # kernel_open = np.ones(kernel_size_open, np.uint8)
+        # kernel_close = np.ones(kernel_size_close, np.uint8)
 
-        # Opening to remove small noise
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open)
-        # Closing to close small gaps
-        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close)
+        # # Opening to remove small noise
+        # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open)
+        # # Closing to close small gaps
+        # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close)
 
         return mask
 
@@ -96,16 +99,17 @@ class Camera2:
             return []
 
         hsv = cv2.cvtColor(self.morphed_image, cv2.COLOR_BGR2HSV)
-        white_lower = np.array([0, 0, 245])
-        white_upper = np.array([180, 54, 255])
+        white_lower = np.array([0, 0, 233])
+        white_upper = np.array([180, 58, 255])
         mask = cv2.inRange(hsv, white_lower, white_upper)
 
         # Use different kernel sizes for opening and closing in white ball preprocessing
-        mask = self.preprocess_mask(mask, kernel_size_open=(5, 5), kernel_size_close=(5, 5))
+        mask = self.preprocess_mask(mask)
 
-        # Additional erosion to separate touching blobs
-        kernel_erode = np.ones((5, 5), np.uint8)
-        mask = cv2.erode(mask, kernel_erode, iterations=2)
+        # The following erosion step is commented out because it may remove small white balls
+        
+        #kernel_erode = np.ones((5, 5), np.uint8)
+        #mask = cv2.erode(mask, kernel_erode, iterations=2)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -142,8 +146,8 @@ class Camera2:
                 cy = int(M['m01'] / M['m00']) if M['m00'] != 0 else 0
                 self.white_ball_centers.append((cx, cy))
 
-    def start(self, image):
-        processed_mask, contours, hierarchy = self.mask_and_find_contours(image)
+    def process_frame(self, frame):
+        processed_mask, contours, hierarchy = self.mask_and_find_contours(frame)
 
         # Sort contours by length
         sorted_contours = self.sort_contours_by_length(contours)
@@ -154,13 +158,11 @@ class Camera2:
             cross_contour = sorted_contours[2]
 
             if arena_contour is not None:
-                print("Found the top contour.")
-                
                 corners = self.find_sharpest_corners(processed_mask, arena_contour, num_corners=4)
 
                 if corners is not None and len(corners) == 4:
                     corners = np.array([corner.ravel() for corner in corners], dtype="float32")
-                    warped_image, M = self.four_point_transform(image, corners)
+                    warped_image, M = self.four_point_transform(frame, corners)
 
                     if cross_contour is not None:
                         cross_contour_points = np.array(cross_contour, dtype='float32')
@@ -194,27 +196,37 @@ class Camera2:
         else:
             print("Not enough contours found.")
 
-        return None
+        return frame
 
+    def start_video_stream(self, video_source):
+        cap = cv2.VideoCapture(video_source)
 
-# Main part to test the Camera2 class
+        if not cap.isOpened():
+            print(f"Error: Unable to open video source {video_source}")
+            return
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("Error: Unable to read frame from video source")
+                break
+
+            processed_frame = self.process_frame(frame)
+
+            # Display the original frame with contours and the processed frame separately
+            cv2.imshow('Processed Frame', processed_frame)
+
+            # Step through frames by pressing any key
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+# Main part to test the Camera2 class with video stream
 if __name__ == "__main__":
-    hsv_thresholds = (np.array([0, 99, 201]), np.array([180, 255, 255]))
+    hsv_thresholds = (np.array([0, 130, 196]), np.array([9, 255, 255]))
     camera = Camera2(hsv_thresholds)
-    
-    imagePath = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/testImg1.jpg"
-    image = cv2.imread(imagePath)
-
-    if image is None:
-        print(f"Error: Unable to load image from {imagePath}")
-    else:
-        result_image = camera.start(image)
-
-        if result_image is not None:
-            cv2.imshow('Warped Image with Transformed Contour and Rotated Cross', result_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-
-        else:
-            print("Image processing failed.")
+    video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/seme.mp4"
+    camera.start_video_stream(video_path)
 
