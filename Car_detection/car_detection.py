@@ -10,7 +10,6 @@ def rgb_to_hsv(rgb):
     return hsv_color[0][0]
 
 
-
 def detect_green_hsv_bounds(image_path):
     # Read the image
     image = cv2.imread(os.path.join(os.path.dirname(__file__), image_path))
@@ -49,7 +48,45 @@ def detect_green_hsv_bounds(image_path):
     print("Lower HSV Bound for green detected: ", overall_lower_bound)
     print("Upper HSV Bound for green detected: ", overall_upper_bound)
 
+    append_to_json('lower_bounds.json', overall_lower_bound.tolist())
+    append_to_json('upper_bounds.json', overall_upper_bound.tolist())
+
     return overall_lower_bound, overall_upper_bound
+
+def append_to_json(filename, data):
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            file_data = json.load(file)
+    else:
+        file_data = []
+
+    file_data.append(data)
+
+    with open(filename, 'w') as file:
+        json.dump(file_data, file, indent=4)
+
+def calculate_mean_from_json(filename):
+    if not os.path.exists(filename):
+        raise ValueError(f"{filename} does not exist.")
+
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    
+    if not data:
+        raise ValueError(f"No data found in {filename}.")
+
+    np_data = np.array(data)
+    mean_values = np.mean(np_data, axis=0)
+
+    return mean_values
+
+# Example usage
+# Calculate mean values from JSON files
+#mean_lower_bound = calculate_mean_from_json('lower_bounds.json')
+#mean_upper_bound = calculate_mean_from_json('upper_bounds.json')
+
+#print(f"Mean lower HSV bound: {mean_lower_bound}")
+#print(f"Mean upper HSV bound: {mean_upper_bound}")
 
 
 
@@ -144,7 +181,7 @@ def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yello
 
 # Example usage:
 # Example usage:
-image_path = 'image_one.jpg'
+#image_path = 'image_one.jpg'
 #image_path = 'image_two.jpg'
 #image_path = 'image_three.jpg'
 #image_path = 'image_four.jpg'
@@ -155,9 +192,69 @@ image_path = 'image_one.jpg'
 #image_path = 'image_nine.jpg'
 # Example usage
 #image_path = 'path_to_your_image.jpg'
-lower_bound, upper_bound = detect_green_hsv_bounds(image_path)
-print(f"Detected lower HSV bound: {lower_bound}")
-print(f"Detected upper HSV bound: {upper_bound}")
+
+
+def calculate_median_from_json(filename):
+    if not os.path.exists(filename):
+        raise ValueError(f"{filename} does not exist.")
+
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    
+    if not data:
+        raise ValueError(f"No data found in {filename}.")
+
+    np_data = np.array(data)
+    median_values = np.median(np_data, axis=0)
+
+    return median_values
+
+
+def find_max_from_json(filename):
+    if not os.path.exists(filename):
+        raise ValueError(f"{filename} does not exist.")
+
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    
+    if not data:
+        raise ValueError(f"No data found in {filename}.")
+
+    np_data = np.array(data)
+    max_values = np.max(np_data, axis=0)
+
+    return max_values
+
+def find_min_from_json(filename):
+    if not os.path.exists(filename):
+        raise ValueError(f"{filename} does not exist.")
+
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    
+    if not data:
+        raise ValueError(f"No data found in {filename}.")
+
+    np_data = np.array(data)
+    min_values = np.min(np_data, axis=0)
+
+    return min_values
+
+
+# Calculate median values from JSON files
+median_lower_bound = calculate_median_from_json('lower_bounds.json')
+median_upper_bound = calculate_median_from_json('upper_bounds.json')
+
+print(f"Median lower HSV bound: {median_lower_bound}")
+print(f"Median upper HSV bound: {median_upper_bound}")
+
+print(f"Max value for upper hsv: {find_max_from_json('upper_bounds.json')}")
+print(f"Min value for lower hsv: {find_min_from_json('lower_bounds.json')}")
+
+
+#lower_bound, upper_bound = detect_green_hsv_bounds(image_path)
+#print(f"Detected lower HSV bound: {lower_bound}")
+#print(f"Detected upper HSV bound: {upper_bound}")
 
 
 
