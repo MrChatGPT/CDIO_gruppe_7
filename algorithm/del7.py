@@ -17,14 +17,14 @@ class Car:
         self.sensors = []
         self.tkimage = None
         self.canvas_obj = None
-        self.rotation_direction = 1  # 1 for clockwise, -1 for counterclockwise
+        self.rotation_direction = 0  # 1 for clockwise, -1 for counterclockwise
         self.is_rotating = False  # Flag to control rotation
 
     def rotate(self):
         self.angle = (self.angle + self.rotation_direction) % 360  # Change direction based on rotation_direction
         print(f"Current angle: {self.angle}")  # Print the current angle
         self.update_position()
-        self.canvas.after(2000, self.rotate)
+        self.canvas.after(100, self.rotate)
 
     def update_position(self):
         rad_angle = radians(self.angle)
@@ -176,16 +176,14 @@ def key_handler(event, car, canvas):
     comforward = (0, 5)
 
     if key == 'a':
-        car.rotation_direction = -1
+        car.angle = (car.angle + 345) % 360
         command = comtiltleft
     elif key == 'd':
-        car.rotation_direction = 1
+        car.angle = (car.angle + 15) % 360
         command = comtiltright
     elif key == 'w':
-        car.is_rotating = False
         command = comforward
     elif key == 's':
-        car.is_rotating = False
         command = comstop
     else:
         return
