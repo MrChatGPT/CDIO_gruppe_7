@@ -234,7 +234,7 @@ def key_handler(event, car, canvas):
 
 
 
-        command = comstop
+        # command = comstop
 
       
         # tic = time.perf_counter()
@@ -252,8 +252,12 @@ def key_handler(event, car, canvas):
         
         
     elif key == 'd':
-        car.angle = (car.angle + 5) % 360
-        command = comtiltright
+        car.is_rotating = True
+        car.rotation_direction = -1
+        canvas.after(200, lambda: stop_rotation(car))  # Schedule stop after 200ms
+        command = comstop
+        # car.angle = (car.angle + 5) % 360
+        # command = comtiltright
     elif key == 'w':
         if curAngle == 0:
             comforward = (0, 2)
