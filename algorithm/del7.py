@@ -11,7 +11,7 @@ class Car:
         self.x = x
         self.y = y
         self.angle = angle
-        self.turn = 0  # Set turn to a high value to rotate indefinitely
+        self.turn = 0
         self.shape = None
         self.wheels = []
         self.sensors = []
@@ -89,161 +89,24 @@ def draw_car(canvas, car):
         canvas.create_oval(car.x + 70, car.y + 40, car.x + 80, car.y + 50, outline="black", width=2, fill='green')
     ]
 
-#TRUE
 # def move_to_target(car, target_position, green_dot_y_range, canvas):
+    # current_x, current_y = car.x, car.y
+    # target_x, target_y = target_position
+    # target_x += 10
+    # target_y -= 50
 
+    # # comstop = (0, 0)
+    # # comtiltleft = (0, -5)
+    # # comtiltright = (0, 5)
+    # # comforward = (5, 0)
 
-#     current_x, current_y = car.x, car.y
-#     target_x, target_y = target_position
-#     target_x -= 50
-#     target_y -= 100
+    # threshhold = 20  # Adjusted threshold
 
-#     comstop = (0, 0)
-#     comtiltleft = (0, -5)
-#     comtiltright = (0, 5)
-#     comforward = (5, 0)
+    # # Calculate the differences
+    # dx = target_x - current_x
+    # dy = target_y - current_y
 
-#     threshhold = 20
-
-#     # Calculate the differences
-#     dx = target_x - current_x
-#     dy = target_y - current_y
-
-#     print(f"current x,y {current_x},{current_y}")
-
-#     if green_dot_y_range[0] <= current_y <= green_dot_y_range[1] and abs(dx) <= threshhold:
-#         car.is_rotating = False  # Stop rotating
-#         return comstop  # The car is within the range of the green dots and close to the target x
-    
-
-#      # Calculate the angle to the target
-#     desired_angle = math.atan2(dy, dx) * (180 / math.pi)  # Convert radians to degrees
-#     if desired_angle < 0:
-#         desired_angle += 360 #360
-
-#     current_angle = car.angle  # Assuming car.angle is in degrees
-
-#     print(f"Current position: ({current_x}, {current_y}), Target position: ({target_x}, {target_y})")
-#     print(f"Current angle: {current_angle}, Desired angle: {desired_angle}")
-
-#     if green_dot_y_range[0] <= current_y <= green_dot_y_range[1] and abs(dx) <= threshhold:
-#         car.is_rotating = False  # Stop rotating
-#         return comstop  # The car is within the range of the green dots and close to the target x
-    
-#     angle_diff = (desired_angle - current_angle + 360) % 360
-#     if angle_diff > 180:
-#         angle_diff -= 360 #360
-
-#     # Determine the movement based on the angle difference
-#     if abs(angle_diff) < 10:  # If the angle difference is small, move forward
-#         # car.is_rotating = False 
-#         car.is_rotating = True
-#         print(f"rotate false 1 angle diff is {angle_diff}")
-#         return comforward if dx > 0 else comtiltleft
-#     else:
-#         car.is_rotating = False
-#         # car.is_rotating = True
-#         if angle_diff > 0:
-#             print(f"rotate true angle diff is {angle_diff}")
-#             car.rotation_direction = 1
-#             return comtiltright  # Rotate clockwise
-#         else:
-#             print(f"rotate true angle diff is {angle_diff} and not bigger than zero")
-#             car.rotation_direction = -1
-#             return comtiltleft  # Rotate anti-clockwise
-
-# #2
-# def move_to_target(car, target_position, green_dot_y_range, canvas):
-#     current_x, current_y = car.x, car.y
-#     target_x, target_y = target_position
-#     target_x -= 50
-#     target_y -= 100
-
-#     comstop = (0, 0)
-#     comtiltleft = (0, -5)
-#     comtiltright = (0, 5)
-#     comforward = (5, 0)
-
-#     threshhold = 10  # Tighter threshold to ensure precise stopping
-
-#     # Calculate the differences
-#     dx = target_x - current_x
-#     dy = target_y - current_y
-
-#     print(f"current x,y {current_x},{current_y}")
-
-#     # Check if the car is close enough to the target position
-#     if abs(dx) <= threshhold and abs(dy) <= threshhold:
-#         car.is_rotating = False  # Stop rotating
-#         return comstop  # The car is close to the target position
-    
-#     # Calculate the angle to the target
-#     desired_angle = math.atan2(dy, dx) * (180 / math.pi)  # Convert radians to degrees
-#     if desired_angle < 0:
-#         desired_angle += 360
-
-#     current_angle = car.angle  # Assuming car.angle is in degrees
-
-#     print(f"Current position: ({current_x}, {current_y}), Target position: ({target_x}, {target_y})")
-#     print(f"Current angle: {current_angle}, Desired angle: {desired_angle}")
-
-#     angle_diff = (desired_angle - current_angle + 360) % 360
-#     if angle_diff > 180:
-#         angle_diff -= 360
-
-#     # Determine the movement based on the angle difference
-#     if abs(angle_diff) < 10:  # If the angle difference is small, move forward
-#         car.is_rotating = False
-#         print(f"Moving forward, angle diff is {angle_diff}")
-#         return comforward
-#     else:
-#         car.is_rotating = True
-#         if angle_diff > 0:
-#             print(f"Rotating clockwise, angle diff is {angle_diff}")
-#             car.rotation_direction = 1
-#             return comtiltright  # Rotate clockwise
-#         else:
-#             print(f"Rotating counter-clockwise, angle diff is {angle_diff}")
-#             car.rotation_direction = -1
-#             return comtiltleft  # Rotate anti-clockwise
-
-def move_to_target(car, target_position, green_dot_y_range, canvas):
-    current_x, current_y = car.x, car.y
-    target_x, target_y = target_position
-    target_x += 10
-    target_y -= 50
-
-    comstop = (0, 0)
-    comtiltleft = (0, -5)
-    comtiltright = (0, 5)
-    comforward = (5, 0)
-
-
-    threshhold = 20  # Adjusted threshold
-
-    # Calculate the differences
-    dx = target_x - current_x
-    dy = target_y - current_y
-
-    # car.is_rotating = False
-
-    
-    turn = input("Drive car by using W: up,\nA: left,S: stop,\nD: right")
-    if turn == 'a':
-         car.rotation_direction = -1 
-         return comtiltleft
-    if turn == 'd':
-        car.rotation_direction = 1 
-        return comtiltright
-    if turn == 'w':
-        car.is_rotating = False
-        return comforward
-    if turn == 's':
-        car.is_rotating = False
-        return comstop
-        
-
-    print(f"current x,y {current_x},{current_y}")
+    # print(f"current x,y {current_x},{current_y}")
 
     # # Calculate the angle to the target
     # desired_angle = math.atan2(dy, dx) * (180 / math.pi)  # Convert radians to degrees
@@ -263,7 +126,7 @@ def move_to_target(car, target_position, green_dot_y_range, canvas):
     # if abs(dx) <= threshhold and abs(dy) <= threshhold and abs(angle_diff) < 10:
     #     car.is_rotating = False
     #     print(f"Stopping, within threshold and aligned. dx: {dx}, dy: {dy}, angle_diff: {angle_diff}")
-    #     car.angle=0
+    #     car.angle = 0
     #     return comstop  # The car is close to the target position and aligned
     # else:
     #     if abs(angle_diff) < 20:  # If the angle difference is small, move forward
@@ -281,9 +144,6 @@ def move_to_target(car, target_position, green_dot_y_range, canvas):
     #             car.rotation_direction = -1
     #             return comtiltleft  # Rotate anti-clockwise
 
-
-
-
 def draw_rectangle(canvas):
     canvas.create_rectangle(10, 10, 1250, 900, outline="red", width=10)
     center_x = 1250 // 2
@@ -291,21 +151,6 @@ def draw_rectangle(canvas):
     cross_size = 40
     canvas.create_line(center_x - cross_size, center_y, center_x + cross_size, center_y, fill="red", width=5)
     canvas.create_line(center_x, center_y - cross_size, center_x, center_y + cross_size, fill="red", width=5)
-
-def draw_car(canvas, car):
-    beginx, beginy, carx, cary = car.x, car.y, car.x, car.y
-    car.shape = canvas.create_polygon(beginx, beginy, carx, cary, outline="black", width=2, fill='darkgrey')
-    wheel_radius = 10
-    wheel_positions = [
-        (beginx - wheel_radius, beginy - wheel_radius, beginx + wheel_radius, beginy + wheel_radius),
-        (carx - wheel_radius, beginy - wheel_radius, carx + wheel_radius, beginy + wheel_radius),
-        (beginx - wheel_radius, cary - wheel_radius, beginx + wheel_radius, cary + wheel_radius),
-        (carx - wheel_radius, cary - wheel_radius, carx + wheel_radius, cary + wheel_radius)
-    ]
-    
-    car.wheels = [canvas.create_oval(pos, outline="black", width=2, fill='black') for pos in wheel_positions]
-    sensor_positions = [(beginx + 30, beginy + 95), (beginx + 75, beginy + 95)]
-    car.sensors = [canvas.create_oval(x - 5, y - 5, x + 5, y + 5, outline="black", width=2, fill='green') for x, y in sensor_positions]
 
 def move_car(canvas, car, command):
     dx, dy = command
@@ -317,14 +162,35 @@ def move_car(canvas, car, command):
     car.x += dx
     car.y += dy
 
-def animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range):
-    command = move_to_target(car, (targetX, targetY), green_dot_y_range, canvas)
-    move_car(canvas, car, command)
-    coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
-    # if command != (0, 0):
-    #     canvas.after(250, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
-    canvas.after(250, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
+# def animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range):
+#     command = move_to_target(car, (targetX, targetY), green_dot_y_range, canvas)
+#     move_car(canvas, car, command)
+#     coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
+#     canvas.after(250, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
 
+def key_handler(event, car, canvas):
+    key = event.keysym
+    comstop = (0, 0)
+    comtiltleft = (-5, -5)
+    comtiltright = (5, 5)
+    comforward = (0, 5)
+
+    if key == 'a':
+        car.rotation_direction = -1
+        command = comtiltleft
+    elif key == 'd':
+        car.rotation_direction = 1
+        command = comtiltright
+    elif key == 'w':
+        car.is_rotating = False
+        command = comforward
+    elif key == 's':
+        car.is_rotating = False
+        command = comstop
+    else:
+        return
+
+    move_car(canvas, car, command)
 
 def rotate_car():
     window = tk.Tk()
@@ -341,20 +207,18 @@ def rotate_car():
 
     car.is_rotating = False
     coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
-    
+
     targetX, targetY = 200, 300
 
+    canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
 
-
-    canvas.create_oval(targetX-10, targetY-10, targetX+10, targetY+10, outline="black", width=2, fill='pink')
-    
     # Define the y-range for the green dots
     green_dot_y_range = (car.y + 30, car.y + 75)
-    animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range)
-    
+    # animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range)
 
     coord_label.pack()
     canvas.bind('<Motion>', lambda event: update_mouse_coordinates(event, coord_label))
+    window.bind('<Key>', lambda event: key_handler(event, car, canvas))
 
     window.mainloop()
 
