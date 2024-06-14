@@ -30,7 +30,6 @@ def init():
     return camera_handler
 
 camera_handler = init()
-
 # run program
 # try:
 #     image = camera_handler._run_video()
@@ -67,14 +66,14 @@ try:
         while not check:
             image = camera_handler._run_video()
             image = transform(image)
-            
             car = find_carv2(image)
             #---- her forventes der at være 4 json filer: -------
             # nogo_zones, ping_pong_balls, orange_ball og robot
             # ---------------------------------------------------
             # Herfra mangles: 
             # algoritme som henter data fra .json filerne og så bevæger bilen
-            check = move_to_targetv2(SortByDistance())       
+            check = move_to_targetv2(SortByDistance())
+            
 finally:
     # Ensure the camera is released properly
     camera_handler.release_camera()

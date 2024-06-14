@@ -36,7 +36,9 @@ def LoadOrangeBall(filename="orangeballs.json"):
     if data and isinstance(data, list) and len(data) > 0:
         OrangeBallXY = tuple(data[0])
     else:
-        raise ValueError("Invalid JSON structure or data not found.")
+        print("orange goone")
+        return (0,0)
+        #raise ValueError("Invalid JSON structure or data not found.")
     
     return OrangeBallXY
 
@@ -69,8 +71,10 @@ def Distance(p1, p2):
 # Function to sort the positions of the balls based on their distance from the Robot 
 # This function is based on the key function lambda, where the ist will be sorted in descending order
 
-def SortByDistance(RobotXY=LoadRobot(), BallsXY=LoadBalls(), OrangeBallXY = LoadOrangeBall() ):
-       
+def SortByDistance(RobotXY=(0,0), BallsXY=(0,0), OrangeBallXY = (0,0)):
+    RobotXY=LoadRobot()
+    BallsXY=LoadBalls()
+    OrangeBallXY = LoadOrangeBall()     
     # Now we sort the balls based on their distance to the Robot
     # Here we use the lam
     SortedList = sorted(BallsXY, key=lambda ball: Distance(RobotXY, ball))

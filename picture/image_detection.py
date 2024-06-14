@@ -121,7 +121,7 @@ def circle_detection(image):
 
     #mindist=18
     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
-                               param1=50, param2=24, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
+                               param1=50, param2=20, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
   ##
      # List to store circle data
     stored_circles = []
@@ -147,7 +147,7 @@ def circle_detection(image):
     # with open('stored_circles.json', 'w') as file:
     #     json.dump(stored_circles, file, indent=4)
     # Display the result
-    # cv2.imshow('Detected Balls', image)
+    cv2.imshow('Detected Balls', image)
     return image, stored_circles
     # return image
   ##
@@ -209,8 +209,8 @@ def detect_ball_colors(image):
     red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
-    orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-    orange_upper = np.array([65, 230, 255], np.uint8) #HSV 65, 211, 255
+    orange_lower = np.array([11, 152, 154], np.uint8) #HSV
+    orange_upper = np.array([50, 255, 255], np.uint8) #HSV 65, 211, 255
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
     """
@@ -218,8 +218,8 @@ def detect_ball_colors(image):
     BEST SO FAR
     """
     #ORIGINAL
-    white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
-    white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
+    white_lower = np.array([ 15, 0, 200], np.uint8) #HSV 6, 0, 191
+    white_upper = np.array([41, 59, 255], np.uint8) #HSV 179, 42, 255
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
     """
@@ -369,7 +369,7 @@ def detect_ball_colors(image):
             # image = cv2.rectangle(image, (x, y),  
             #                            (x + w, y + h), 
             #                            (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
+            #print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
             orange_detected.append(contour)
             # check_point_in_orange_region(contours)
               
@@ -477,8 +477,6 @@ def detect_ball_colors(image):
     #     break  
 
 
-
-
 def match_circles_and_contours(image, contours):
 
     #To store balls in separate arrays
@@ -496,7 +494,7 @@ def match_circles_and_contours(image, contours):
                 cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)
                 cv2.putText(image, "Orange Colour", (x, y), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255))
-                print(f"we had a match at {cx},{cy}")
+                #print(f"we had a match at {cx},{cy}")
                 orange_balls.append((cx, cy))
             else:
                 white_balls.append((cx, cy))
@@ -675,8 +673,8 @@ def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mas
 def find_carv2(image, output_image_path='output_image.jpg'):
     # Read the mask image
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    green_lower = np.array([5, 10, 26], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([73, 247, 246], np.uint8) #HSV   89, 255 , 255
+    green_lower = np.array([54, 0, 194], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([82, 255, 255], np.uint8) #HSV   89, 255 , 255
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
     
     # Find contours in the mask
@@ -745,10 +743,15 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     front_y //= 2
     
     # Calculate the angle
-    # The angle is calculated with respect to the vertical direction (up is 180 degrees, down is 0 degrees)
-    angle_rad = math.atan2(front_x - back_x, back_y - front_y)
-    angle_deg = (math.degrees(angle_rad) + 180) % 360
+    angle_rad = math.atan2(back_y - front_y, front_x - back_x)
     
+    angle_deg = math.degrees(angle_rad)
+
+    angle_deg = (angle_deg+90)%360 
+
+    #if angle_deg < 0:
+    #    angle_deg += 360
+
    
     
     # Draw the centroids, car center, and direction arrow on the image for visualization
@@ -766,6 +769,10 @@ def find_carv2(image, output_image_path='output_image.jpg'):
         json.dump(data, json_file)
 
     return (center_x, center_y, angle_deg)
+
+
+
+
 
 # Example usage
 # Assuming you have an image (mask) loaded as `image`
