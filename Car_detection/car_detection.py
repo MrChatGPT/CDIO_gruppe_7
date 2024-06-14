@@ -9,18 +9,61 @@ def rgb_to_hsv(rgb):
     hsv_color = cv2.cvtColor(color, cv2.COLOR_RGB2HSV)
     return hsv_color[0][0]
 
+
+
+def detect_green_hsv_bounds(image_path):
+    # Read the image
+    image = cv2.imread(os.path.join(os.path.dirname(__file__), image_path))
+    if image is None:
+        raise ValueError("Image not found or unable to read the image file.")
+
+    # Convert the image to HSV color space
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # Define a range for green color in HSV space
+    # These are broad ranges and may need to be adjusted based on the image
+    lower_green = np.array([35, 40, 40])
+    upper_green = np.array([85, 255, 255])
+
+    # Create a mask for green color
+    mask = cv2.inRange(hsv_image, lower_green, upper_green)
+
+    # Find contours in the mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Initialize variables to store the overall lower and upper bounds
+    overall_lower_bound = np.array([255, 255, 255])
+    overall_upper_bound = np.array([0, 0, 0])
+
+    # Iterate over each contour to find the bounds
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        roi = hsv_image[y:y+h, x:x+w]
+
+        min_hsv = roi.min(axis=(0, 1))
+        max_hsv = roi.max(axis=(0, 1))
+
+        overall_lower_bound = np.minimum(overall_lower_bound, min_hsv)
+        overall_upper_bound = np.maximum(overall_upper_bound, max_hsv)
+
+    print("Lower HSV Bound for green detected: ", overall_lower_bound)
+    print("Upper HSV Bound for green detected: ", overall_upper_bound)
+
+    return overall_lower_bound, overall_upper_bound
+
+
+
 def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yellow_mask.jpg', green_mask_path='green_mask.jpg', center_weight=25):
     # Read the image
     
     image = cv2.imread(os.path.join(os.path.dirname(__file__), image_path))
-    
+
     # Convert the image to HSV color space
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     
-    # Manually adjusted HSV ranges for yellow
-    yellow_lower_hsv = np.array([20, 100, 100])
-    yellow_upper_hsv = np.array([30, 255, 255])
-    
+
+
+
     # Define broader HSV ranges for green, gotten after using the two green_hsv1 and green_hsv2 
     green_lower_hsv = np.array([75, 100, 100])
     green_upper_hsv = np.array([95, 255, 255])
@@ -101,12 +144,26 @@ def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yello
 
 # Example usage:
 # Example usage:
-#image_path = 'image_one.jpg'
+image_path = 'image_one.jpg'
 #image_path = 'image_two.jpg'
 #image_path = 'image_three.jpg'
 #image_path = 'image_four.jpg'
 #image_path = 'image_five.jpg'
 #image_path = 'image_six.jpg'
-car_center = find_car(image_path)
-print(f'The center of the car is at: {car_center[:2]}')
-print(f'The angle of the car is: {car_center[2]} degrees')
+#image_path = 'image_seven.jpg'
+#image_path = 'image_eight.jpg'
+#image_path = 'image_nine.jpg'
+# Example usage
+#image_path = 'path_to_your_image.jpg'
+lower_bound, upper_bound = detect_green_hsv_bounds(image_path)
+print(f"Detected lower HSV bound: {lower_bound}")
+print(f"Detected upper HSV bound: {upper_bound}")
+
+
+
+
+
+
+#car_center = find_car(image_path)
+#print(f'The center of the car is at: {car_center[:2]}')
+#print(f'The angle of the car is: {car_center[2]} degrees')
