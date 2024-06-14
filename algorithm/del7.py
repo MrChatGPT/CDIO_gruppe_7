@@ -190,7 +190,7 @@ def key_handler(event, car, canvas):
         if curAngle == 0:
             comforward = (0, 5)
         elif curAngle == 90:
-            comforward = (4, 0)
+            comforward = (-4, 0)
         elif curAngle == 180:
             comforward = (0, -5)
         elif curAngle == 270:
@@ -202,7 +202,7 @@ def key_handler(event, car, canvas):
         elif 150 >= curAngle >= 120:
             comforward = (-2, -4)
         elif 210 <= curAngle <= 240:
-            comforward = (-2, -4)
+            comforward = (2, -4)
         elif 240 <= curAngle < 270:
             comforward = (4, -4)
         elif 270 <= curAngle <= 300:
