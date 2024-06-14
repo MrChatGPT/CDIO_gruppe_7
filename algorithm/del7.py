@@ -154,6 +154,27 @@ def draw_rectangle(canvas):
 
 def move_car(canvas, car, command):
     dx, dy = command
+    rad_angle = radians(car.angle)
+    dx_rot = dx * cos(rad_angle) - dy * sin(rad_angle)
+    dy_rot = dx * sin(rad_angle) + dy * cos(rad_angle)
+
+    new_x = car.x + dx_rot
+    new_y = car.y + dy_rot
+
+    # Define the rectangle boundaries
+    left_bound = 10
+    right_bound = 1250 - 10
+    top_bound = 10
+    bottom_bound = 900 - 10
+    toplx, toply = 12,15
+    toprx, topry = 1240, 15
+    bottomlx, bottomly = 15 , 894
+    bottomrx, bottomry = 1244 , 880
+
+
+
+
+    dx, dy = command
     canvas.move(car.shape, dx, dy)
     for wheel in car.wheels:
         canvas.move(wheel, dx, dy)
@@ -182,11 +203,14 @@ def key_handler(event, car, canvas):
 
     if key == 'a':
         car.angle = (car.angle + 345) % 360
+        curAngle = car.angle 
         command = comtiltleft
     elif key == 'd':
         car.angle = (car.angle + 15) % 360
+        curAngle = car.angle 
         command = comtiltright
     elif key == 'w':
+        curAngle = car.angle 
         if curAngle == 0:
             comforward = (0, 5)
         elif curAngle == 90:
@@ -194,33 +218,35 @@ def key_handler(event, car, canvas):
         elif curAngle == 180:
             comforward = (0, -5)
         elif curAngle == 270:
-            comforward = (-4, 0)
-        elif 180 < curAngle <= 210:
-            comforward = (2, -5)
-        elif 180 >= curAngle >= 150:
-            comforward = (-2, -5)
-        elif 150 >= curAngle >= 120:
+            comforward = (4, 0)
+            print(f"I am stupid")
+        elif 0 < curAngle < 30:
+            comforward = (-2, 4)
+        elif 30 <= curAngle < 60:
+            comforward = (-2, 2)
+        elif 60 <= curAngle < 90:
+            comforward = (-4, 4)
+        elif 90 < curAngle < 120:
+            comforward = (-4, -2)
+        elif 120 <= curAngle < 150:
+            comforward = (-4, -4)
+        elif 150 <= curAngle < 180:
             comforward = (-2, -4)
-        elif 210 <= curAngle <= 240:
+        elif 180 < curAngle < 210:
+            comforward = (2, -4)
+        elif 210 <= curAngle < 240:
             comforward = (2, -4)
         elif 240 <= curAngle < 270:
             comforward = (4, -4)
-        elif 270 <= curAngle <= 300:
-            comforward = (2, 2)
-        elif 300 <= curAngle <= 330:
+        elif 270 < curAngle < 300:
             comforward = (4, 2)
+        elif 300 <= curAngle < 330:
+            comforward = (4, 4)
         elif 330 <= curAngle <= 360:
-            comforward = (4, 4)
-        elif 0 < curAngle <= 330:
-            comforward = (-2, 4)
-        elif 0 < curAngle <= 30:
             comforward = (2, 4)
-        elif 30 <= curAngle <= 60:
-            comforward = (4, 4)
-        elif 60 <= curAngle < 90:
-            comforward = (2, 4)
-        elif 90 < curAngle <= 120:
-            comforward = (-4, -4)
+        # elif 0 < curAngle <= 330:
+        #     comforward = (-2, 4)
+       
         
         command = comforward
         print(f"comforward{comforward}")
@@ -239,7 +265,7 @@ def rotate_car():
     canvas.pack()
     draw_rectangle(canvas)
 
-    car = Car(canvas, 60, 60, 0)
+    car = Car(canvas, 75, 75, 0)
     car.angle = 0
     draw_car(canvas, car)
 
