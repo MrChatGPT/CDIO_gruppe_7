@@ -51,7 +51,7 @@ def init():
 
 # image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
 # image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_15_02_15_Pro.jpg')
-image = cv2.imread('extra/test/images/WIN_20240613_12_27_17_Pro.jpg')
+image = cv2.imread('extra/test/images/WIN_20240614_09_46_53_Pro.jpg')
 # /home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg
 transform_and_detect(image)
 #calibrateColors2(image)

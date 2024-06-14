@@ -205,12 +205,12 @@ def detect_ball_colors(image):
     
     # Set range for red color and  
     # define mask 
-    red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
-    red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
+    red_lower = np.array([0, 165, 184], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
+    red_upper = np.array([10, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
-    orange_lower = np.array([11, 121, 215], np.uint8) #HSV
-    orange_upper = np.array([65, 230, 255], np.uint8) #HSV 65, 211, 255
+    orange_lower = np.array([16, 162, 215], np.uint8) #HSV
+    orange_upper = np.array([122, 255, 255], np.uint8) #HSV 65, 211, 255
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
     """
@@ -218,8 +218,8 @@ def detect_ball_colors(image):
     BEST SO FAR
     """
     #ORIGINAL
-    white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
-    white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
+    white_lower = np.array([ 10, 0, 203], np.uint8) #HSV 6, 0, 191
+    white_upper = np.array([37, 57, 255], np.uint8) #HSV 179, 42, 255
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
     """
@@ -235,6 +235,9 @@ def detect_ball_colors(image):
     pink_upper = np.array([169, 105, 255], np.uint8) #HSV  
     pink_mask = cv2.inRange(hsvFrame, pink_lower, pink_upper) 
 
+    green_lower = np.array([54, 0, 194], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([82, 255, 255], np.uint8) #HSV   89, 255 , 255
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
     # Set range for green color and  
     # define mask 
 
@@ -586,8 +589,8 @@ def rgb_to_hsv(rgb):
 def find_carv2(image, output_image_path='output_image.jpg'):
     # Read the mask image
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    green_lower = np.array([24, 71, 174], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([100, 180, 240], np.uint8) #HSV   89, 255 , 255
+    green_lower = np.array([54, 0, 194], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([82, 255, 255], np.uint8) #HSV   89, 255 , 255
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
     
     # Find contours in the mask
