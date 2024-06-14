@@ -175,6 +175,11 @@ def key_handler(event, car, canvas):
     comtiltright = (5, 5)
     comforward = (0, 5)
 
+
+
+    curAngle = car.angle 
+    "If car angle == 180, comforward = (0, -5)  "
+
     if key == 'a':
         car.angle = (car.angle + 345) % 360
         command = comtiltleft
@@ -182,7 +187,44 @@ def key_handler(event, car, canvas):
         car.angle = (car.angle + 15) % 360
         command = comtiltright
     elif key == 'w':
+        if curAngle == 0:
+            comforward = (0, 5)
+        elif curAngle == 90:
+            comforward = (4, 0)
+        elif curAngle == 180:
+            comforward = (0, -5)
+        elif curAngle == 270:
+            comforward = (-4, 0)
+        elif 180 < curAngle <= 210:
+            comforward = (2, -5)
+        elif 180 >= curAngle >= 150:
+            comforward = (-2, -5)
+        elif 150 >= curAngle >= 120:
+            comforward = (-2, -4)
+        elif 210 <= curAngle <= 240:
+            comforward = (-2, -4)
+        elif 240 <= curAngle < 270:
+            comforward = (4, -4)
+        elif 270 <= curAngle <= 300:
+            comforward = (2, 2)
+        elif 300 <= curAngle <= 330:
+            comforward = (4, 2)
+        elif 330 <= curAngle <= 360:
+            comforward = (4, 4)
+        elif 0 < curAngle <= 330:
+            comforward = (-2, 4)
+        elif 0 < curAngle <= 30:
+            comforward = (2, 4)
+        elif 30 <= curAngle <= 60:
+            comforward = (4, 4)
+        elif 60 <= curAngle < 90:
+            comforward = (2, 4)
+        elif 90 < curAngle <= 120:
+            comforward = (-4, -4)
+        
         command = comforward
+        print(f"comforward{comforward}")
+
     elif key == 's':
         command = comstop
     else:
