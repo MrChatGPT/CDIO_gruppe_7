@@ -114,10 +114,10 @@ TrackEdges = {
 
 # Defining the points of the cross
 ObstaclePoints = {
-    tuple(ListObstacle[1]): 7,  # Top point 
-    tuple(ListObstacle[0]): 8,  # Bottom point  
-    tuple(ListObstacle[2]): 5,  # Left point 
-    tuple(ListObstacle[3]): 6   # Right point
+    tuple(ListObstacle[1]): 9,  # Top point 
+    tuple(ListObstacle[0]): 10,  # Bottom point  
+    tuple(ListObstacle[2]): 11,  # Left point 
+    tuple(ListObstacle[3]): 12   # Right point
 }
 
 
@@ -167,13 +167,19 @@ def BallValue(ball, TrackCorners, TrackEdges, ObstaclePoints, CenterPoint):
 
     # Check if the ball is close to lines forming the inner quadrants
     if Distance(ball, TopPoint) < 100 and Distance(ball, CenterPoint) < 100 and Distance(ball, LeftPoint) < 100:
-        return 4
+        return 13
+    
+    # Check if the ball is in the top-right inner corner
     if Distance(ball, TopPoint) < 100 and Distance(ball, CenterPoint) < 100 and Distance(ball, RightPoint) < 100:
-        return 3
+        return 14
+    
+    # Check if the ball is in the bottom-left inner corner
     if Distance(ball, LeftPoint) < 100 and Distance(ball, CenterPoint) < 100 and Distance(ball, BottomPoint) < 100:
-        return 2
+        return 15
+    
+    # Check if the ball is in the bottom-right inner corner
     if Distance(ball, BottomPoint) < 100 and Distance(ball, CenterPoint) < 100 and Distance(ball, RightPoint) < 100:
-        return 1
+        return 16
     
     # Check proximity to obstacle points (outer points of the cross)
     for point, value in ObstaclePoints.items():
