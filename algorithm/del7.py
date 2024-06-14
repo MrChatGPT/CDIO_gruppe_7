@@ -4,6 +4,7 @@ from random import randint
 import time
 import numpy as np
 import math
+# from algorithm.control import publish_controller_data
 
 class Car:
     def __init__(self, canvas, x, y, angle):
@@ -22,7 +23,7 @@ class Car:
 
     def rotate(self):
         self.angle = (self.angle + self.rotation_direction) % 360  # Change direction based on rotation_direction
-        # print(f"Current angle: {self.angle}")  # Print the current angle
+        print(f"Current angle: {self.angle}")  # Print the current angle
         self.update_position()
         self.canvas.after(100, self.rotate)
 
@@ -90,59 +91,59 @@ def draw_car(canvas, car):
     ]
 
 # def move_to_target(car, target_position, green_dot_y_range, canvas):
-    # current_x, current_y = car.x, car.y
-    # target_x, target_y = target_position
-    # target_x += 10
-    # target_y -= 50
+#     current_x, current_y = car.x, car.y
+#     target_x, target_y = target_position
+#     target_x += 10
+#     target_y -= 50
 
-    # # comstop = (0, 0)
-    # # comtiltleft = (0, -5)
-    # # comtiltright = (0, 5)
-    # # comforward = (5, 0)
+#     # comstop = (0, 0)
+#     # comtiltleft = (0, -5)
+#     # comtiltright = (0, 5)
+#     # comforward = (5, 0)
 
-    # threshhold = 20  # Adjusted threshold
+#     threshhold = 20  # Adjusted threshold
 
-    # # Calculate the differences
-    # dx = target_x - current_x
-    # dy = target_y - current_y
+#     # Calculate the differences
+#     dx = target_x - current_x
+#     dy = target_y - current_y
 
-    # print(f"current x,y {current_x},{current_y}")
+#     print(f"current x,y {current_x},{current_y}")
 
-    # # Calculate the angle to the target
-    # desired_angle = math.atan2(dy, dx) * (180 / math.pi)  # Convert radians to degrees
-    # if desired_angle < 0:
-    #     desired_angle += 360
+#     # Calculate the angle to the target
+#     desired_angle = math.atan2(dy, dx) * (180 / math.pi)  # Convert radians to degrees
+#     if desired_angle < 0:
+#         desired_angle += 360
 
-    # current_angle = car.angle  # Assuming car.angle is in degrees
+#     current_angle = car.angle  # Assuming car.angle is in degrees
 
-    # print(f"Current position: ({current_x}, {current_y}), Target position: ({target_x}, {target_y})")
-    # print(f"Current angle: {current_angle}, Desired angle: {desired_angle}")
+#     print(f"Current position: ({current_x}, {current_y}), Target position: ({target_x}, {target_y})")
+#     print(f"Current angle: {current_angle}, Desired angle: {desired_angle}")
 
-    # angle_diff = (desired_angle - current_angle + 360) % 360
-    # if angle_diff > 180:
-    #     angle_diff -= 360
+#     angle_diff = (desired_angle - current_angle + 360) % 360
+#     if angle_diff > 180:
+#         angle_diff -= 360
 
-    # # Determine the movement based on the angle difference
-    # if abs(dx) <= threshhold and abs(dy) <= threshhold and abs(angle_diff) < 10:
-    #     car.is_rotating = False
-    #     print(f"Stopping, within threshold and aligned. dx: {dx}, dy: {dy}, angle_diff: {angle_diff}")
-    #     car.angle = 0
-    #     return comstop  # The car is close to the target position and aligned
-    # else:
-    #     if abs(angle_diff) < 20:  # If the angle difference is small, move forward
-    #         car.is_rotating = False
-    #         print(f"Moving forward, angle diff is {angle_diff}")
-    #         return comforward
-    #     else:
-    #         car.is_rotating = True
-    #         if angle_diff > 0:
-    #             print(f"Rotating clockwise, angle diff is {angle_diff}")
-    #             car.rotation_direction = 1
-    #             return comtiltright  # Rotate clockwise
-    #         else:
-    #             print(f"Rotating counter-clockwise, angle diff is {angle_diff}")
-    #             car.rotation_direction = -1
-    #             return comtiltleft  # Rotate anti-clockwise
+#     # Determine the movement based on the angle difference
+#     if abs(dx) <= threshhold and abs(dy) <= threshhold and abs(angle_diff) < 10:
+#         car.is_rotating = False
+#         print(f"Stopping, within threshold and aligned. dx: {dx}, dy: {dy}, angle_diff: {angle_diff}")
+#         car.angle = 0
+#         return comstop  # The car is close to the target position and aligned
+#     else:
+#         if abs(angle_diff) < 20:  # If the angle difference is small, move forward
+#             car.is_rotating = False
+#             print(f"Moving forward, angle diff is {angle_diff}")
+#             return comforward
+#         else:
+#             car.is_rotating = True
+#             if angle_diff > 0:
+#                 print(f"Rotating clockwise, angle diff is {angle_diff}")
+#                 car.rotation_direction = 1
+#                 return comtiltright  # Rotate clockwise
+#             else:
+#                 print(f"Rotating counter-clockwise, angle diff is {angle_diff}")
+#                 car.rotation_direction = -1
+#                 return comtiltleft  # Rotate anti-clockwise
 
 def draw_rectangle(canvas):
     canvas.create_rectangle(10, 10, 1250, 900, outline="red", width=10)
@@ -193,6 +194,12 @@ def move_car(canvas, car, command):
 #     coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
 #     canvas.after(250, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
 
+def is_within_boundaries(new_x, new_y):
+    left_bound = 30  #10
+    right_bound = 1250 - 70 #30
+    top_bound = 30   #10
+    bottom_bound = 900 - 70 #30
+    return left_bound <= new_x <= right_bound and top_bound <= new_y <= bottom_bound
 
 
 def stop_rotation(car):
@@ -205,18 +212,13 @@ def key_handler(event, car, canvas):
     comstop = (0, 0)
     comtiltleft = (-4, 0)
     comtiltright = (4, 0)
-    comforward = (0, 5)
+    # comforward = (0, 5)
 
 
 
     curAngle = car.angle 
 
-    # def stop_tilt():
-    #     move_car(canvas, car, comstop)
-    
-    # def stop_rotation(car):
-    #     car.is_rotating = False
-    #     car.rotation_direction = 0
+
 
     if key == 'a':
 
@@ -226,31 +228,6 @@ def key_handler(event, car, canvas):
         command = comstop
 
 
-        # car.is_rotating = True
-        # car.rotation_direction = 1
-        # canvas.after(200, lambda: move_car(canvas, car, comstop))  # Schedule stop after 200ms
-        # car.is_rotating = False
-        # car.rotation_direction = 0
-
-
-
-        # command = comstop
-
-      
-        # tic = time.perf_counter()
-        # toc = time.perf_counter()
-        # print(f"total time {toc - tic:0.4f} seconds, car angle is {car.angle}, after timer {toc-tic2:0.4f}")
-       
-        # car.angle = (car.angle + 355) % 360
-        # command = comtiltleft
-        # move_car(canvas, car, command)
-        # tic2 = time.perf_counter()
-        # canvas.after(200,stop_tilt)
-        # toc = time.perf_counter()
-        # print(f"total time {toc - tic:0.4f} seconds, car angle is {car.angle}, after timer {toc-tic2:0.4f}")
-        # # if toc-tic == 0.2:
-        #     print(f"moved car in {toc - tic:0.4f} seconds, car angle is {car.angle}")
-        # car.angle = (car.angle + 355) % 360
         
         
     elif key == 'd':
@@ -319,11 +296,33 @@ def key_handler(event, car, canvas):
     else:
         return
 
-    move_car(canvas, car, command)
+
+    dx, dy = command
+    rad_angle = radians(car.angle)
+    dx_rot = dx * cos(rad_angle) - dy * sin(rad_angle)
+    dy_rot = dx * sin(rad_angle) + dy * cos(rad_angle)
+
+    new_x = car.x + dx_rot
+    new_y = car.y + dy_rot
+
+    if is_within_boundaries(new_x, new_y):
+        move_car(canvas, car, command)
+
+    # move_car(canvas, car, command)
+
+
+
+
+
+
+
+
+
 
 def rotate_car():
     window = tk.Tk()
     window.title("Car Rotation")
+    window.resizable(False,False)
     canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
     canvas.pack()
     draw_rectangle(canvas)
