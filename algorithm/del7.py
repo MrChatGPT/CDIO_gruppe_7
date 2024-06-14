@@ -199,18 +199,15 @@ def key_handler(event, car, canvas):
 
 
     curAngle = car.angle 
-    "If car angle == 180, comforward = (0, -5)  "
+
 
     if key == 'a':
         car.angle = (car.angle + 345) % 360
-        curAngle = car.angle 
         command = comtiltleft
     elif key == 'd':
         car.angle = (car.angle + 15) % 360
-        curAngle = car.angle 
         command = comtiltright
     elif key == 'w':
-        curAngle = car.angle 
         if curAngle == 0:
             comforward = (0, 5)
         elif curAngle == 90:
@@ -219,7 +216,7 @@ def key_handler(event, car, canvas):
             comforward = (0, -5)
         elif curAngle == 270:
             comforward = (4, 0)
-            print(f"I am stupid")
+        
         elif 0 < curAngle < 30:
             comforward = (-2, 4)
         elif 30 <= curAngle < 60:
@@ -244,8 +241,7 @@ def key_handler(event, car, canvas):
             comforward = (4, 4)
         elif 330 <= curAngle <= 360:
             comforward = (2, 4)
-        # elif 0 < curAngle <= 330:
-        #     comforward = (-2, 4)
+     
        
         
         command = comforward
@@ -253,6 +249,17 @@ def key_handler(event, car, canvas):
 
     elif key == 's':
         command = comstop
+    
+    elif key == 'f':
+        car.is_rotating = False
+        car.rotation_direction = 0
+        command = comstop  # Ensure command is defined, though it may not be used
+
+    elif key == 't':
+        car.is_rotating = True
+        car.rotation_direction = 1
+        command = comstop  # Ensure command is defined, though it may not be used
+
     else:
         return
 
