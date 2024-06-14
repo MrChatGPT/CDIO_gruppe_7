@@ -103,7 +103,7 @@ def find_car(image_path, output_path='output_image.jpg', yellow_mask_path='yello
 # Example usage:
 #image_path = 'image_one.jpg'
 #image_path = 'image_two.jpg'
-image_path = 'image_three.jpg'
+#image_path = 'image_three.jpg'
 #image_path = 'image_four.jpg'
 #image_path = 'image_five.jpg'
 #image_path = 'image_six.jpg'
