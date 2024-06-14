@@ -73,7 +73,7 @@ def find_corners(img):
 
 def transform(img):
     # resulution (can be made smaller if we want to)
-    width, height = 1250, 900
+    width, height = 1229, 900
 
     corners = load_calibration_data('calibration_data.json')
     input_corners = np.float32(corners)

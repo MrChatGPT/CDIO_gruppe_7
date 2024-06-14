@@ -675,8 +675,8 @@ def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mas
 def find_carv2(image, output_image_path='output_image.jpg'):
     # Read the mask image
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    green_lower = np.array([24, 71, 174], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([100, 180, 240], np.uint8) #HSV   89, 255 , 255
+    green_lower = np.array([5, 10, 26], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([73, 247, 246], np.uint8) #HSV   89, 255 , 255
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
     
     # Find contours in the mask
