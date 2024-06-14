@@ -5,7 +5,7 @@ from picture.livefeed import *
 from picture.transform_arena import *
 from picture.image_detection import *
 from algorithm.algorithm import *
-from algorithm.move_to_target import *
+from algorithm.move_to_targetv2 import *
 from algorithm.utils import *
 from algorithm.control import *
 
@@ -74,7 +74,7 @@ try:
             # ---------------------------------------------------
             # Herfra mangles: 
             # algoritme som henter data fra .json filerne og så bevæger bilen
-            check = move_to_target(SortByDistance())       
+            check = move_to_targetv2(SortByDistance())       
 finally:
     # Ensure the camera is released properly
     camera_handler.release_camera()
