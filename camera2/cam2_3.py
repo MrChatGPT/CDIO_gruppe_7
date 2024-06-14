@@ -261,7 +261,7 @@ class Camera2:
             h_lower, s_lower, v_lower = self.hsv_lower_orange
             h_upper, s_upper, v_upper = self.hsv_upper_orange
 
-        cv2.createTrackbar('H Lower', 'Calibration', h_lower, 180, nothing)
+        cv2.createTrackbar('H Lower', 'Calibration', h_lower, 180, )
         cv2.createTrackbar('S Lower', 'Calibration', s_lower, 255, nothing)
         cv2.createTrackbar('V Lower', 'Calibration', v_lower, 255, nothing)
         cv2.createTrackbar('H Upper', 'Calibration', h_upper, 180, nothing)
@@ -311,7 +311,7 @@ if __name__ == "__main__":
     video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/seme.mp4"
 
     # Uncomment the line below to calibrate the white color
-    # camera.calibrate_color('white')
+    camera.calibrate_color('white')
 
     # Uncomment the line below to calibrate the orange color
     # camera.calibrate_color('orange')
