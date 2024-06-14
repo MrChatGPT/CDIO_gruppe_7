@@ -97,6 +97,7 @@ if image is None:
 else:
     hsv_lower, hsv_upper = np.array([0, 130, 196]), np.array([9, 255, 255])
     processed_mask, contours, hierarchy = mask_and_find_contours(image, hsv_lower, hsv_upper)
+    sorted_contours = sort_contours_by_length(contours)
 
     # Draw all contours on the original image
     #original_image_with_contours = image.copy()
@@ -104,23 +105,19 @@ else:
     #cv2.imshow('Original Image with All Contours', original_image_with_contours)
 
     # Find the longest child of the top contour
-    top_child_index = find_longest_child(contours, hierarchy, 0)
-    if top_child_index != -1:
-        print(f"The longest child of the top contour is at index: {top_child_index}")
-        top_child_contour = contours[top_child_index]
-        corners = find_sharpest_corners(processed_mask, top_child_contour)
+    arena_contour = sorted_contours[1]
+    if arena_contour != None:
+        corners = find_sharpest_corners(processed_mask, arena_contour)
 
         if corners is not None and len(corners) == 4:
             corners = np.array([corner.ravel() for corner in corners], dtype="float32")
             warped_image, M = four_point_transform(image, corners)
 
-            longest_child_index = find_longest_child(contours, hierarchy, top_child_index)
-            if longest_child_index != -1:
-                print(f"The longest child of the first child contour is at index: {longest_child_index}")
-                longest_child_contour = contours[longest_child_index]
+            cross_contour = sorted_contours[2]
+            if cross_contour != None:
 
-                longest_child_contour_points = np.array(longest_child_contour, dtype='float32')
-                transformed_contour = cv2.perspectiveTransform(longest_child_contour_points.reshape(-1, 1, 2), M)
+                cross_contour_points = np.array(cross_contour, dtype='float32')
+                transformed_contour = cv2.perspectiveTransform(cross_contour_points.reshape(-1, 1, 2), M)
 
                 # Fit a rotated cross to the transformed longest child contour
                 cross_lines = fit_rotated_cross_to_contour(transformed_contour.astype(int))
