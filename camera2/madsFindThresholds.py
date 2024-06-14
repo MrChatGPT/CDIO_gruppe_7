@@ -86,7 +86,7 @@ def fit_rotated_cross_to_contour(contour):
     return endpoints
 
 # Example usage:
-imagePath = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/extra/test/images/WIN_20240610_09_33_12_Pro.jpg"
+imagePath = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/testImg.jpg"
 image = cv2.imread(imagePath)
 
 if image is None:
