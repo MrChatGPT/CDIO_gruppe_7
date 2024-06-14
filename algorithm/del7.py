@@ -222,7 +222,7 @@ def key_handler(event, car, canvas):
 
         car.is_rotating = True
         car.rotation_direction = 1
-        canvas.after(200, lambda: stop_rotation(car))  # Schedule stop after 200ms
+        canvas.after(2000, lambda: stop_rotation(car))  # Schedule stop after 200ms
         command = comstop
 
 
@@ -238,6 +238,8 @@ def key_handler(event, car, canvas):
 
       
         # tic = time.perf_counter()
+        # toc = time.perf_counter()
+        # print(f"total time {toc - tic:0.4f} seconds, car angle is {car.angle}, after timer {toc-tic2:0.4f}")
        
         # car.angle = (car.angle + 355) % 360
         # command = comtiltleft
@@ -254,7 +256,10 @@ def key_handler(event, car, canvas):
     elif key == 'd':
         car.is_rotating = True
         car.rotation_direction = -1
-        canvas.after(200, lambda: stop_rotation(car))  # Schedule stop after 200ms
+        # tic = time.perf_counter()
+        canvas.after(2000, lambda: stop_rotation(car))  # Schedule stop after 200ms
+        # toc = time.perf_counter()
+        # print(f"total time {toc - tic:0.4f} seconds, car angle is {car.angle}")
         command = comstop
         # car.angle = (car.angle + 5) % 360
         # command = comtiltright
