@@ -1,7 +1,0 @@
-paho-mqtt
-numpy
-opencv-python==4.9.0.80
-imutils
-matplotlib
-pynput
-scikit-image

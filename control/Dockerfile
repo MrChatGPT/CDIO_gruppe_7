@@ -1,4 +1,5 @@
-FROM ubuntu:20.04
+# simple python container
+FROM python:3.9-slim
 
 WORKDIR /app  # Set a specific work directory
 
@@ -11,4 +12,6 @@ RUN apt-get update && \
 # Install python packages from a list
 COPY requirements.txt requirements.txt 
 RUN pip3 install --no-cache-dir -r requirements.txt
+
+
 

@@ -3,7 +3,6 @@ import time
 import threading
 import sys
 import paho.mqtt.client as mqtt
-import uuid
 from pyPS4Controller.controller import Controller 
 import math
 import json

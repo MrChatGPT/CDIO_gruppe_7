@@ -1,4 +1,0 @@
-libudev-dev
-libevdev2
-python3
-python3-pip
