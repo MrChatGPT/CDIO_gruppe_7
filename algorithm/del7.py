@@ -22,7 +22,7 @@ class Car:
 
     def rotate(self):
         self.angle = (self.angle + self.rotation_direction) % 360  # Change direction based on rotation_direction
-        print(f"Current angle: {self.angle}")  # Print the current angle
+        # print(f"Current angle: {self.angle}")  # Print the current angle
         self.update_position()
         self.canvas.after(100, self.rotate)
 
@@ -172,6 +172,7 @@ def move_car(canvas, car, command):
     bottomrx, bottomry = 1244 , 880
 
 
+    # tic = time.perf_counter()
 
 
     dx, dy = command
@@ -183,37 +184,83 @@ def move_car(canvas, car, command):
     car.x += dx
     car.y += dy
 
+    # toc = time.perf_counter()
+    # print(f"moved car in {toc - tic:0.4f} seconds")
+
 # def animate_car(canvas, car, targetX, targetY, coord_label, green_dot_y_range):
 #     command = move_to_target(car, (targetX, targetY), green_dot_y_range, canvas)
 #     move_car(canvas, car, command)
 #     coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
 #     canvas.after(250, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
 
+
+
+def stop_rotation(car):
+    car.is_rotating = False
+    car.rotation_direction = 0
+
 def key_handler(event, car, canvas):
+   
     key = event.keysym
     comstop = (0, 0)
-    comtiltleft = (-5, -5)
-    comtiltright = (5, 5)
+    comtiltleft = (-4, 0)
+    comtiltright = (4, 0)
     comforward = (0, 5)
 
 
 
     curAngle = car.angle 
 
+    # def stop_tilt():
+    #     move_car(canvas, car, comstop)
+    
+    # def stop_rotation(car):
+    #     car.is_rotating = False
+    #     car.rotation_direction = 0
 
     if key == 'a':
-        car.angle = (car.angle + 345) % 360
-        command = comtiltleft
+
+        car.is_rotating = True
+        car.rotation_direction = 1
+        canvas.after(200, lambda: stop_rotation(car))  # Schedule stop after 200ms
+        command = comstop
+
+
+        # car.is_rotating = True
+        # car.rotation_direction = 1
+        # canvas.after(200, lambda: move_car(canvas, car, comstop))  # Schedule stop after 200ms
+        # car.is_rotating = False
+        # car.rotation_direction = 0
+
+
+
+        command = comstop
+
+      
+        # tic = time.perf_counter()
+       
+        # car.angle = (car.angle + 355) % 360
+        # command = comtiltleft
+        # move_car(canvas, car, command)
+        # tic2 = time.perf_counter()
+        # canvas.after(200,stop_tilt)
+        # toc = time.perf_counter()
+        # print(f"total time {toc - tic:0.4f} seconds, car angle is {car.angle}, after timer {toc-tic2:0.4f}")
+        # # if toc-tic == 0.2:
+        #     print(f"moved car in {toc - tic:0.4f} seconds, car angle is {car.angle}")
+        # car.angle = (car.angle + 355) % 360
+        
+        
     elif key == 'd':
-        car.angle = (car.angle + 15) % 360
+        car.angle = (car.angle + 5) % 360
         command = comtiltright
     elif key == 'w':
         if curAngle == 0:
-            comforward = (0, 5)
+            comforward = (0, 2)
         elif curAngle == 90:
             comforward = (-4, 0)
         elif curAngle == 180:
-            comforward = (0, -5)
+            comforward = (0, -4)
         elif curAngle == 270:
             comforward = (4, 0)
         
