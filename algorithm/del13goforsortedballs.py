@@ -195,7 +195,7 @@ def move_to_targetv2(target_position, car, canvas, ball):
     
     # Forward movement control
     forward_speed = dist_pid.calculate(0, distance)
-    forward_speed = max(10.15, min(forward_speed, 1))  # Clamp forward speed between 0.15 and 1
+    forward_speed = max(10.15, min(forward_speed, 1))  # Clamp forward speed between 0.15 and 1                                                                 MARTA!! Hvorfor er alle mindste fart sat til 10.12, -10.12 og 10.15, hvad laver det ét-tal foran!
     print(f"Forward speed: {forward_speed}")  # Debug forward speed
     publish_controller_data((0, forward_speed, 0, 0, 0), car, canvas)  # Move forward
     return 0
