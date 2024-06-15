@@ -235,6 +235,11 @@ def draw_balls(canvas, coordinates):
 
     return balls
 
+# def delete_balls(canvas, balls):
+#     for ball_id in balls:
+#         canvas.delete(ball_id)
+     
+
 
 def myballs():
     window = tk.Tk()
@@ -242,10 +247,17 @@ def myballs():
     window.resizable(False,False)
     canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
     canvas.pack()
+
+
+    coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
+    canvas.bind('<Motion>', lambda event: update_mouse_coordinates(event, coord_label))
+
+
     draw_rectangle(canvas)
     ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))#(70, 70), (1200, 800)
     # Draw balls on the canvas at the generated coordinates
-    draw_balls(canvas, ball_coordinates)
+    balls = draw_balls(canvas, ball_coordinates)
+    # canvas.after(4000, lambda: delete_balls(canvas, balls))  # Schedule stop after 400ms
     window.mainloop()
     
 
