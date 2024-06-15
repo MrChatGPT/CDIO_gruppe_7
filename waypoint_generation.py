@@ -22,7 +22,7 @@ class Ball:
     def __repr__(self):
         return f"Ball(x={self.x}, y={self.y}, obstacle={self.obstacle}, waypoints={self.waypoints})"
 
-waypoint_distance = 100
+waypoint_distance = 150
 x,y = 1229, 900
 def calc_waypoints(ball):
     # Example logic to calculate waypoints based on the ball's coordinates and obstacle
@@ -40,6 +40,18 @@ def calc_waypoints(ball):
         ball.add_waypoint(waypoint)
     elif ball.obstacle == 4:
         waypoint = Waypoint(waypoint_distance, y - waypoint_distance)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 5:
+        waypoint = Waypoint(ball.x, ball.y + waypoint_distance)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 6:
+        waypoint = Waypoint(ball.x + waypoint_distance, ball.y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 7:
+        waypoint = Waypoint(ball.x, ball.y - waypoint_distance)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 8:
+        waypoint = Waypoint(ball.x - waypoint_distance, ball.y)
         ball.add_waypoint(waypoint)
 
     # Return the ball object (optional, since modifications are in-place)
