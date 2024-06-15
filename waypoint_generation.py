@@ -1,3 +1,5 @@
+import json
+
 class Waypoint:
     def __init__(self, x, y):
         self.x = x
@@ -25,6 +27,10 @@ class Ball:
 waypoint_distance = 150
 x,y = 1229, 900
 def calc_waypoints(ball):
+    with open('no_go_zones.json', 'r') as file:
+        data = json.load(file)
+    cross_angle = data[2][1]
+    cross_center = data[2][0]
     # Example logic to calculate waypoints based on the ball's coordinates and obstacle
     if ball.obstacle == 0:
         print("No waypoints added")
@@ -53,6 +59,11 @@ def calc_waypoints(ball):
     elif ball.obstacle == 8:
         waypoint = Waypoint(ball.x - waypoint_distance, ball.y)
         ball.add_waypoint(waypoint)
+    elif ball.obstacle == 9:
+        waypoint = Waypoint()
+        ball.add_waypoint(waypoint)
 
     # Return the ball object (optional, since modifications are in-place)
     return ball
+
+
