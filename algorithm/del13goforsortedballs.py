@@ -149,6 +149,7 @@ def stop_rotation(car):
     car.is_rotating = False
     car.rotation_direction = 0
 
+#Marta... de der fart-enheder er skøre
 def move_to_targetv2(target_position, car, canvas, ball):
     # Initialize PID controllers
     Kp_angle, Ki_angle, Kd_angle = 0.001, 0, 0.05
