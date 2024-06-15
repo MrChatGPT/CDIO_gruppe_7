@@ -1,4 +1,5 @@
 import json
+import math
 
 class Waypoint:
     def __init__(self, x, y):
@@ -60,7 +61,52 @@ def calc_waypoints(ball):
         waypoint = Waypoint(ball.x - waypoint_distance, ball.y)
         ball.add_waypoint(waypoint)
     elif ball.obstacle == 9:
-        waypoint = Waypoint()
+        angle_rad = math.radians(cross_angle + 270)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 10:
+        angle_rad = math.radians(cross_angle + 180)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 11:
+        angle_rad = math.radians(cross_angle + 90)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 12:
+        angle_rad = math.radians(cross_angle)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 13:
+        angle_rad = math.radians(cross_angle + 45)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 14:
+        angle_rad = math.radians(cross_angle + 45 + 90)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 15:
+        angle_rad = math.radians(cross_angle + 45 + 90 * 2)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
+        ball.add_waypoint(waypoint)
+    elif ball.obstacle == 16:
+        angle_rad = math.radians(cross_angle + 45 + 90 * 3)
+        waypoint_x = cross_center[0] + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross_center[1] + waypoint_distance * math.sin(angle_rad)
+        waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
 
     # Return the ball object (optional, since modifications are in-place)
