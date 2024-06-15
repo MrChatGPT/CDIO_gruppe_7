@@ -214,9 +214,13 @@ def animate_carv2(canvas, car, targetX, targetY, coord_label, ball, list):
             id = canvas.find_closest(targetX,targetY)
             canvas.delete(id)
             print("removing ball from list...")
-            ball_coordinates.remove(list[0])
-            print(ball_coordinates)
-            sortList = sorted(ball_coordinates, key=lambda ball: Distance((car.x,car.y), ball))
+            if len(list) != 0:
+                list.remove(list[0])
+            if len(list) == 0:
+                list = generate_random_coordinates(10, (25, 1100), (25, 800))#(70, 70), (1200, 800)
+                ball = draw_balls(canvas, list)
+            print(list)
+            sortList = sorted(list, key=lambda ball: Distance((car.x,car.y), ball))
             print(f"Shortest ball at: {sortList[0]}")
             targetX, targetY = sortList[0]
             coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
@@ -245,9 +249,13 @@ def generate_random_coordinates(num_balls, x_range, y_range):
 def draw_balls(canvas, coordinates):
     balls = []
     for (x, y) in coordinates:
-        ball_id =canvas.create_oval(x-10, y-10, x+10, y+10, fill="white")
-        balls.append(ball_id)
+        ball_id = canvas.create_oval(x-10, y-10, x+10, y+10, fill="white")
+        if ball_id == 5:
+            canvas.delete(5)
+            ball_id = canvas.create_oval(x-10, y-10, x+10, y+10, fill="orange")
 
+        balls.append(ball_id)
+    print(balls)
     return balls
 
 def delete_balls(canvas, balls):
@@ -287,6 +295,7 @@ def run_car():
     canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
     canvas.pack()
     draw_rectangle(canvas)
+    ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))#(70, 70), (1200, 800)
     print(ball_coordinates)
     # Draw balls on the canvas at the generated coordinates
     balls = draw_balls(canvas, ball_coordinates)
@@ -302,7 +311,7 @@ def run_car():
     #Get only 1 ball in arena
     #targetX, targetY = 500, 300  # Changed target coordinates for better visibility
     #ball = draw_ball(canvas, targetX, targetY)
-
+    
     SortedList = sorted(ball_coordinates, key=lambda ball: Distance((car.x,car.y), ball))
     print(f"Shortest ball at: {SortedList[0]}")
     targetX, targetY = SortedList[0]
@@ -321,6 +330,6 @@ def run_car():
     window.mainloop()
 
 #myballs()
-ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))#(70, 70), (1200, 800)
+
 run_car()
 
