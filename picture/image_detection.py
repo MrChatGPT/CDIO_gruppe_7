@@ -570,10 +570,6 @@ def check_point_in_orange_region(contours):
     saveOrange_balls(orange_balls)
     saveWhite_balls(white_balls)
 
-def save_no_go_zones(zones, filename="no_go_zones.json"):
-    with open(filename, 'w') as file:
-        json.dump(zones, file)
-
 def rgb_to_hsv(rgb):
     color = np.uint8([[rgb]])
     hsv_color = cv2.cvtColor(color, cv2.COLOR_RGB2HSV)
