@@ -342,12 +342,12 @@ def detect_ball_colors(image):
                 
                 cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
                 
-                no_go_zones = []
-                no_go_zones.append([
+                no_go_zones = [
                     (end1, end2),
-                    (end3, end4)
-                ])
-
+                    (end3, end4),
+                    (center, angle)
+                ]
+                
                 save_no_go_zones(no_go_zones)
 
                     
