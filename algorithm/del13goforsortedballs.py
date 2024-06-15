@@ -2,6 +2,8 @@ import tkinter as tk
 from math import radians, cos, sin, atan2, pi
 import math
 import random
+import numpy as np
+
 
 class Car:
     def __init__(self, canvas, x, y, angle):
@@ -156,7 +158,7 @@ def move_to_targetv2(target_position, car, canvas, ball):
     
     # Commands
     comswallow = (0, 0, 0, 1, 0)
-    print(f"in move to target v2")  # Debug rotation direction
+    #print(f"in move to target v2")  # Debug rotation direction
     # De-structure the target position
     target_x, target_y = target_position
     position_threshold = 70 #185
@@ -165,12 +167,12 @@ def move_to_targetv2(target_position, car, canvas, ball):
     # Load car values into the car object
     current_x, current_y, current_angle = car.x, car.y, car.angle
     
-    print(f"Desired position: {target_position}\nMy position: ({current_x}, {current_y}), angle: {current_angle}")
+    #print(f"Desired position: {target_position}\nMy position: ({current_x}, {current_y}), angle: {current_angle}")
     
     # Calculate distance and desired angle
     distance = math.sqrt((target_x - current_x) ** 2 + (target_y - current_y) ** 2)
     desired_angle = (math.degrees(atan2(target_y - current_y, target_x - current_x)) - 90) % 360
-    print(f"Desired angle: {desired_angle}\n")
+    #print(f"Desired angle: {desired_angle}\n")
     
     angle_error = (desired_angle - current_angle) % 360
     if angle_error > 180:
@@ -178,13 +180,11 @@ def move_to_targetv2(target_position, car, canvas, ball):
     
     if (distance < position_threshold) and (abs(angle_error) < angle_threshold):
         print("Target reached!")
-        canvas.after(17, lambda: delete_ball(canvas, ball))   #100
-        # canvas.delete(ball)
         publish_controller_data((0, 0, 0, 1, 0), car, canvas)  # Activate intake at target
         return 1
 
     # Angle correction
-    print(f"Angle error: {abs(angle_error)}\n")
+    #print(f"Angle error: {abs(angle_error)}\n")
     if abs(angle_error) > angle_threshold:
         angle_correction = angle_pid.calculate(0, angle_error)
         if angle_error > 0:
@@ -204,6 +204,26 @@ def animate_car(canvas, car, targetX, targetY, coord_label, ball):
     if move_to_targetv2((targetX, targetY), car, canvas, ball) == 0:
         coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
         canvas.after(17, animate_car, canvas, car, targetX, targetY, coord_label, ball) #100
+        
+
+def animate_carv2(canvas, car, targetX, targetY, coord_label, ball, list):
+        if move_to_targetv2((targetX, targetY), car, canvas, ball) == 0:
+            coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
+            canvas.after(17, animate_carv2, canvas, car, targetX, targetY, coord_label, ball, list) #100
+        else:
+            id = canvas.find_closest(targetX,targetY)
+            canvas.delete(id)
+            print("removing ball from list...")
+            ball_coordinates.remove(list[0])
+            print(ball_coordinates)
+            sortList = sorted(ball_coordinates, key=lambda ball: Distance((car.x,car.y), ball))
+            print(f"Shortest ball at: {sortList[0]}")
+            targetX, targetY = sortList[0]
+            coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
+            canvas.after(17, animate_carv2, canvas, car, targetX, targetY, coord_label, ball, sortList) #100
+                
+    
+    
 
 
 
@@ -255,50 +275,67 @@ def myballs():
     ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))#(70, 70), (1200, 800)
     # Draw balls on the canvas at the generated coordinates
     balls = draw_balls(canvas, ball_coordinates)
+    
     # canvas.after(4000, lambda: delete_balls(canvas, balls))  # Schedule stop after 400ms
     window.mainloop()
     
-
+def Distance(p1, p2):
+     return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
 
 ###Where the program begins###
 def run_car():
-    window = tk.Tk()
-    window.title("Car Rotation")
-    window.resizable(False,False)
-    canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
-    canvas.pack()
-    draw_rectangle(canvas)
+    #do once:
+    try:
+        window = tk.Tk()
+        window.title("Car Rotation")
+        window.resizable(False,False)
+        canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
+        canvas.pack()
+        draw_rectangle(canvas)
+        print(ball_coordinates)
+        # Draw balls on the canvas at the generated coordinates
+        balls = draw_balls(canvas, ball_coordinates)
+        print(balls)
+        car = Car(canvas, 75, 75, 0)
+        car.angle = 0
+        draw_car(canvas, car)
 
-    car = Car(canvas, 75, 75, 0)
-    car.angle = 0
-    draw_car(canvas, car)
+        car.rotate()
 
-    car.rotate()
+        coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
 
-    coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
+        #Get only 1 ball in arena
+        #targetX, targetY = 500, 300  # Changed target coordinates for better visibility
+        #ball = draw_ball(canvas, targetX, targetY)
 
-    #Get only 1 ball in arena
-    targetX, targetY = 500, 300  # Changed target coordinates for better visibility
-    ball = draw_ball(canvas, targetX, targetY)
+        SortedList = sorted(ball_coordinates, key=lambda ball: Distance((car.x,car.y), ball))
+        print(f"Shortest ball at: {SortedList[0]}")
+        targetX, targetY = SortedList[0]
+        #animate_car(canvas, car, targetX, targetY, coord_label, balls)
+        animate_carv2(canvas, car, targetX, targetY, coord_label, balls, SortedList)
 
- 
-    animate_car(canvas, car, targetX, targetY, coord_label, ball)
+                
+        #WHEN ADDING MULTIPLE BALLS
+        # ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))
+        # Draw balls on the canvas at the generated coordinates
+        # balls = draw_balls(canvas, ball_coordinates)
+        # animate_car(canvas, car, ball_coordinates, coord_label, balls)
+
+        coord_label.pack()
+        canvas.bind('<Motion>', lambda event: update_mouse_coordinates(event, coord_label))
+        window.mainloop()
+
+
         
-    #WHEN ADDING MULTIPLE BALLS
-    # ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))
-    # Draw balls on the canvas at the generated coordinates
-    # balls = draw_balls(canvas, ball_coordinates)
-    # animate_car(canvas, car, ball_coordinates, coord_label, balls)
-
-    coord_label.pack()
-    canvas.bind('<Motion>', lambda event: update_mouse_coordinates(event, coord_label))
-
-    window.mainloop()
+    finally:
+        exit(0)
 
 
 
 
 
+#myballs()
+ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))#(70, 70), (1200, 800)
 run_car()
-# myballs()
+
