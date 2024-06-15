@@ -1,6 +1,7 @@
 import tkinter as tk
 from math import radians, cos, sin, atan2, pi
 import math
+import random
 
 class Car:
     def __init__(self, canvas, x, y, angle):
@@ -122,10 +123,10 @@ def publish_controller_data(command, car, canvas):
     new_y = car.y + dy_rot
 
     # Define the rectangle boundaries
-    left_bound = 10
-    right_bound = 1250 - 10
-    top_bound = 10
-    bottom_bound = 900 - 10
+    left_bound = 50 #10
+    right_bound = 1250 - 50 #10
+    top_bound = 50 #10
+    bottom_bound = 900 - 50 #10
 
     if left_bound < new_x < right_bound and top_bound < new_y < bottom_bound:
         canvas.move(car.shape, dx_rot, dy_rot)
@@ -208,20 +209,45 @@ def animate_car(canvas, car, targetX, targetY, coord_label, ball):
 
 def draw_ball(canvas, targetX, targetY):
  
-    ball = canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
+    ball = canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='white')
   
     # Return the ids
     return ball
-
-
 
 def delete_ball(canvas, ball):
     canvas.delete(ball)
     return
 
+def generate_random_coordinates(num_balls, x_range, y_range):
+    coordinates = []
+    for _ in range(num_balls):
+        x = random.randint(x_range[0], x_range[1])
+        y = random.randint(y_range[0], y_range[1])
+        coordinates.append((x, y))
+    return coordinates
 
 
+def draw_balls(canvas, coordinates):
+    balls = []
+    for (x, y) in coordinates:
+        ball_id =canvas.create_oval(x-10, y-10, x+10, y+10, fill="white")
+        balls.append(ball_id)
 
+    return balls
+
+
+def myballs():
+    window = tk.Tk()
+    window.title("Car Rotation")
+    window.resizable(False,False)
+    canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
+    canvas.pack()
+    draw_rectangle(canvas)
+    ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))#(70, 70), (1200, 800)
+    # Draw balls on the canvas at the generated coordinates
+    draw_balls(canvas, ball_coordinates)
+    window.mainloop()
+    
 
 ###Where the program begins###
 def rotate_car():
@@ -240,16 +266,28 @@ def rotate_car():
 
     coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
 
-    targetX, targetY = 1200, 200  # Changed target coordinates for better visibility
-
-    # canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
-  
+    #Get only 1 ball in arena
+    targetX, targetY = 500, 300  # Changed target coordinates for better visibility
     ball = draw_ball(canvas, targetX, targetY)
+
+ 
     animate_car(canvas, car, targetX, targetY, coord_label, ball)
+        
+    #WHEN ADDING MULTIPLE BALLS
+    # ball_coordinates = generate_random_coordinates(10, (25, 1100), (25, 800))
+    # Draw balls on the canvas at the generated coordinates
+    # balls = draw_balls(canvas, ball_coordinates)
+    
+    # animate_car(canvas, car, ball_coordinates, coord_label, balls)
 
     coord_label.pack()
     canvas.bind('<Motion>', lambda event: update_mouse_coordinates(event, coord_label))
 
     window.mainloop()
 
-rotate_car()
+
+
+
+
+# rotate_car()
+myballs()

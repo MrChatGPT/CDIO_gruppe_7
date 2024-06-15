@@ -195,10 +195,11 @@ def move_car(canvas, car, command):
 #     canvas.after(250, animate_car, canvas, car, targetX, targetY, coord_label, green_dot_y_range)
 
 def is_within_boundaries(new_x, new_y):
-    left_bound = 30  #10
+    #70 all
+    left_bound = 70  #10 #30
     right_bound = 1250 - 70 #30
-    top_bound = 30   #10
-    bottom_bound = 900 - 70 #30
+    top_bound = 70   #10 #30
+    bottom_bound = 900 - 70 #30  
     return left_bound <= new_x <= right_bound and top_bound <= new_y <= bottom_bound
 
 
