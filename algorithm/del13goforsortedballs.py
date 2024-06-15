@@ -250,8 +250,8 @@ def draw_balls(canvas, coordinates):
     balls = []
     for (x, y) in coordinates:
         ball_id = canvas.create_oval(x-10, y-10, x+10, y+10, fill="white")
-        if ball_id == 5:
-            canvas.delete(5)
+        if ball_id % 10 == 0:
+            canvas.delete(ball_id)
             ball_id = canvas.create_oval(x-10, y-10, x+10, y+10, fill="orange")
 
         balls.append(ball_id)
