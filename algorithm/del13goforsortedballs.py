@@ -163,7 +163,7 @@ def move_to_targetv2(target_position, car, canvas, ball):
     # De-structure the target position
     target_x, target_y = target_position
     position_threshold = 70 #185
-    angle_threshold = 11
+    angle_threshold = 5
     
     # Load car values into the car object
     current_x, current_y, current_angle = car.x, car.y, car.angle
