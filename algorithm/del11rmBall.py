@@ -177,7 +177,7 @@ def move_to_targetv2(target_position, car, canvas, ball):
     
     if (distance < position_threshold) and (abs(angle_error) < angle_threshold):
         print("Target reached!")
-        canvas.after(100, lambda: delete_balls(canvas, ball))  
+        canvas.after(100, lambda: delete_ball(canvas, ball))  
         # canvas.delete(ball)
         publish_controller_data((0, 0, 0, 1, 0), car, canvas)  # Activate intake at target
         return 1
@@ -206,7 +206,7 @@ def animate_car(canvas, car, targetX, targetY, coord_label, ball):
 
 
 
-def draw_shapes(canvas, targetX, targetY):
+def draw_ball(canvas, targetX, targetY):
  
     ball = canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
   
@@ -215,7 +215,7 @@ def draw_shapes(canvas, targetX, targetY):
 
 
 
-def delete_balls(canvas, ball):
+def delete_ball(canvas, ball):
     canvas.delete(ball)
     return
 
@@ -227,6 +227,7 @@ def delete_balls(canvas, ball):
 def rotate_car():
     window = tk.Tk()
     window.title("Car Rotation")
+    window.resizable(False,False)
     canvas = tk.Canvas(window, width=1260, height=910, bg='lightgrey')
     canvas.pack()
     draw_rectangle(canvas)
@@ -239,11 +240,11 @@ def rotate_car():
 
     coord_label = tk.Label(window, text="Car Coordinates: x=200, y=200")
 
-    targetX, targetY = 600, 200  # Changed target coordinates for better visibility
+    targetX, targetY = 1200, 200  # Changed target coordinates for better visibility
 
     # canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
   
-    ball = draw_shapes(canvas, targetX, targetY)
+    ball = draw_ball(canvas, targetX, targetY)
     animate_car(canvas, car, targetX, targetY, coord_label, ball)
 
     coord_label.pack()
