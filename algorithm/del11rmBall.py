@@ -146,7 +146,7 @@ def stop_rotation(car):
     car.is_rotating = False
     car.rotation_direction = 0
 
-def move_to_targetv2(target_position, car, canvas):
+def move_to_targetv2(target_position, car, canvas, ball):
     # Initialize PID controllers
     Kp_angle, Ki_angle, Kd_angle = 0.001, 0, 0.05
     Kp_dist, Ki_dist, Kd_dist = 0.01, 0, 0.05
@@ -158,7 +158,7 @@ def move_to_targetv2(target_position, car, canvas):
     print(f"in move to target v2")  # Debug rotation direction
     # De-structure the target position
     target_x, target_y = target_position
-    position_threshold = 100 #185
+    position_threshold = 70 #185
     angle_threshold = 11
     
     # Load car values into the car object
@@ -177,6 +177,8 @@ def move_to_targetv2(target_position, car, canvas):
     
     if (distance < position_threshold) and (abs(angle_error) < angle_threshold):
         print("Target reached!")
+        canvas.after(100, lambda: delete_balls(canvas, ball))  
+        # canvas.delete(ball)
         publish_controller_data((0, 0, 0, 1, 0), car, canvas)  # Activate intake at target
         return 1
 
@@ -197,11 +199,31 @@ def move_to_targetv2(target_position, car, canvas):
     publish_controller_data((0, forward_speed, 0, 0, 0), car, canvas)  # Move forward
     return 0
 
-def animate_car(canvas, car, targetX, targetY, coord_label):
-    if move_to_targetv2((targetX, targetY), car, canvas) == 0:
+def animate_car(canvas, car, targetX, targetY, coord_label, ball):
+    if move_to_targetv2((targetX, targetY), car, canvas, ball) == 0:
         coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
-        canvas.after(100, animate_car, canvas, car, targetX, targetY, coord_label)
+        canvas.after(100, animate_car, canvas, car, targetX, targetY, coord_label, ball)
 
+
+
+def draw_shapes(canvas, targetX, targetY):
+ 
+    ball = canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
+  
+    # Return the ids
+    return ball
+
+
+
+def delete_balls(canvas, ball):
+    canvas.delete(ball)
+    return
+
+
+
+
+
+###Where the program begins###
 def rotate_car():
     window = tk.Tk()
     window.title("Car Rotation")
@@ -219,9 +241,10 @@ def rotate_car():
 
     targetX, targetY = 600, 200  # Changed target coordinates for better visibility
 
-    canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
-
-    animate_car(canvas, car, targetX, targetY, coord_label)
+    # canvas.create_oval(targetX - 10, targetY - 10, targetX + 10, targetY + 10, outline="black", width=2, fill='pink')
+  
+    ball = draw_shapes(canvas, targetX, targetY)
+    animate_car(canvas, car, targetX, targetY, coord_label, ball)
 
     coord_label.pack()
     canvas.bind('<Motion>', lambda event: update_mouse_coordinates(event, coord_label))
