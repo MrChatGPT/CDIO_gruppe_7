@@ -141,7 +141,7 @@ def publish_controller_data(command, car, canvas):
         car.is_rotating = True
         car.rotation_direction = 1 if rotation > 0 else -1
         print(f"Rotating with direction: {car.rotation_direction}")  # Debug rotation direction
-        canvas.after(200, lambda: stop_rotation(car))  # Schedule stop after 200ms
+        canvas.after(17, lambda: stop_rotation(car))  # Schedule stop after 200ms
 
 def stop_rotation(car):
     car.is_rotating = False
@@ -178,7 +178,7 @@ def move_to_targetv2(target_position, car, canvas, ball):
     
     if (distance < position_threshold) and (abs(angle_error) < angle_threshold):
         print("Target reached!")
-        canvas.after(100, lambda: delete_ball(canvas, ball))  
+        canvas.after(17, lambda: delete_ball(canvas, ball))   #100
         # canvas.delete(ball)
         publish_controller_data((0, 0, 0, 1, 0), car, canvas)  # Activate intake at target
         return 1
@@ -203,7 +203,7 @@ def move_to_targetv2(target_position, car, canvas, ball):
 def animate_car(canvas, car, targetX, targetY, coord_label, ball):
     if move_to_targetv2((targetX, targetY), car, canvas, ball) == 0:
         coord_label.config(text=f"Car Coordinates: x={car.x}, y={car.y}, angle={car.angle}")
-        canvas.after(100, animate_car, canvas, car, targetX, targetY, coord_label, ball)
+        canvas.after(17, animate_car, canvas, car, targetX, targetY, coord_label, ball) #100
 
 
 
@@ -218,6 +218,7 @@ def delete_ball(canvas, ball):
     canvas.delete(ball)
     return
 
+## For multiple balls ##
 def generate_random_coordinates(num_balls, x_range, y_range):
     coordinates = []
     for _ in range(num_balls):
@@ -225,7 +226,6 @@ def generate_random_coordinates(num_balls, x_range, y_range):
         y = random.randint(y_range[0], y_range[1])
         coordinates.append((x, y))
     return coordinates
-
 
 def draw_balls(canvas, coordinates):
     balls = []
@@ -235,11 +235,9 @@ def draw_balls(canvas, coordinates):
 
     return balls
 
-# def delete_balls(canvas, balls):
-#     for ball_id in balls:
-#         canvas.delete(ball_id)
-     
-
+def delete_balls(canvas, balls):
+    for ball_id in balls:
+        canvas.delete(ball_id)
 
 def myballs():
     window = tk.Tk()
@@ -261,8 +259,10 @@ def myballs():
     window.mainloop()
     
 
+
+
 ###Where the program begins###
-def rotate_car():
+def run_car():
     window = tk.Tk()
     window.title("Car Rotation")
     window.resizable(False,False)
@@ -301,5 +301,5 @@ def rotate_car():
 
 
 
-# rotate_car()
-myballs()
+run_car()
+# myballs()
