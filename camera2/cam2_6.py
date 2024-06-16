@@ -12,6 +12,8 @@ class Camera2:
         self.hsv_upper_white = np.array([180, 58, 255])
         self.hsv_lower_orange = np.array([12, 186, 222])
         self.hsv_upper_orange = np.array([180, 255, 255])
+        self.hsv_lower_blue_LED = np.array([100, 100, 100])
+        self.hsv_upper_blue_LED = np.array([140, 255, 255])
 
         self.morph = True
         self.morph_points = None
@@ -21,6 +23,7 @@ class Camera2:
         self.white_ball_centers = []
         self.egg_center = None
         self.orange_blob_centers = []
+        self.blue_LED_centers = []
         self.last_cross_angle = 0  # Initialize the last found rotation angle
         self.M = None  # Transformation matrix
         self.last_valid_points = None  # Store last valid points
@@ -36,6 +39,8 @@ class Camera2:
             hsv_lower, hsv_upper = self.hsv_lower_white, self.hsv_upper_white
         elif color == 'orange':
             hsv_lower, hsv_upper = self.hsv_lower_orange, self.hsv_upper_orange
+        elif color == 'blue_LED':
+            hsv_lower, hsv_upper = self.hsv_lower_blue_LED, self.hsv_upper_blue_LED
 
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, hsv_lower, hsv_upper)
@@ -45,6 +50,7 @@ class Camera2:
         return contours, processed_mask
 
     def find_sharpest_corners_method1(self, contour, num_corners=4, epsilon_factor=0.02):
+
         # Approximate the contour with a simpler polygon
         epsilon = epsilon_factor * cv2.arcLength(contour, True)
         approx_corners = cv2.approxPolyDP(contour, epsilon, True)
@@ -164,12 +170,13 @@ class Camera2:
         return centers
 
     def find_white_blobs(self):
-        if self.morphed_frame is None:
+        if self.morph and self.morphed_frame is None:
             print("Morphed image is not available.")
             return False
 
-        contours, _ = self.mask_and_find_contours(
-            self.morphed_frame, color='white')
+        target_frame = self.morphed_frame if self.morph else self.frame
+
+        contours, _ = self.mask_and_find_contours(target_frame, color='white')
 
         if not contours:
             return False
@@ -178,7 +185,7 @@ class Camera2:
             contours, min_length=10, reverse=True)
 
         if len(sorted_contours) == 1:
-            egg_contour = contours[0]
+            egg_contour = sorted_contours[0]
             white_ball_contours = []
             self.egg_center = self.find_centers_in_contour_list([egg_contour])[
                 0]
@@ -198,12 +205,9 @@ class Camera2:
             return True
 
     def find_orange_blobs(self):
-        if self.morphed_frame is None:
-            print("Morphed image is not available.")
-            return False
+        target_frame = self.morphed_frame if self.morph else self.frame
 
-        contours, _ = self.mask_and_find_contours(
-            self.morphed_frame, color='orange')
+        contours, _ = self.mask_and_find_contours(target_frame, color='orange')
 
         if not contours:
             return False
@@ -216,8 +220,25 @@ class Camera2:
 
         return bool(self.orange_blob_centers)
 
+    def find_blue_LED_blobs(self):
+        target_frame = self.morphed_frame if self.morph else self.frame
+
+        contours, _ = self.mask_and_find_contours(
+            target_frame, color='blue_LED')
+
+        if not contours:
+            return False
+
+        sorted_contours = self.sort_contours_by_length(
+            contours, min_length=10, reverse=True)
+
+        self.blue_LED_centers = self.find_centers_in_contour_list(
+            sorted_contours)
+
+        return bool(self.blue_LED_centers)
+
     def process_frame(self):
-        try:
+        if self.morph:
             # Mask and find contours
             contours, _ = self.mask_and_find_contours(
                 self.frame, color='red')
@@ -230,18 +251,17 @@ class Camera2:
                 cross_contour = sorted_contours[2]
 
                 # Find sharpest corners
-                if self.morph:
-                    corners = self.find_sharpest_corners_method1(
-                        arena_contour)  # Method 1 is faster
+                corners = self.find_sharpest_corners_method1(
+                    arena_contour)  # Method 1 is faster
 
-                    if corners is not None and len(corners) == 4:
-                        corners = np.array([corner.ravel()
-                                            for corner in corners], dtype="float32")
+                if corners is not None and len(corners) == 4:
+                    corners = np.array([corner.ravel()
+                                        for corner in corners], dtype="float32")
 
-                        # Perform perspective transform
-                        if not self.four_point_transform(self.frame, corners):
-                            print("Skipping frame due to invalid morph points.")
-                            return
+                    # Perform perspective transform
+                    if not self.four_point_transform(self.frame, corners):
+                        print("Skipping frame due to invalid morph points.")
+                        return
 
                     # Process cross contour in the transformed image
                     if cross_contour is not None:
@@ -252,37 +272,79 @@ class Camera2:
                         self.fit_rotated_cross_to_contour_method1(
                             transformed_contour.astype(int))
 
-                else:
-                    self.morphed_frame = self.frame
-                    self.fit_rotated_cross_to_contour_method1(cross_contour)
+                    # Find and draw white blobs
+                    self.find_white_blobs()
+                    self.find_orange_blobs()
+                    self.find_blue_LED_blobs()
 
-                # Find and draw white blobs
-                self.find_white_blobs()
-                self.find_orange_blobs()
+                    # Draw on the morphed frame
+                    if self.white_ball_centers:
+                        for center in self.white_ball_centers:
+                            cv2.circle(self.morphed_frame,
+                                       center, 3, (0, 255, 0), -1)
 
-                # Draw on the morphed frame
-                if self.white_ball_centers:
-                    for center in self.white_ball_centers:
+                    if self.egg_center is not None:
                         cv2.circle(self.morphed_frame,
-                                   center, 3, (0, 255, 0), -1)
+                                   self.egg_center, 3, (0, 0, 255), -1)
 
-                if self.egg_center is not None:
+                    if self.cross_lines:
+                        for line in self.cross_lines:
+                            cv2.line(self.morphed_frame,
+                                     line[0], line[1], (255, 0, 0), 2)
+
+                    if self.orange_blob_centers:
+                        for center in self.orange_blob_centers:
+                            cv2.circle(self.morphed_frame, center,
+                                       3, (0, 165, 255), -1)
+
+                    if self.blue_LED_centers:
+                        for center in self.blue_LED_centers:
+                            cv2.circle(self.morphed_frame, center,
+                                       3, (255, 0, 0), -1)
+        else:
+            # When not morphing, draw directly on the frame
+            self.morphed_frame = self.frame.copy()
+
+            # Mask and find contours
+            contours, _ = self.mask_and_find_contours(
+                self.frame, color='red')
+            sorted_contours = self.sort_contours_by_length(
+                contours, min_length=200, reverse=True)
+
+            if len(sorted_contours) > 2:
+                # Get cross contour
+                cross_contour = sorted_contours[2]
+                self.fit_rotated_cross_to_contour_method1(cross_contour)
+
+            # Find and draw white blobs
+            self.find_white_blobs()
+            self.find_orange_blobs()
+            self.find_blue_LED_blobs()
+
+            # Draw on the original frame
+            if self.white_ball_centers:
+                for center in self.white_ball_centers:
                     cv2.circle(self.morphed_frame,
-                               self.egg_center, 3, (0, 0, 255), -1)
+                               center, 3, (0, 255, 0), -1)
 
-                if self.cross_lines:
-                    for line in self.cross_lines:
-                        cv2.line(self.morphed_frame,
-                                 line[0], line[1], (255, 0, 0), 2)
+            if self.egg_center is not None:
+                cv2.circle(self.morphed_frame,
+                           self.egg_center, 3, (0, 0, 255), -1)
 
-                if self.orange_blob_centers:
-                    for center in self.orange_blob_centers:
-                        cv2.circle(self.morphed_frame, center,
-                                   3, (0, 255, 255), -1)
-            else:
-                self.morphed_frame = self.frame
-        except IndexError as e:
-            self.morphed_frame = self.frame
+            if self.cross_lines:
+                for line in self.cross_lines:
+                    cv2.line(self.morphed_frame,
+                             line[0], line[1], (255, 0, 0), 2)
+
+            if self.orange_blob_centers:
+                for center in self.orange_blob_centers:
+                    cv2.circle(self.morphed_frame, center,
+                               3, (0, 255, 0), -1)
+
+            if self.blue_LED_centers:
+                for center in self.blue_LED_centers:
+                    cv2.circle(self.morphed_frame, center,
+                               3, (255, 0, 0), -1)
 
     def resize_with_aspect_ratio(self, image, width=None, height=None, inter=cv2.INTER_AREA):
         (h, w) = image.shape[:2]
@@ -375,6 +437,9 @@ class Camera2:
         elif color == 'orange':
             h_lower, s_lower, v_lower = self.hsv_lower_orange
             h_upper, s_upper, v_upper = self.hsv_upper_orange
+        elif color == 'blue_LED':
+            h_lower, s_lower, v_lower = self.hsv_lower_blue_LED
+            h_upper, s_upper, v_upper = self.hsv_upper_blue_LED
 
         cv2.createTrackbar('H Lower', 'Calibration', h_lower, 180, nothing)
         cv2.createTrackbar('S Lower', 'Calibration', s_lower, 255, nothing)
@@ -417,6 +482,9 @@ class Camera2:
                 elif color == 'orange':
                     self.hsv_lower_orange = lower_hsv
                     self.hsv_upper_orange = upper_hsv
+                elif color == 'blue_LED':
+                    self.hsv_lower_blue_LED = lower_hsv
+                    self.hsv_upper_blue_LED = upper_hsv
                 break
             elif key == ord('q'):
                 break
@@ -439,4 +507,7 @@ if __name__ == "__main__":
     # Uncomment the line below to calibrate the orange color
     # camera.calibrate_color('orange')
 
-    camera.start_video_stream(video_path, morph=True)
+    # Uncomment the line below to calibrate the blue_LED color
+    camera.calibrate_color('blue_LED')
+
+    camera.start_video_stream(video_path, morph=False)

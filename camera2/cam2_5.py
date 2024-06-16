@@ -439,4 +439,4 @@ if __name__ == "__main__":
     # Uncomment the line below to calibrate the orange color
     # camera.calibrate_color('orange')
 
-    camera.start_video_stream(video_path, morph=True)
+    camera.start_video_stream(video_path, morph=False)
