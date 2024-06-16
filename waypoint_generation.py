@@ -14,6 +14,7 @@ class Ball:
         self.waypoints = []
 
     def add_waypoint(self, waypoint):
+        print(f"Waypoint added at: {waypoint}, on {self}")
         self.waypoints.append(waypoint)
 
     def clear_waypoints(self):
@@ -148,4 +149,10 @@ def other_waypoints():
     
     """
     
+def run():
+    ball = Ball(5,10,1)
+    calc_obstacle_waypoints(ball)
+    print(ball)
 
+
+run()
