@@ -1,5 +1,5 @@
 import tkinter as tk
-import algorithm 
+# import algorithm 
 
 
 
