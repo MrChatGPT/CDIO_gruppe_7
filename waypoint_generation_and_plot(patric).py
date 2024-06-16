@@ -92,16 +92,32 @@ def get_quadrant(point, center):
     elif point.x >= center[0] and point.y >= center[1]:
         return 4  # Bottom-right
 
+def get_closest_quadrants(first_quadrant):
+    if first_quadrant == 1:
+        return [2, 4]
+    elif first_quadrant == 2:
+        return [1, 3]
+    elif first_quadrant == 3:
+        return [2, 4]
+    elif first_quadrant == 4:
+        return [1, 3]
+
 def calc_obstacle_waypoints(ball, car, cross_segments):
-    cross_length = 100
     waypoint_distance = 150  # Distance from ball location to put waypoint
     cross_center = calc_cross_center(cross_segments)
 
     if ball.obstacle == 0:
         print("No waypoints added")
     else:
-        angle = 45  # Default angle for obstacles 1-4, 13-16
-        if ball.obstacle == 5:
+        if ball.obstacle == 1:
+            angle = 45
+        elif ball.obstacle == 2:
+            angle = 135
+        elif ball.obstacle == 3:
+            angle = 315
+        elif ball.obstacle == 4:
+            angle = 225
+        elif ball.obstacle == 5:
             angle = 90
         elif ball.obstacle == 6:
             angle = 0
@@ -110,21 +126,21 @@ def calc_obstacle_waypoints(ball, car, cross_segments):
         elif ball.obstacle == 8:
             angle = 180
         elif ball.obstacle == 9:
-            angle = 270
-        elif ball.obstacle == 10:
-            angle = 180
-        elif ball.obstacle == 11:
-            angle = 90
-        elif ball.obstacle == 12:
             angle = 0
+        elif ball.obstacle == 10:
+            angle = 270
+        elif ball.obstacle == 11:
+            angle = 180
+        elif ball.obstacle == 12:
+            angle = 90
         elif ball.obstacle == 13:
-            angle = 225  # 180 + 45
+            angle = 225
         elif ball.obstacle == 14:
-            angle = 135  # 90 + 45
+            angle = 135
         elif ball.obstacle == 15:
-            angle = 45  # 270 + 45
+            angle = 45
         elif ball.obstacle == 16:
-            angle = 315  # 270 + 45
+            angle = 315
 
         angle_rad = math.radians(angle)
         waypoint_x = ball.x + waypoint_distance * math.cos(angle_rad)
@@ -134,29 +150,28 @@ def calc_obstacle_waypoints(ball, car, cross_segments):
 
         # Check if the cross is between the car and waypoint, if so, add additional waypoints
         while is_crossed_by_line(car, ball.waypoints[-1], cross_segments):
-            add_additional_waypoint(ball, car, cross_segments, cross_length, waypoint_distance, cross_center)
+            add_additional_waypoint(ball, car, cross_segments, waypoint_distance, cross_center)
 
-def add_additional_waypoint(ball, car, cross_segments, cross_length, waypoint_distance, cross_center):
+def add_additional_waypoint(ball, car, cross_segments, waypoint_distance, cross_center):
     first_waypoint = ball.waypoints[-1]
-    quadrant = get_quadrant(first_waypoint, cross_center)
+    first_quadrant = get_quadrant(first_waypoint, cross_center)
+    closest_quadrants = get_closest_quadrants(first_quadrant)
 
-    if quadrant == 1:
-        nearby_quadrants = [(cross_center[0] + cross_length + waypoint_distance, cross_center[1] + cross_length + waypoint_distance),
-                            (cross_center[0] - cross_length - waypoint_distance, cross_center[1] + cross_length + waypoint_distance)]
-    elif quadrant == 2:
-        nearby_quadrants = [(cross_center[0] + cross_length + waypoint_distance, cross_center[1] + cross_length + waypoint_distance),
-                            (cross_center[0] + cross_length + waypoint_distance, cross_center[1] - cross_length - waypoint_distance)]
-    elif quadrant == 3:
-        nearby_quadrants = [(cross_center[0] + cross_length + waypoint_distance, cross_center[1] - cross_length - waypoint_distance),
-                            (cross_center[0] - cross_length - waypoint_distance, cross_center[1] - cross_length - waypoint_distance)]
-    elif quadrant == 4:
-        nearby_quadrants = [(cross_center[0] - cross_length - waypoint_distance, cross_center[1] + cross_length + waypoint_distance),
-                            (cross_center[0] - cross_length - waypoint_distance, cross_center[1] - cross_length - waypoint_distance)]
+    potential_quadrants = []
+    for quadrant in closest_quadrants:
+        if quadrant == 1:
+            potential_quadrants.append((cross_center[0] + waypoint_distance, cross_center[1] - waypoint_distance))
+        elif quadrant == 2:
+            potential_quadrants.append((cross_center[0] - waypoint_distance, cross_center[1] - waypoint_distance))
+        elif quadrant == 3:
+            potential_quadrants.append((cross_center[0] - waypoint_distance, cross_center[1] + waypoint_distance))
+        elif quadrant == 4:
+            potential_quadrants.append((cross_center[0] + waypoint_distance, cross_center[1] + waypoint_distance))
 
-    for x, y in nearby_quadrants:
+    for x, y in potential_quadrants:
         waypoint = Waypoint(x, y)
-        ball.add_waypoint(waypoint)
         if not is_crossed_by_line(car, waypoint, cross_segments):
+            ball.add_waypoint(waypoint)
             break
 
 def plot_coordinates(car, ball, cross_segments):
@@ -192,31 +207,30 @@ def plot_coordinates(car, ball, cross_segments):
     plt.grid()
     plt.show()
 
-
 def run():
-    #different balls:
-    #ball = Ball(33, 20, 1) #zone 1
-    #ball = Ball(1150, 50, 2) #zone 2
-    #ball = Ball(29, 875, 3) #zone 3
-    #ball = Ball(1150, 869, 4) #zone 4 
-    #ball = Ball(600, 30, 5) #zone 5
-    #ball = Ball(33, 450, 6) #zone 6
-    #ball = Ball(600, 862, 7) #zone 7
-    #ball = Ball(1150, 450, 8) #zone 8
-    #ball = Ball(598, 364, 9) #zone 9
-    #ball = Ball(515, 449, 10) #zone 10
-    #ball = Ball(598, 529, 11) #zone 11
-    #ball = Ball(682, 449, 12) #zone 12
-    #ball = Ball(580, 427, 13) #zone 13
-    #ball = Ball(585, 466, 14) #zone 14
-    #ball = Ball(612, 462, 15) #zone 15
-    ball = Ball(614, 427, 16) #zone 16
+    # Different balls
+    #ball = Ball(33, 20, 1)  # Zone 1
+    ball = Ball(1150, 50, 2)  # Zone 2
+    #ball = Ball(29, 875, 3)  # Zone 3
+    #ball = Ball(1150, 869, 4)  # Zone 4
+    #ball = Ball(600, 30, 5)  # Zone 5
+    #ball = Ball(33, 450, 6)  # Zone 6
+    #ball = Ball(600, 862, 7)  # Zone 7
+    #ball = Ball(1150, 450, 8)  # Zone 8
+    #ball = Ball(598, 364, 9)  # Zone 9
+    #ball = Ball(515, 449, 10)  # Zone 10
+    #ball = Ball(598, 529, 11)  # Zone 11
+    #ball = Ball(682, 449, 12)  # Zone 12
+    #ball = Ball(580, 427, 13)  # Zone 13
+    #ball = Ball(585, 466, 14)  # Zone 14
+    #ball = Ball(612, 462, 15)  # Zone 15
+    #ball = Ball(614, 427, 16)  # Zone 16
 
-    #Car placements each corner:
-    #car = Car(200, 100, 0) #top left
-    car = Car(200, 800, 0) #bottom left
-    #car = Car(1000, 800, 0) #bottom right
-    #car = Car(1000, 100, 0) #top right
+    # Car placements each corner
+    #car = Car(200, 100, 0)  # Top left
+    car = Car(200, 800, 0)  # Bottom left
+    #car = Car(1000, 800, 0)  # Bottom right
+    #car = Car(1000, 100, 0)  # Top right
 
     # Load cross segments from JSON file
     no_go_zones = [
