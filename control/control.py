@@ -3,9 +3,10 @@ from time import sleep
 from utils import MQTTClient, MyController
 from typing import Tuple, Optional
 
-controller = MyController() 
-client = MQTTClient(client_id='controller',loop_method='start')
+controller = MyController()
+client = MQTTClient(client_id='controller', loop_method='start')
 topic = 'robot/control'
+
 
 def publish_controller_data(command: Optional[Tuple[float, float, float, int, int]] = None):
     '''
@@ -18,24 +19,26 @@ def publish_controller_data(command: Optional[Tuple[float, float, float, int, in
     last_message = None
 
     def update_controller(command: Tuple[float, float, float, int, int]):
-        controller.motors = controller.calculate_wheel_speeds(command[0], command[1], command[2])
+        controller.motors = controller.calculate_wheel_speeds(
+            command[0], command[1], command[2])
         controller.R1_value = command[3]
         controller.L1_value = command[4]
-    
+
     def publish():
         nonlocal last_message
-        
-        new_message = (controller.motors, controller.R1_value, controller.L1_value)
-        #print(controller.R3_value, controller.L3_value)
-        
-        if new_message != last_message: # Only publish if message changed.
+
+        new_message = (controller.motors, controller.R1_value,
+                       controller.L1_value)
+        # print(controller.R3_value, controller.L3_value)
+
+        if new_message != last_message:  # Only publish if message changed.
             client.publish(topic, new_message)
             last_message = new_message
 
     if command is not None:
         update_controller(command)
         publish()
-    
+
     return publish
 
 
@@ -43,7 +46,7 @@ controller.new_data_callback = publish_controller_data()
 
 
 if __name__ == "__main__":
-    controller.start()  
+    controller.start()
     client.connect()
     while True:
-        
+        pass

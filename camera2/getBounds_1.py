@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
 
+
 def nothing(x):
     pass
+
 
 def mask_dark_matte_gray_with_contours(image):
     # Create a window
@@ -36,7 +38,8 @@ def mask_dark_matte_gray_with_contours(image):
         mask = cv2.inRange(hsv, lower_gray, upper_gray)
 
         # Find contours
-        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(
+            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Draw the contours on the original image
         contour_image = image.copy()
@@ -54,14 +57,16 @@ def mask_dark_matte_gray_with_contours(image):
     # Destroy all windows
     cv2.destroyAllWindows()
 
+
 def grab_first_frame(video_source):
     cap = cv2.VideoCapture(video_source)
     ret, frame = cap.read()
     cap.release()
     return frame if ret else None
 
+
 # Example usage:
-video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/seme.mp4"
+video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/output.avi"
 first_frame = grab_first_frame(video_path)
 
 if first_frame is not None:

@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from scipy.optimize import minimize
 
+
 class Camera2:
     def __init__(self, hsv_thresholds):
         self.hsv_lower, self.hsv_upper = hsv_thresholds
@@ -27,14 +28,17 @@ class Camera2:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self.hsv_lower, self.hsv_upper)
         processed_mask = self.preprocess_mask(mask)
-        contours, hierarchy = cv2.findContours(processed_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(
+            processed_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         hierarchy = hierarchy[0] if hierarchy is not None else []
         return processed_mask, contours, hierarchy
 
     def find_sharpest_corners(self, mask, contour, num_corners=4):
         contour_mask = np.zeros_like(mask)
-        cv2.drawContours(contour_mask, [contour], -1, 255, thickness=cv2.FILLED)
-        corners = cv2.goodFeaturesToTrack(contour_mask, maxCorners=num_corners, qualityLevel=0.01, minDistance=10)
+        cv2.drawContours(
+            contour_mask, [contour], -1, 255, thickness=cv2.FILLED)
+        corners = cv2.goodFeaturesToTrack(
+            contour_mask, maxCorners=num_corners, qualityLevel=0.01, minDistance=10)
         return corners.astype(int) if corners is not None else None
 
     def order_points(self, pts):
@@ -48,11 +52,15 @@ class Camera2:
     def four_point_transform(self, image, pts):
         rect = self.order_points(pts)
         self.morph_points = tuple(map(tuple, rect))
-        maxWidth = int(max(np.linalg.norm(rect[2] - rect[3]), np.linalg.norm(rect[1] - rect[0])))
-        maxHeight = int(max(np.linalg.norm(rect[1] - rect[2]), np.linalg.norm(rect[0] - rect[3])))
-        dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], dtype="float32")
+        maxWidth = int(
+            max(np.linalg.norm(rect[2] - rect[3]), np.linalg.norm(rect[1] - rect[0])))
+        maxHeight = int(
+            max(np.linalg.norm(rect[1] - rect[2]), np.linalg.norm(rect[0] - rect[3])))
+        dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1,
+                       maxHeight - 1], [0, maxHeight - 1]], dtype="float32")
         M = cv2.getPerspectiveTransform(rect, dst)
-        self.morphed_image = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+        self.morphed_image = cv2.warpPerspective(
+            image, M, (maxWidth, maxHeight))
         return self.morphed_image, M
 
     def distance_to_cross(self, points, cx, cy, angle):
@@ -68,10 +76,12 @@ class Camera2:
         cy = int(M['m01'] / M['m00']) if M['m00'] != 0 else 0
 
         contour_points = contour.reshape(-1, 2)
-        max_distance = np.max(np.linalg.norm(contour_points - np.array([cx, cy]), axis=1))
+        max_distance = np.max(np.linalg.norm(
+            contour_points - np.array([cx, cy]), axis=1))
 
         # Use the last found rotation angle as the initial guess for optimization
-        result = minimize(lambda angle: self.distance_to_cross(contour_points, cx, cy, angle), self.last_cross_angle)
+        result = minimize(lambda angle: self.distance_to_cross(
+            contour_points, cx, cy, angle), self.last_cross_angle)
         best_angle = result.x[0]
         self.last_cross_angle = best_angle  # Update the last found rotation angle
         cross_length = max_distance
@@ -79,9 +89,9 @@ class Camera2:
         cos_angle = np.cos(best_angle)
         sin_angle = np.sin(best_angle)
         self.cross_lines = [
-            ((int(cx + cross_length * cos_angle), int(cy + cross_length * sin_angle)), 
+            ((int(cx + cross_length * cos_angle), int(cy + cross_length * sin_angle)),
              (int(cx - cross_length * cos_angle), int(cy - cross_length * sin_angle))),
-            ((int(cx + cross_length * -sin_angle), int(cy + cross_length * cos_angle)), 
+            ((int(cx + cross_length * -sin_angle), int(cy + cross_length * cos_angle)),
              (int(cx - cross_length * -sin_angle), int(cy - cross_length * cos_angle)))
         ]
 
@@ -101,13 +111,15 @@ class Camera2:
         mask = cv2.inRange(hsv, white_lower, white_upper)
 
         # Use different kernel sizes for opening and closing in white ball preprocessing
-        mask = self.preprocess_mask(mask, kernel_size_open=(5, 5), kernel_size_close=(5, 5))
+        mask = self.preprocess_mask(
+            mask, kernel_size_open=(5, 5), kernel_size_close=(5, 5))
 
         # Additional erosion to separate touching blobs
         kernel_erode = np.ones((5, 5), np.uint8)
         mask = cv2.erode(mask, kernel_erode, iterations=2)
 
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(
+            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Sort contours by length
         sorted_contours = self.sort_contours_by_length(contours)
@@ -132,56 +144,68 @@ class Camera2:
 
         # Calculate average contour length of white balls
         if white_ball_contours:
-            avg_contour_length = np.mean([cv2.arcLength(contour, True) for contour in white_ball_contours])
+            avg_contour_length = np.mean(
+                [cv2.arcLength(contour, True) for contour in white_ball_contours])
 
         # Find and save the white ball centers, filtering out small contours
         for contour in white_ball_contours:
-            if cv2.arcLength(contour, True) >= 0.5 * avg_contour_length:  # Adjust the factor as needed
+            # Adjust the factor as needed
+            if cv2.arcLength(contour, True) >= 0.5 * avg_contour_length:
                 M = cv2.moments(contour)
                 cx = int(M['m10'] / M['m00']) if M['m00'] != 0 else 0
                 cy = int(M['m01'] / M['m00']) if M['m00'] != 0 else 0
                 self.white_ball_centers.append((cx, cy))
 
     def start(self, image):
-        processed_mask, contours, hierarchy = self.mask_and_find_contours(image)
+        processed_mask, contours, hierarchy = self.mask_and_find_contours(
+            image)
 
         # Sort contours by length
         sorted_contours = self.sort_contours_by_length(contours)
 
         if len(sorted_contours) > 1:
             arena_contour = sorted_contours[1]
-            arena_contour = cv2.approxPolyDP(arena_contour, 0.01 * cv2.arcLength(arena_contour, True), True)
+            arena_contour = cv2.approxPolyDP(
+                arena_contour, 0.01 * cv2.arcLength(arena_contour, True), True)
             cross_contour = sorted_contours[2]
 
             if arena_contour is not None:
                 print("Found the top contour.")
-                
-                corners = self.find_sharpest_corners(processed_mask, arena_contour, num_corners=4)
+
+                corners = self.find_sharpest_corners(
+                    processed_mask, arena_contour, num_corners=4)
 
                 if corners is not None and len(corners) == 4:
-                    corners = np.array([corner.ravel() for corner in corners], dtype="float32")
+                    corners = np.array([corner.ravel()
+                                       for corner in corners], dtype="float32")
                     warped_image, M = self.four_point_transform(image, corners)
 
                     if cross_contour is not None:
-                        cross_contour_points = np.array(cross_contour, dtype='float32')
-                        transformed_contour = cv2.perspectiveTransform(cross_contour_points.reshape(-1, 1, 2), M)
+                        cross_contour_points = np.array(
+                            cross_contour, dtype='float32')
+                        transformed_contour = cv2.perspectiveTransform(
+                            cross_contour_points.reshape(-1, 1, 2), M)
 
                         # Fit a rotated cross to the transformed longest child contour
-                        self.fit_rotated_cross_to_contour(transformed_contour.astype(int))
+                        self.fit_rotated_cross_to_contour(
+                            transformed_contour.astype(int))
 
                         # Draw the cross lines on the image
                         for line in self.cross_lines:
-                            cv2.line(warped_image, line[0], line[1], (0, 0, 255), 2)
+                            cv2.line(warped_image,
+                                     line[0], line[1], (0, 0, 255), 2)
 
                         # Find white balls in the morphed image
                         self.find_white_balls()
 
                         # Draw the white balls and the egg center on the image
                         for center in self.white_ball_centers:
-                            cv2.circle(warped_image, center, 3, (0, 255, 0), -1)
-                        
+                            cv2.circle(warped_image, center,
+                                       3, (0, 255, 0), -1)
+
                         if self.egg_center is not None:
-                            cv2.circle(warped_image, self.egg_center, 3, (0, 0, 255), -1)
+                            cv2.circle(warped_image, self.egg_center,
+                                       3, (0, 0, 255), -1)
 
                         return warped_image
 
@@ -201,7 +225,7 @@ class Camera2:
 if __name__ == "__main__":
     hsv_thresholds = (np.array([0, 99, 201]), np.array([180, 255, 255]))
     camera = Camera2(hsv_thresholds)
-    
+
     imagePath = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/testImg1.jpg"
     image = cv2.imread(imagePath)
 
@@ -211,10 +235,10 @@ if __name__ == "__main__":
         result_image = camera.start(image)
 
         if result_image is not None:
-            cv2.imshow('Warped Image with Transformed Contour and Rotated Cross', result_image)
+            cv2.imshow(
+                'Warped Image with Transformed Contour and Rotated Cross', result_image)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
         else:
             print("Image processing failed.")
-
