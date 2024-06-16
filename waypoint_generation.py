@@ -25,15 +25,15 @@ class Ball:
     def __repr__(self):
         return f"Ball(x={self.x}, y={self.y}, obstacle={self.obstacle}, waypoints={self.waypoints})"
 
-waypoint_distance = 150
-x,y = 1229, 900
-def calc_waypoints(ball):
+def calc_obstacle_waypoints(ball):
     with open('no_go_zones.json', 'r') as file:
         data = json.load(file)
     cross_angle = data[2][1]
     cross_center = data[2][0]
     cross_length = 100
-    # Example logic to calculate waypoints based on the ball's coordinates and obstacle
+    waypoint_distance = 150 # Distance from ball location to put waypoint
+    x,y = 1229, 900
+
     if ball.obstacle == 0:
         print("No waypoints added")
     elif ball.obstacle == 1:
@@ -113,4 +113,39 @@ def calc_waypoints(ball):
     # Return the ball object (optional, since modifications are in-place)
     return ball
 
+def other_waypoints():
+    """
+    if red cross between car and ball.waypoints
+        # calculate waypoint quadrant
+        if ball.waypoints.y < cross_center.y
+            if ball.waypoints.x < cross_center.x 
+                waypoint_quadrant = 0 # top_left
+            elif ball.waypoints.x >= cross_center.x 
+                waypoint_quadrant = 1 # top_right
+        elif ball.waypoints.y >= cross_center.y
+            if ball.waypoints.x < cross_center.x 
+                waypoint_quadrant = 2 # bottom_left
+            elif ball.waypoints.x >= cross_center.x 
+                waypoint_quadrant = 3 # bottom_right
+
+        # calculate car quadrant
+        if car.y < cross_center.y
+            if car.x < cross_center.x 
+                car_quadrant = 0 # top_left
+            elif car.x >= cross_center.x 
+                car_quadrant = 1 # top_right
+        elif car.y >= cross_center.y
+            if car.x < cross_center.x 
+                car_quadrant = 2 # bottom_left
+            elif car.x >= cross_center.x 
+                car_quadrant = 3 # bottom_right
+            
+        x,y = 1229, 900
+        
+        if car_quadrant % 2 == waypoint_quadrant % 2 # if they are both odd or even, they must be in opposite corners wich is worst case
+
+
+    
+    """
+    
 
