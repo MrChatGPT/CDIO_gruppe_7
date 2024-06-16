@@ -51,10 +51,24 @@ robot_hsv_range = (np.array([44,56,141]), np.array([179,255,255]))
 white_balls_hsv_range = (np.array([0, 0, 200]), np.array([179, 50, 255]))
 
 
-print("\nRobot Car HSV Range:", robot_hsv_range)
-print("\nWhite Balls HSV Range:", white_balls_hsv_range)
-print("\nOrange Ball HSV Range:", orange_ball_hsv_range)
-print("\nRed Arena HSV Range:", red_arena_hsv_range)
+#print("\nRobot Car HSV Range:", robot_hsv_range)
+#print("\nWhite Balls HSV Range:", white_balls_hsv_range)
+#print("\nOrange Ball HSV Range:", orange_ball_hsv_range)
+#print("\nRed Arena HSV Range:", red_arena_hsv_range)
+# Use the HSV ranges calculated from the sample image
+hsv_ranges = {
+    "robot_car": robot_hsv_range,
+    "white_balls": white_balls_hsv_range,
+    "orange_ball": orange_ball_hsv_range,
+    "red_arena": red_arena_hsv_range
+}
+
+print(f"\nRobot lower, upper: {hsv_ranges["robot_car"][0]}, {hsv_ranges["robot_car"][1]}")
+print(f"\nWhite balls lower, upper: {hsv_ranges["white_balls"][0]},{hsv_ranges["white_balls"][1]}")
+print(f"\nOrange ball(s) lower, upper: {hsv_ranges["orange_ball"][0][0]}, {hsv_ranges["orange_ball"][1][1]}")
+print(f"\nArena lower, upper: {hsv_ranges["red_arena"][0][0]}, {hsv_ranges["red_arena"][1][1]}")
+
+print("\n\n Consider using the reduce_noise on the white mask, and cv2.bitwise_or(orange_mask, red_mask), before passing to functions!\n")
 
 def create_mask(image, lower_color, upper_color):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -93,13 +107,6 @@ def process_images(folder_path, hsv_ranges):
             cv2.imwrite(os.path.join(folder_path, f"{filename}_combined_orange_red_arena_mask.png"), combined_orange_red_arena_mask)
             print(f"Masks saved for {filename}")
 
-# Use the HSV ranges calculated from the sample image
-hsv_ranges = {
-    "robot_car": robot_hsv_range,
-    "white_balls": white_balls_hsv_range,
-    "orange_ball": orange_ball_hsv_range,
-    "red_arena": red_arena_hsv_range
-}
 
 # Specify the folder path containing the images
 folder_path = "newest_images/"
