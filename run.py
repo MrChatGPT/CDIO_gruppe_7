@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 from picture.livefeed import *
 from picture.transform_arena import *
 from picture.image_detection import *
+# from picture.image_detection_fromROBO import *
 # from algorithm.algorithm import *
 # from algorithm.move_to_target import *
 
@@ -13,6 +14,7 @@ def transform_and_detect(image):
     circle_detection(image) 
     image = detect_ball_colors(image)
     car = find_car(image,center_weight=150)
+    # car = find_carv2(image)
     cv2.imshow("Picture", image)
     
 
@@ -50,7 +52,10 @@ def init():
 
 # image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
 # image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_15_02_15_Pro.jpg')
-image = cv2.imread('extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
+image = cv2.imread('extra/test/images/pinkballtest.jpg')
+
+# image = cv2.imread('extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
+# image = cv2.imread('extra/test/images/WIN_20240614_09_47_15_Pro.jpg') new:(
 # /home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg
 transform_and_detect(image)
 
