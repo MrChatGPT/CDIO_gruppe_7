@@ -36,6 +36,32 @@ class Car:
     def __repr__(self):
         return f"Car(x={self.x}, y={self.y}, angle={self.angle})"
 
+class Cross:
+    # def __init__(self,center, angle, x1, y1, x2, y2, x3, y3, x4, y4): # x1, y1, x2, y2 first line begins and ends.  x3, y3, x4, y4 where the second line begins and ends
+    #     self.center = center
+    #     self.angle = angle
+    #     self.begin1 = (x1,y1)
+    #     self.end1 = (x2,y2)
+    #     self.begin2 = (x3,y3)
+    #     self.end2 = (x4,y4)
+   
+    def __init__(self, center, angle, begin1, end1, begin2, end2):
+        # Center and angle
+        self.center = center
+        self.angle = angle
+        
+        # Lines as tuples (x, y)
+        self.begin1 = begin1
+        self.end1 = end1
+        self.begin2 = begin2
+        self.end2 = end2
+    
+    
+    def __repr__(self):
+        return (f"Cross(center={self.center}, angle={self.angle}, "
+                f"begin1={self.begin1}, end1={self.end1},begin2={self.begin2} end2={self.end2},")
+
+
 def do_intersect(p1, q1, p2, q2):
     def orientation(p, q, r):
         val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
@@ -211,13 +237,24 @@ def plot_coordinates(car, ball, cross_segments):
     cross_center, rotation_matrix = calc_cross_center(cross_segments, 30)
     rotated_segments = rotate_cross_segments(cross_segments, cross_center, rotation_matrix)
 
+    crossbegin = []
+    crossend = []
+    #center, angle, x1, y1, x2, y2, x3, y3, x4, y4
     # Plot the rotated cross
     for segment in rotated_segments:
         plt.plot([segment[0][0], segment[1][0]], [segment[0][1], segment[1][1]], 'r-')
+        first = segment[0][0], segment[0][1]
+        sec = segment[1][0], segment[1][1]
+        print(f"Line begin (x,y) = {first}, line end (x,y) = {sec}")
+        crossbegin.append(first)
+        crossend.append(sec)
         plt.plot(segment[0][0], segment[0][1], 'rx')
         plt.plot(segment[1][0], segment[1][1], 'rx')
     plt.plot(cross_center[0], cross_center[1], 'rx', label='Rotated Cross Center')
+    print(f"cross center {cross_center}")
 
+    
+    cross = Cross(cross_center,30, crossbegin[-2], crossend[-2], crossbegin[-1],  crossend[-1]) 
     # Plot waypoints
     for i, waypoint in enumerate(ball.waypoints):
         plt.plot(waypoint.x, waypoint.y, 'go')
@@ -232,12 +269,14 @@ def plot_coordinates(car, ball, cross_segments):
     plt.grid()
     plt.show()
 
+    return cross
+
 def run():
     # Different balls
     #ball = Ball(33, 20, 1)  # Zone 1
     # ball = Ball(1150, 50, 2)  # Zone 2
     #ball = Ball(29, 875, 3)  # Zone 3
-    #ball = Ball(1150, 869, 4)  # Zone 4
+    ball = Ball(1150, 869, 4)  # Zone 4
     #ball = Ball(600, 30, 5)  # Zone 5
     #ball = Ball(33, 450, 6)  # Zone 6
     #ball = Ball(600, 862, 7)  # Zone 7
@@ -246,11 +285,12 @@ def run():
     #ball = Ball(515, 449, 10)  # Zone 10
     #ball = Ball(598, 529, 11)  # Zone 11
     #ball = Ball(682, 449, 12)  # Zone 12
-    ball = Ball(580, 427, 13)  # Zone 13
+    # ball = Ball(580, 427, 13)  # Zone 13
     #ball = Ball(585, 466, 14)  # Zone 14
     #ball = Ball(612, 462, 15)  # Zone 15
     # ball = Ball(614, 427, 16)  # Zone 16
     # ball = Ball(639, 443, 16)     
+    ball = Ball(592, 396, 16)   
     # Car placements each corner
     #car = Car(200, 100, 0)  # Top left
     car = Car(200, 800, 0)  # Bottom left
@@ -267,6 +307,7 @@ def run():
     print(ball)
 
     # Plot the coordinates
-    plot_coordinates(car, ball, no_go_zones)
+    cross = plot_coordinates(car, ball, no_go_zones)
+    print(cross)
 
 run()
