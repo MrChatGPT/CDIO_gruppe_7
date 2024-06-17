@@ -155,27 +155,32 @@ def calc_obstacle_waypoints(ball, car, cross_segments):
     cross_center, rotation_matrix = calc_cross_center(cross_segments, 30)
     rotated_cross_segments = rotate_cross_segments(cross_segments, cross_center, rotation_matrix)
 
-    # if ball.y <= 100 and ball.x <= 100:
-    #     angle = 45
-    # else:
-    #     if ball.y <= 100 and ball.x >= 1100:
-    #      angle = 135
-    if ball.y <= 100 and ball.x <= 100:
+    if ball.y <= 100 and ball.x <= 100:  # Condition 1
         angle = 45
-    else:
-        if ball.y <= 100 and ball.x >= 1100:
-         angle = 135
+    elif ball.y <= 100 and ball.x >= 1100:  # Condition 2
+        angle = 135
+    elif ball.y >= 800 and ball.x <= 100:  # Condition 3
+        angle = 315
+    elif ball.y >= 800 and ball.x >= 1100:  # Condition 4
+        angle = 225
+
+
+
+
+
+        
+        
 
 
     
 
-    if ball.obstacle == 0:
-        print("No waypoints added")
-    else:
-        if ball.obstacle == 1:
-            angle = 45
-        elif ball.obstacle == 2:
-            angle = 135
+    # if ball.obstacle == 0:
+    #     print("No waypoints added")
+    # else:
+    #     if ball.obstacle == 1:
+    #         angle = 45
+    #     elif ball.obstacle == 2:
+    #         angle = 135
     #     elif ball.obstacle == 3:
     #         angle = 315
     #     elif ball.obstacle == 4:
@@ -288,9 +293,9 @@ def plot_coordinates(car, ball, cross_segments):
 def run():
     # Different balls
     # ball = Ball(33, 20, 1)  # Zone 1
-    ball = Ball(1150, 50, 2)  # Zone 2
-    #ball = Ball(29, 875, 3)  # Zone 3
-    # ball = Ball(1150, 869, 4)  # Zone 4
+    # ball = Ball(1150, 50, 2)  # Zone 2
+    # ball = Ball(29, 875, 3)  # Zone 3
+    ball = Ball(1150, 869, 4)  # Zone 4
     #ball = Ball(600, 30, 5)  # Zone 5
     #ball = Ball(33, 450, 6)  # Zone 6
     #ball = Ball(600, 862, 7)  # Zone 7
