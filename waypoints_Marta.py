@@ -155,6 +155,20 @@ def calc_obstacle_waypoints(ball, car, cross_segments):
     cross_center, rotation_matrix = calc_cross_center(cross_segments, 30)
     rotated_cross_segments = rotate_cross_segments(cross_segments, cross_center, rotation_matrix)
 
+    # if ball.y <= 100 and ball.x <= 100:
+    #     angle = 45
+    # else:
+    #     if ball.y <= 100 and ball.x >= 1100:
+    #      angle = 135
+    if ball.y <= 100 and ball.x <= 100:
+        angle = 45
+    else:
+        if ball.y <= 100 and ball.x >= 1100:
+         angle = 135
+
+
+    
+
     if ball.obstacle == 0:
         print("No waypoints added")
     else:
@@ -162,34 +176,34 @@ def calc_obstacle_waypoints(ball, car, cross_segments):
             angle = 45
         elif ball.obstacle == 2:
             angle = 135
-        elif ball.obstacle == 3:
-            angle = 315
-        elif ball.obstacle == 4:
-            angle = 225
-        elif ball.obstacle == 5:
-            angle = 90
-        elif ball.obstacle == 6:
-            angle = 0
-        elif ball.obstacle == 7:
-            angle = 270
-        elif ball.obstacle == 8:
-            angle = 180
-        elif ball.obstacle == 9:
-            angle = 0
-        elif ball.obstacle == 10:
-            angle = 270
-        elif ball.obstacle == 11:
-            angle = 180
-        elif ball.obstacle == 12:
-            angle = 90
-        elif ball.obstacle == 13:
-            angle = 225
-        elif ball.obstacle == 14:
-            angle = 135
-        elif ball.obstacle == 15:
-            angle = 45
-        elif ball.obstacle == 16:
-            angle = 315
+    #     elif ball.obstacle == 3:
+    #         angle = 315
+    #     elif ball.obstacle == 4:
+    #         angle = 225
+    #     elif ball.obstacle == 5:
+    #         angle = 90
+    #     elif ball.obstacle == 6:
+    #         angle = 0
+    #     elif ball.obstacle == 7:
+    #         angle = 270
+    #     elif ball.obstacle == 8:
+    #         angle = 180
+    #     elif ball.obstacle == 9:
+    #         angle = 0
+    #     elif ball.obstacle == 10:
+    #         angle = 270
+    #     elif ball.obstacle == 11:
+    #         angle = 180
+    #     elif ball.obstacle == 12:
+    #         angle = 90
+    #     elif ball.obstacle == 13:
+    #         angle = 225
+    #     elif ball.obstacle == 14:
+    #         angle = 135
+    #     elif ball.obstacle == 15:
+    #         angle = 45
+    #     elif ball.obstacle == 16:
+    #         angle = 315
 
         angle_rad = math.radians(angle)
         waypoint_x = ball.x + waypoint_distance * math.cos(angle_rad)
@@ -273,10 +287,10 @@ def plot_coordinates(car, ball, cross_segments):
 
 def run():
     # Different balls
-    #ball = Ball(33, 20, 1)  # Zone 1
-    # ball = Ball(1150, 50, 2)  # Zone 2
+    # ball = Ball(33, 20, 1)  # Zone 1
+    ball = Ball(1150, 50, 2)  # Zone 2
     #ball = Ball(29, 875, 3)  # Zone 3
-    ball = Ball(1150, 869, 4)  # Zone 4
+    # ball = Ball(1150, 869, 4)  # Zone 4
     #ball = Ball(600, 30, 5)  # Zone 5
     #ball = Ball(33, 450, 6)  # Zone 6
     #ball = Ball(600, 862, 7)  # Zone 7
@@ -290,7 +304,7 @@ def run():
     #ball = Ball(612, 462, 15)  # Zone 15
     # ball = Ball(614, 427, 16)  # Zone 16
     # ball = Ball(639, 443, 16)     
-    ball = Ball(592, 396, 16)   
+    # ball = Ball(592, 396, 16)   
     # Car placements each corner
     #car = Car(200, 100, 0)  # Top left
     car = Car(200, 800, 0)  # Bottom left
