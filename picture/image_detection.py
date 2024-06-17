@@ -481,7 +481,7 @@ def detect_ball_colors(image):
     #     break  
 
 
-def match_circles_and_contours(image, contours):
+def match_circles_and_contours(image, orange_detected, white_detected):
 
     #To store balls in separate arrays
     white_balls = []
@@ -491,17 +491,35 @@ def match_circles_and_contours(image, contours):
     balls = load_balls("balls.json")
     matched_circles = []
     for cx, cy in balls:
-        for contour in contours:
+        for contour in orange_detected:
             x, y, w, h = cv2.boundingRect(contour)
             if x <= cx <= x + w and y <= cy <= y + h:
                 matched_circles.append((cx, cy))
                 cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)
                 cv2.putText(image, "Orange Colour", (x, y), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255))
-                #print(f"we had a match at {cx},{cy}")
+                print(f"we had a match at {cx},{cy}")
                 orange_balls.append((cx, cy))
-            else:
+        
+        for contour in white_detected:
+            x, y, w, h = cv2.boundingRect(contour)
+            if x <= cx <= x + w and y <= cy <= y + h:
+                matched_circles.append((cx, cy))
+                # cv2.rectangle(image, (x, y), (x + w, y + h), (0, 165, 255), 2)
+                # cv2.putText(image, "Orange Colour", (x, y), 
+                #             cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 165, 255))
+                print(f"white ball is checked at {cx},{cy}")
                 white_balls.append((cx, cy))
+          
+
+            
+    
+    
+    saveOrange_balls(orange_balls)
+    saveWhite_balls(white_balls)
+
+
+    return image, matched_circles
 
             
     
