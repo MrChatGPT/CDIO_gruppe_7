@@ -37,6 +37,7 @@ def LoadOrangeBall(filename="orangeballs.json"):
         OrangeBallXY = tuple(data[0])
     else:
         print("orange goone")
+        return (0,0)
         #return (0,0)
         #raise ValueError("Invalid JSON structure or data not found.")
     

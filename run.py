@@ -67,12 +67,9 @@ try:
             image = camera_handler._run_video()
             image = transform(image)
             car = find_carv2(image)
-            #---- her forventes der at være 4 json filer: -------
-            # nogo_zones, ping_pong_balls, orange_ball og robot
-            # ---------------------------------------------------
-            # Herfra mangles: 
-            # algoritme som henter data fra .json filerne og så bevæger bilen
             check = move_to_targetv2(SortByDistance())
+            cv2.imshow("LiveV2",image)
+            # exit()
             
 finally:
     # Ensure the camera is released properly

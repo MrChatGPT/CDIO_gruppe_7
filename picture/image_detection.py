@@ -209,8 +209,8 @@ def detect_ball_colors(image):
     red_upper = np.array([15, 227, 255], np.uint8) #HSV_old  9, 255, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
-    orange_lower = np.array([5, 156, 184], np.uint8) #HSV_old 11, 152, 154
-    orange_upper = np.array([34, 253, 255], np.uint8) #HSV_old 50, 255, 255
+    orange_lower = np.array([13, 135, 223], np.uint8) #HSV_old 5, 156, 184
+    orange_upper = np.array([44, 255, 255], np.uint8) #HSV_old 50, 255, 255
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
     """
@@ -271,7 +271,7 @@ def detect_ball_colors(image):
     res_orange = cv2.bitwise_and(image, image, 
                                 mask = orange_mask) 
       
-
+    
     
     # For blue color 
     # blue_mask = cv2.dilate(blue_mask, kernel) 
@@ -450,22 +450,22 @@ def detect_ball_colors(image):
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
             
-    # # Creating contour to track yellow color 
-    contours, hierarchy = cv2.findContours(yellow_mask, 
-                                           cv2.RETR_TREE, 
-                                           cv2.CHAIN_APPROX_SIMPLE) 
-    for pic, contour in enumerate(contours): 
-        area = cv2.contourArea(contour) 
-        if(area > 800): 
-            x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y), 
-                                       (x + w, y + h), 
-                                       (0, 0, 0), 2) 
-            print(f"(yellow x={x}, y={y}) w={w} h={h} area={area}")
-            # line_drawForPat(image, x, y, w, h, area)
-            cv2.putText(image, "yellow Colour", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        1.0, (0, 0, 0)) 
+    # # # Creating contour to track yellow color 
+    # contours, hierarchy = cv2.findContours(yellow_mask, 
+    #                                        cv2.RETR_TREE, 
+    #                                        cv2.CHAIN_APPROX_SIMPLE) 
+    # for pic, contour in enumerate(contours): 
+    #     area = cv2.contourArea(contour) 
+    #     if(area > 800): 
+    #         x, y, w, h = cv2.boundingRect(contour) 
+    #         image = cv2.rectangle(image, (x, y), 
+    #                                    (x + w, y + h), 
+    #                                    (0, 0, 0), 2) 
+    #         print(f"(yellow x={x}, y={y}) w={w} h={h} area={area}")
+    #         # line_drawForPat(image, x, y, w, h, area)
+    #         cv2.putText(image, "yellow Colour", (x, y), 
+    #                     cv2.FONT_HERSHEY_SIMPLEX, 
+    #                     1.0, (0, 0, 0)) 
 
 
 
@@ -514,7 +514,9 @@ def match_circles_and_contours(image, orange_detected, white_detected):
 
             
     
-    
+    #print(f"Whiteballs: {white_balls}\nOrangeballs: {orange_balls}")
+
+
     saveOrange_balls(orange_balls)
     saveWhite_balls(white_balls)
 
@@ -625,21 +627,21 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     max_area = 0
     
     # Filter out very small contours (noise)
-    min_contour_area = 100  # Adjust this threshold as needed
+    min_contour_area = 200  # Adjust this threshold as needed
     valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
     for contour in valid_contours:
         area = cv2.contourArea(contour)
-        #print(f"Contour area: {area}")  # Debug: Print contour area
+        # print(f"Contour area: {area}")  # Debug: Print contour area
         #Vi får 3 tal, i en vilkårlig rækkefølge. de to små skal appendes til front, den største skal være lig back_contour
         if area > 4000:
             back_contour = contour
         else:
             front_contours.append(contour)
         
-    
+   
     # Debug: Log the largest contour area and number of front contours
-    #print(f"Largest contour area (back contour): {max_area}")
-    #print(f"Number of front contours: {len(front_contours)}")
+    # print(f"Largest contour area (back contour): {cv2.contourArea(back_contour)}")
+    # print(f"Number of front contours: {len(front_contours)}")
     
     # Ensure we have exactly one back contour and two front contours
     if len(front_contours) != 2:
@@ -677,11 +679,11 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     front_y //= 2
     
     # Calculate the angle
-    angle_rad = math.atan2(back_y - front_y, front_x - back_x)
+    angle_rad = math.atan2(front_y - back_y, front_x - back_x)
     
     angle_deg = math.degrees(angle_rad)
 
-    angle_deg = (angle_deg+90)%360 
+    angle_deg = (angle_deg)%360 
 
     #if angle_deg < 0:
     #    angle_deg += 360
@@ -701,7 +703,7 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     data = [[center_x, center_y, angle_deg]]
     with open('robot.json', 'w') as json_file:
         json.dump(data, json_file)
-
+    #exit()
     return (center_x, center_y, angle_deg)
 
 

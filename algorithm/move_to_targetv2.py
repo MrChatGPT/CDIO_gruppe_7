@@ -60,8 +60,10 @@ def move_to_targetv2(target_position):
 
     # De-structure the target position
     target_x, target_y = target_position
-    position_threshold = 185 #gammel 190
-    angle_threshold = 11
+    #Hvis vi kører for langt sæt den op kører for kort sæt den ned
+    position_threshold = 176 
+    #Virker nu!!!!!!!!
+    angle_threshold = 4
     
     
     # Load car values into the car object
@@ -73,8 +75,13 @@ def move_to_targetv2(target_position):
     # Calculate distance and desired angle
     distance = math.sqrt((target_x - current_x) ** 2 + (target_y - current_y) ** 2)
     
-    desired_angle = (math.degrees(math.atan2(target_y - current_y, target_x - current_x))-90) % 360
-    print(f"Desired angle:{desired_angle}\n")
+    desired_angle_rad = math.atan2(target_y-current_y, target_x-current_x)
+    print(f"Desired angle in rad: {desired_angle_rad}")
+    desired_angle =  math.degrees(desired_angle_rad)
+    desired_angle = desired_angle % 360
+
+
+    print(f"Desired angle in degrees:{desired_angle}\n")
     
 
     
@@ -92,7 +99,7 @@ def move_to_targetv2(target_position):
     print(f"angle error: {abs(angle_error)}\n")
     if abs(angle_error) > angle_threshold:
         angle_correction = angle_pid.calculate(0, angle_error)
-        if angle_error > 180:#Der forventes at skulle skrues her: 
+        if angle_error > 0:#Der forventes at skulle skrues her: 
             publish_controller_data((0, 0, max(0.12, min(angle_correction, 1)), 0, 0))  # Tilt right
         else:
             publish_controller_data((0, 0, max(-0.12, min(angle_correction, -1)), 0, 0))  # Tilt left
