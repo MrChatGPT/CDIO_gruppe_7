@@ -180,8 +180,8 @@ def calc_obstacle_waypoints(ball, car, cross):
         if angle > 359:
             angle = angle -360
         angle_rad = math.radians(angle)
-        waypoint_x = ball.x + waypoint_distance * math.cos(angle_rad)
-        waypoint_y = ball.y + waypoint_distance * math.sin(angle_rad)
+        waypoint_x = cross.x + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross.y + waypoint_distance * math.sin(angle_rad)
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
     elif ball.obstacle == 14:
@@ -189,8 +189,8 @@ def calc_obstacle_waypoints(ball, car, cross):
         if angle > 359:
             angle = angle -360
         angle_rad = math.radians(angle)
-        waypoint_x = ball.x + waypoint_distance * math.cos(angle_rad)
-        waypoint_y = ball.y + waypoint_distance * math.sin(angle_rad)
+        waypoint_x = cross.x + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross.y + waypoint_distance * math.sin(angle_rad)
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
     elif ball.obstacle == 15:
@@ -198,8 +198,8 @@ def calc_obstacle_waypoints(ball, car, cross):
         if angle > 359:
             angle = angle -360
         angle_rad = math.radians(angle)
-        waypoint_x = ball.x + waypoint_distance * math.cos(angle_rad)
-        waypoint_y = ball.y + waypoint_distance * math.sin(angle_rad)
+        waypoint_x = cross.x + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross.y + waypoint_distance * math.sin(angle_rad)
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
     elif ball.obstacle == 16:
@@ -207,8 +207,8 @@ def calc_obstacle_waypoints(ball, car, cross):
         if angle > 359:
             angle = angle -360
         angle_rad = math.radians(angle)
-        waypoint_x = ball.x + waypoint_distance * math.cos(angle_rad)
-        waypoint_y = ball.y + waypoint_distance * math.sin(angle_rad)
+        waypoint_x = cross.x + waypoint_distance * math.cos(angle_rad)
+        waypoint_y = cross.y + waypoint_distance * math.sin(angle_rad)
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
     
@@ -276,8 +276,20 @@ def get_waypoints(ball, car, cross):
     calc_obstacle_waypoints(ball, car, cross)
     plot_coordinates(car, ball, cross)
 
-ball = Ball(600, 330, 16) 
+ball = Ball(870, 350, 9)  
+# ball = Ball(800, 450, 10) 
+# ball = Ball(800, 450, 11) 
+# ball = Ball(800, 450, 12) 
+# ball = Ball(800, 450, 13) 
+# ball = Ball(730, 410, 14) 
+# ball = Ball(800, 370, 15) 
+# ball = Ball(820, 410, 16) 
+
+
+
+
 car = Car(200, 800, 0)  # Bottom left
+
 
 with open('no_go_zones.json', 'r') as file:
     data = json.load(file)
