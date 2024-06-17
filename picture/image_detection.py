@@ -315,50 +315,51 @@ def detect_ball_colors(image):
     #MAybe save the data, and when this function is almost done, fiind the median of the two values if any. Or just use the only one
     #regarding the arena
     for pic, contour in enumerate(contours): 
-            area = cv2.contourArea(contour) 
-            if area > 5000: 
-                x, y, w, h = cv2.boundingRect(contour) 
-                if area > 6000 and area < 8000:  # area of cross is aprox 7000
-                    rect = cv2.minAreaRect(contour)
-                    box = cv2.boxPoints(rect)
-                    box = np.int0(box)
-                    
-                    center = (int(rect[0][0]), int(rect[0][1]))
-                    size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
-                    angle = rect[2] + 45
-                    
-                    # Create a rotation matrix
-                    M = cv2.getRotationMatrix2D(center, angle, 1.0)
-                    
-                    # Calculate the end points of the cross lines
-                    end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
-                            int(center[1] + size[0] * np.sin(np.radians(angle))))
-                    end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
-                            int(center[1] - size[0] * np.sin(np.radians(angle))))
-                    end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
-                            int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
-                    end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
-                            int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
-                    
-                    # Draw the cross
-                    cv2.line(image, end1, end2, (0, 0, 255), 2)
-                    cv2.line(image, end3, end4, (0, 0, 255), 2)
-                    
-                    cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
-                    
-                    no_go_zones = []
-                    no_go_zones.append([
-                        (end1, end2),
-                        (end3, end4)
-                    ])
-
-                    save_no_go_zones(no_go_zones)
+        area = cv2.contourArea(contour) 
+        if area > 5000: 
+            x, y, w, h = cv2.boundingRect(contour) 
+            if area > 6000 and area < 8000:  # area of cross is aprox 7000
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+                
+                center = (int(rect[0][0]), int(rect[0][1]))
+                size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
+                angle = rect[2] + 45
+                
+                # Create a rotation matrix
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                
+                # Calculate the end points of the cross lines
+                end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
+                        int(center[1] + size[0] * np.sin(np.radians(angle))))
+                end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
+                        int(center[1] - size[0] * np.sin(np.radians(angle))))
+                end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
+                end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
+                
+                # Draw the cross
+                cv2.line(image, end1, end2, (0, 0, 255), 2)
+                cv2.line(image, end3, end4, (0, 0, 255), 2)
+                
+                cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+                
+                no_go_zones = [
+                    (end1, end2),
+                    (end3, end4),
+                    (center, angle)
+                ]
+                
+                save_no_go_zones(no_go_zones)
 
                     
                 
                 cv2.putText(image, "Red Colour utils", (x, y), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
                             (0, 0, 255))     
+    
     
     # Creating contour to track orange color 
     contours, hierarchy = cv2.findContours(orange_mask, 

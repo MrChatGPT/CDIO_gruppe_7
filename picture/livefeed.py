@@ -33,7 +33,7 @@ class CameraHandler:
                 break
 
             # Display the resulting frame
-            cv2.imshow('Live Feed', frame)
+            #cv2.imshow('Live Feed', frame)
 
             # Press 'q' on the keyboard to exit the video
             if cv2.waitKey(1) & 0xFF == ord('q'):

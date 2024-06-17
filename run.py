@@ -26,7 +26,7 @@ def init():
 
     # for arena transform calibration
     image = camera_handler._run_video()
-    #find_corners(image)
+    find_corners(image)
     return camera_handler
 
 camera_handler = init()
@@ -69,7 +69,6 @@ try:
             car = find_carv2(image)
             check = move_to_targetv2(SortByDistance())
             cv2.imshow("LiveV2",image)
-            # exit()
             
 finally:
     # Ensure the camera is released properly
