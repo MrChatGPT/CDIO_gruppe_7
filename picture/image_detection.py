@@ -243,9 +243,9 @@ def detect_ball_colors(image):
 
 
 
-    yellow_lower = np.array([20, 131, 199], np.uint8) #HSV  28,  82, 247   # 20,  40, 247 # 20, 131, 199
-    yellow_upper = np.array([ 50, 202, 255], np.uint8) #HSV 46, 172, 255   #  27, 202, 255
-    yellow_mask = cv2.inRange(hsvFrame, yellow_lower, yellow_upper) 
+    # yellow_lower = np.array([20, 131, 199], np.uint8) #HSV  28,  82, 247   # 20,  40, 247 # 20, 131, 199
+    # yellow_upper = np.array([ 50, 202, 255], np.uint8) #HSV 46, 172, 255   #  27, 202, 255
+    # yellow_mask = cv2.inRange(hsvFrame, yellow_lower, yellow_upper) 
 
     orange_detected = []
     white_detected = []
