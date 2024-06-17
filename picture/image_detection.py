@@ -147,7 +147,7 @@ def circle_detection(image):
     # with open('stored_circles.json', 'w') as file:
     #     json.dump(stored_circles, file, indent=4)
     # Display the result
-    cv2.imshow('Detected Balls', image)
+    #cv2.imshow('Detected Balls', image)
     return image, stored_circles
     # return image
   ##
@@ -225,15 +225,15 @@ def detect_ball_colors(image):
     """
     Attempt on the picture ending with 46
     """
-    blue_lower = np.array([95, 66, 141], np.uint8) #HSV
-    blue_upper = np.array([113, 150, 205], np.uint8) #HSV
-    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
+    #blue_lower = np.array([95, 66, 141], np.uint8) #HSV
+    #blue_upper = np.array([113, 150, 205], np.uint8) #HSV
+    #blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
 
     # Set range for pink color and  
     # define mask 
-    pink_lower = np.array([154,  62,  80], np.uint8) #HSV 
-    pink_upper = np.array([169, 105, 255], np.uint8) #HSV  
-    pink_mask = cv2.inRange(hsvFrame, pink_lower, pink_upper) 
+    #pink_lower = np.array([154,  62,  80], np.uint8) #HSV 
+    #pink_upper = np.array([169, 105, 255], np.uint8) #HSV  
+    #pink_mask = cv2.inRange(hsvFrame, pink_lower, pink_upper) 
 
     # Set range for green color and  
     # define mask 
@@ -248,6 +248,7 @@ def detect_ball_colors(image):
     yellow_mask = cv2.inRange(hsvFrame, yellow_lower, yellow_upper) 
 
     orange_detected = []
+    white_detected = []
     # point_in_orange_region = False
     #px, py = 1302, 166
    
@@ -273,23 +274,25 @@ def detect_ball_colors(image):
 
     
     # For blue color 
-    blue_mask = cv2.dilate(blue_mask, kernel) 
-    res_blue = cv2.bitwise_and(image, image, 
-                               mask = blue_mask) 
+    # blue_mask = cv2.dilate(blue_mask, kernel) 
+    # res_blue = cv2.bitwise_and(image, image, 
+    #                            mask = blue_mask) 
    
     # For pink color 
-    pink_mask = cv2.dilate(pink_mask, kernel) 
-    res_pink = cv2.bitwise_and(image, image,  
-                              mask = pink_mask) 
+    # pink_mask = cv2.dilate(pink_mask, kernel) 
+    # res_pink = cv2.bitwise_and(image, image,  
+    #                           mask = pink_mask) 
     # # For green color 
     green_mask = cv2.dilate(green_mask, kernel) 
     res_green = cv2.bitwise_and(image, image, 
                                mask = green_mask) 
     
     # # For yellow color 
-    yellow_mask = cv2.dilate(yellow_mask, kernel) 
-    res_yellow = cv2.bitwise_and(image, image, 
-                               mask = yellow_mask) 
+    # yellow_mask = cv2.dilate(yellow_mask, kernel) 
+    # res_yellow = cv2.bitwise_and(image, image, 
+    #                            mask = yellow_mask) 
+
+
     
 
 
@@ -377,9 +380,9 @@ def detect_ball_colors(image):
                         cv2.FONT_HERSHEY_SIMPLEX,  
                         1.0, (0, 165, 255)) 
             # orange_detected.append(contour)
-    #check_point_in_orange_region(contours)
-    image, matched_circles = match_circles_and_contours(image, orange_detected)
-    check_point_in_orange_region(orange_detected)
+    
+    # image, matched_circles = match_circles_and_contours(image, orange_detected)
+    # check_point_in_orange_region(orange_detected)
    
 
     
@@ -398,7 +401,7 @@ def detect_ball_colors(image):
     ret, markers = cv2.connectedComponents(sure_fg)
     markers = markers + 1
     markers[unknown == 255] = 0
-    markers = cv2.watershed(image, markers)
+    # markers = cv2.watershed(image, markers)
     # image[markers == -1] = [0, 0, 255]
 
 
@@ -409,6 +412,7 @@ def detect_ball_colors(image):
         area = cv2.contourArea(contour) 
         if(area > 450): 
             x, y, w, h = cv2.boundingRect(contour) 
+            white_detected.append(contour)
             # image = cv2.rectangle(image, (x, y), 
             #                            (x + w, y + h), 
             #                            (255, 255, 255), 2) 
@@ -427,7 +431,7 @@ def detect_ball_colors(image):
                         1.0, (255, 255, 255)) 
             
     
-
+    image, matched_circles = match_circles_and_contours(image, orange_detected, white_detected)
 
 
     # # Creating contour to track green color 
