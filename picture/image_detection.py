@@ -121,7 +121,7 @@ def circle_detection(image):
 
     #mindist=18
     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
-                               param1=50, param2=24, minRadius=9, maxRadius=14) #minRadius=5, maxRadius=20 , param2= 28 ORIG
+                               param1=50, param2=20, minRadius=9, maxRadius=15) #minRadius=5, maxRadius=20 , param2= 28 ORIG
   ##
      # List to store circle data
     stored_circles = []
@@ -137,8 +137,8 @@ def circle_detection(image):
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
             
             # Put text 'Ball' near the detected ball
-            cv2.putText(image, 'Ball', (x - r, y - r),
-                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            # cv2.putText(image, 'Ball', (x - r, y - r),
+            #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
             
             # print(f"'center': {x, y}, 'radius': {r}")
             # Store the circles data
@@ -203,16 +203,25 @@ def detect_ball_colors(image):
     # color space 
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
     
-    white_mask = np.load('white_mask.npy')
-    orange_mask = np.load('orange_mask.npy')
-    red_mask = np.load('red_mask.npy')
-    green_mask= np.load('green_mask.npy')
-    
-#    cv2.imshow('White Mask', white_mask)
-#    cv2.imshow('Orange Mask', orange_mask)
-#    cv2.imshow('Red Mask', red_mask)
-#    cv2.imshow('Green Mask', green_mask)
+    hsv_ranges = load_hsv_ranges('hsv_ranges.json')
 
+# Assuming 'frame' is a new image you want to process
+    orange_lower = np.array(hsv_ranges['orange']['lower'])
+    orange_upper = np.array(hsv_ranges['orange']['upper'])
+    orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper)
+
+    white_lower = np.array(hsv_ranges['white']['lower'])
+    white_upper = np.array(hsv_ranges['white']['upper'])
+    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper)
+
+    green_lower = np.array(hsv_ranges['green']['lower'])
+    green_upper = np.array(hsv_ranges['green']['upper'])
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+
+    red_lower = np.array(hsv_ranges['red']['lower'])
+    red_upper = np.array(hsv_ranges['red']['upper'])
+    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
+      
 
     orange_detected = []
     # point_in_orange_region = False
@@ -231,7 +240,7 @@ def detect_ball_colors(image):
     #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if area > 5000: 
+        if area > 4000: 
             x, y, w, h = cv2.boundingRect(contour) 
             if area > 6000 and area < 8000:  # area of cross is aprox 7000
                 rect = cv2.minAreaRect(contour)
@@ -330,7 +339,7 @@ def detect_ball_colors(image):
             # image = cv2.rectangle(image, (x, y), 
             #                            (x + w, y + h), 
             #                            (255, 255, 255), 2) 
-            print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
+            # print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
             if(area > 1000 and area < 3000): #before 2900
                 image = egg_draw(image,x,y,w,h,area)
