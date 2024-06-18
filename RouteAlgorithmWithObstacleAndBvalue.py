@@ -33,15 +33,16 @@ import matplotlib.pyplot as plt
 #     with open(filename, 'r') as file:
 #         data = json.load(file)
         
-#     # Extract the coordinates
-#     obstacles = data[0]
-#     return obstacles
+    # # Extract the coordinates
+    # obstacles = data[:-1]  # Ignore the last element (center with angle)
+    # center_point = tuple(data[-1][0])  # Extract the center coordinates
+    # return obstacles, center_point
 
 # # Load the coordinates from the JSON files
 # BallsXY = LoadCoordinatesWindows("whiteballs.json")
 # OrangeBallXY = LoadCoordinatesWindows("orangeballs.json")[0]  # Only one orange ball, therefore take only the first element
 # RobotXY = LoadCoordinatesWindows("robot.json")[0][:2]  # Only one robot, therefore take only the first element (without the angle)
-# Obstacles = LoadObstaclesWindows()
+# ObstacleXY, CenterXY = LoadObstaclesWindows(filename="no_go_zones.json")
 
 
 # Converting the nested list that represents the points of the cross to a list
@@ -73,15 +74,16 @@ def LoadObstacles(filename="no_go_zones.json"):
     with open(filename, 'r') as file:
         data = json.load(file)
     # Extract the coordinates
-    obstacles = data[0]
-    return obstacles
+    obstacles = data[:-1]  # Ignore the last element (center with angle)
+    center_point = tuple(data[-1][0])  # Extract the center coordinates
+    return obstacles, center_point
 
 
 # Load the coordinates from the json files
 BallsXY = LoadCoordinates("whiteballs.json")
 OrangeBallXY = LoadCoordinates("orangeballs.json")[0]  # Only one orange ball, therefore take only the first element
 RobotXY = LoadCoordinates("robot.json")[0][:2]  # Only one robot, therefore take only the first element (without the angle)
-ObstacleXY = LoadObstacles("no_go_zones.json")
+ObstacleXY, CenterPoint = LoadObstacles("no_go_zones.json")
 
 
 # Converting the nested list that represents the points of the cross to a list
@@ -121,20 +123,20 @@ ObstaclePoints = {
 }
 
 
-# Calculating the center point of the cross(obstacle)
-def CalculateCenterPoint(ObstaclePoints):
-    TopPoint = tuple(ListObstacle[1])
-    BottomPoint = tuple(ListObstacle[0])
-    LeftPoint = tuple(ListObstacle[2])
-    RightPoint = tuple(ListObstacle[3])
+# # Calculating the center point of the cross(obstacle)
+# def CalculateCenterPoint(ObstaclePoints):
+#     TopPoint = tuple(ListObstacle[1])
+#     BottomPoint = tuple(ListObstacle[0])
+#     LeftPoint = tuple(ListObstacle[2])
+#     RightPoint = tuple(ListObstacle[3])
     
-    CenterX = (LeftPoint[0] + RightPoint[0]) / 2
-    CenterY = (TopPoint[1] + BottomPoint[1]) / 2
-    CenterPoint = (CenterX, CenterY)
+#     CenterX = (LeftPoint[0] + RightPoint[0]) / 2
+#     CenterY = (TopPoint[1] + BottomPoint[1]) / 2
+#     CenterPoint = (CenterX, CenterY)
     
-    return CenterPoint
+#     return CenterPoint
 
-CenterPoint = CalculateCenterPoint(ObstaclePoints)
+# CenterPoint = CalculateCenterPoint(ObstaclePoints)
 
 
 # Function to calculate the distance between the Robot and the balls
