@@ -36,7 +36,8 @@ import matplotlib.pyplot as plt
     # # Extract the coordinates
     # obstacles = data[:-1]  # Ignore the last element (center with angle)
     # center_point = tuple(data[-1][0])  # Extract the center coordinates
-    # return obstacles, center_point
+    # cross_angle = data[-1][1]  # Extract the angle
+    # return obstacles, center_point, cross_angle
 
 # # Load the coordinates from the JSON files
 # BallsXY = LoadCoordinatesWindows("whiteballs.json")
@@ -76,15 +77,16 @@ def LoadObstacles(filename="no_go_zones.json"):
     # Extract the coordinates
     obstacles = data[:-1]  # Ignore the last element (center with angle)
     center_point = tuple(data[-1][0])  # Extract the center coordinates
-    return obstacles, center_point
+    cross_angle = data[-1][1]  # Extract the angle
+    return obstacles, center_point, cross_angle
 
 
 # Load the coordinates from the json files
 BallsXY = LoadCoordinates("whiteballs.json")
 OrangeBallXY = LoadCoordinates("orangeballs.json")[0]  # Only one orange ball, therefore take only the first element
 RobotXY = LoadCoordinates("robot.json")[0][:2]  # Only one robot, therefore take only the first element (without the angle)
-ObstacleXY, CenterPoint = LoadObstacles("no_go_zones.json")
-
+ObstacleXY, CenterPoint, CrossAngle = LoadObstacles("no_go_zones.json")
+GoalsXY = LoadCoordinates("goals.json")
 
 # Converting the nested list that represents the points of the cross to a list
 ListObstacle = [point for sublist in ObstacleXY for point in sublist]
@@ -93,6 +95,9 @@ ListObstacle = [point for sublist in ObstacleXY for point in sublist]
 # # Check the length of converted list for debugging 
 # if len(ListObstacle) < 4:
 #     raise ValueError("ERROR! Converted ObstacleXY does not contain enough points. Check the contents of no_go_zones.json.")
+
+# Print the cross angle for debugging
+print("Cross angle:", CrossAngle)
 
 #********************************* FOR IBTI ******************************** 
 
@@ -113,6 +118,13 @@ TrackEdges = {
     ((1250, 0), (1250, 900)): 8  # Right edge
 }
 
+# Defining the goal coordinates
+Goal1 = tuple(GoalsXY[0])  # Center of edge 6
+Goal2 = tuple(GoalsXY[1])  # Center of edge 8
+
+# Print the goals for debugging
+print("Goal 1:", Goal1)
+print("Goal 2:", Goal2)
 
 # Defining the points of the cross
 ObstaclePoints = {
