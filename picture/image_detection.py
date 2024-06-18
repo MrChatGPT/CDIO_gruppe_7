@@ -204,8 +204,8 @@ def detect_ball_colors(image):
     
     # Set range for red color and  
     # define mask 
-    red_lower = np.array([0, 167, 157], np.uint8) #HSV_old  0, 113, 180
-    red_upper = np.array([15, 227, 255], np.uint8) #HSV_old  9, 255, 255
+    red_lower = np.array([0, 130, 157], np.uint8) #HSV_old  0, 113, 180
+    red_upper = np.array([15, 220, 255], np.uint8) #HSV_old  9, 255, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
     orange_lower = np.array([13, 135, 223], np.uint8) #HSV_old 5, 156, 184
@@ -264,7 +264,8 @@ def detect_ball_colors(image):
     red_mask = cv2.dilate(red_mask, kernel) 
     res_red = cv2.bitwise_and(image, image,  
                               mask = red_mask) 
-      
+    red_debug = cv2.cvtColor(red_mask, cv2.COLOR_GRAY2BGR)
+    cv2.imwrite("debug_red_contours.jpg", red_debug)  
     # For orange color 
     orange_mask = cv2.dilate(orange_mask, kernel) 
     res_orange = cv2.bitwise_and(image, image, 
@@ -315,9 +316,11 @@ def detect_ball_colors(image):
     #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if area > 5000: 
+        if area > 4000: 
             x, y, w, h = cv2.boundingRect(contour) 
-            if area > 6000 and area < 8000:  # area of cross is aprox 7000
+            print (area)
+            if area > 6000 and area < 8000:  # area of cross is aprox 2500
+                
                 rect = cv2.minAreaRect(contour)
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
@@ -339,15 +342,18 @@ def detect_ball_colors(image):
                 end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
                         int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
                 
-                # Draw the cross
-                cv2.line(image, end1, end2, (0, 0, 255), 2)
-                cv2.line(image, end3, end4, (0, 0, 255), 2)
-                
-                cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+                # List of all end points
+                points = [end1, end2, end3, end4]
+                print("fexaimxffdxaimx", points)
+                # Sort points based on y-values and x-values
+                temp1 = max(points, key=lambda p: p[1])  # Point with the highest y-value
+                temp2 = min(points, key=lambda p: p[1])  # Point with the lowest y-value
+                temp3 = max(points, key=lambda p: p[0])  # Point with the highest x-value
+                temp4 = min(points, key=lambda p: p[0])  # Point with the lowest x-value
                 
                 no_go_zones = [
-                    (end1, end2),
-                    (end3, end4),
+                    (temp2, temp1),
+                    (temp4, temp3),
                     (center, angle)
                 ]
                 

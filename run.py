@@ -5,7 +5,7 @@ from picture.livefeed import *
 from picture.transform_arena import *
 from picture.image_detection import *
 from algorithm.algorithm import *
-from algorithm.move_to_targetv4 import *
+from algorithm.move_to_targetv5 import *
 from algorithm.utils import *
 from algorithm.control import *
 
@@ -43,7 +43,7 @@ try:
         car = find_carv2(image)
         
         ball = SortByDistance()
-        move_to_targetv4(camera_handler, ball)
+        move_to_targetv5(camera_handler, ball)
         # cv2.imshow("LiveV2",image)
         
             

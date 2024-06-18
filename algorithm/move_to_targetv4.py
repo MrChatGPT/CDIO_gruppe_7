@@ -77,8 +77,8 @@ def move_to_targetv4(camera_handler, ball):
             car = Car(car[0], car[1], car[2])
             
             # Initialize PID controllers
-            Kp_angle, Ki_angle, Kd_angle =  0.001, 0, 0.05
-            Kp_dist, Ki_dist, Kd_dist = 0.01, 0, 0.05
+            Kp_angle, Ki_angle, Kd_angle =  0.001, 1, 0
+            Kp_dist, Ki_dist, Kd_dist = 0, 0, 0
             angle_pid = PIDController(Kp_angle, Ki_angle, Kd_angle)
             dist_pid = PIDController(Kp_dist, Ki_dist, Kd_dist)
             
@@ -91,7 +91,7 @@ def move_to_targetv4(camera_handler, ball):
             #Hvis vi kører for langt sæt den op kører for kort sæt den ned
             
             #Virker nu!!!!!!!!
-            angle_threshold = 2
+            angle_threshold = 1
             
             # Load car values into the car object
             current_x, current_y, current_angle = car.x, car.y, car.angle
@@ -121,20 +121,18 @@ def move_to_targetv4(camera_handler, ball):
                 flag_done = 1
                 break
                 
-
-
             # Angle correction
             #print(f"angle error: {abs(angle_error)}\n")
             if abs(angle_error) > angle_threshold:
                 angle_correction = angle_pid.calculate(0, angle_error)
                 if angle_error > 0:#Der forventes at skulle skrues her: 
                     publish_controller_data((0, 0, max(0.12, min(angle_correction, 1)), 0, 0))  # Tilt right
-                    sleep(0.2)
-                    publish_controller_data((0,0,0,0,0))
+                    # sleep(0.2)
+                    # publish_controller_data((0,0,0,0,0))
                 else:
                     publish_controller_data((0, 0, max(-0.12, min(angle_correction, -1)), 0, 0))  # Tilt left
-                    sleep(0.2)
-                    publish_controller_data((0,0,0,0,0))
+                    # sleep(0.2)
+                    # publish_controller_data((0,0,0,0,0))
                 continue
             # Forward movement control
             print("Angle error: ",abs(angle_error))
@@ -146,7 +144,7 @@ def move_to_targetv4(camera_handler, ball):
         
   
     target_x, target_y = ball.x, ball.y
-    position_threshold = 176 
+    position_threshold = 160 #176 
     flag_done = 0
     print("all waypoints cleared, next stop THE BALL!")
     while not(flag_done):
@@ -156,8 +154,8 @@ def move_to_targetv4(camera_handler, ball):
             car = Car(car[0], car[1], car[2])
             
             # Initialize PID controllers
-            Kp_angle, Ki_angle, Kd_angle = 0.001, 0, 0.05
-            Kp_dist, Ki_dist, Kd_dist = 0.01, 0, 0.05
+            Kp_angle, Ki_angle, Kd_angle = 0.001, 0, 1
+            Kp_dist, Ki_dist, Kd_dist = 0.001, 0, 1
             angle_pid = PIDController(Kp_angle, Ki_angle, Kd_angle)
             dist_pid = PIDController(Kp_dist, Ki_dist, Kd_dist)
             
@@ -208,12 +206,12 @@ def move_to_targetv4(camera_handler, ball):
                 angle_correction = angle_pid.calculate(0, angle_error)
                 if angle_error > 0:#Der forventes at skulle skrues her: 
                     publish_controller_data((0, 0, max(0.12, min(angle_correction, 1)), 0, 0))  # Tilt right
-                    sleep(0.2)
-                    publish_controller_data((0,0,0,0,0))
+                    # sleep(0.2)
+                    # publish_controller_data((0,0,0,0,0))
                 else:
                     publish_controller_data((0, 0, max(-0.12, min(angle_correction, -1)), 0, 0))  # Tilt left
-                    sleep(0.2)
-                    publish_controller_data((0,0,0,0,0))
+                    # sleep(0.2)
+                    # publish_controller_data((0,0,0,0,0))
                 continue
             
             # Forward movement control

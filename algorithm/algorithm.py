@@ -67,6 +67,7 @@ def LoadObstacles(filename="no_go_zones.json"):
         arms.append(data[0])
         arms.append(data[1])
         cross = Cross(cross_center[0], cross_center[1], cross_angle, arms)
+        print(arms[0], arms[1])
     return cross
 
 # Function to calculate the distance 
@@ -93,16 +94,13 @@ def write_obstacle_val(ball, cross):
 
     # Converting the nested list that represents the points of the cross to a list
     
-    print(cross.arms[1].end)
-    print(cross.arms[1].start)
-    print(cross.arms[0].end)
-    print(cross.arms[0].start)
+    
     # Defining the obstacle values inside the cross
     ObstaclePoints = {
-        tuple(cross.arms[1].end): 9,  # Top point 
-        tuple(cross.arms[1].start): 10,  # Bottom point  
-        tuple(cross.arms[0].end): 11,  # Left point 
-        tuple(cross.arms[0].start): 12   # Right point
+        tuple(cross.arms[0].start): 9,  # Top point 
+        tuple(cross.arms[0].end): 11,  # Bottom point  
+        tuple(cross.arms[1].start): 10,  # Left point 
+        tuple(cross.arms[1].end): 12   # Right point
     }
 
     # Check proximity to track corners
@@ -123,28 +121,28 @@ def write_obstacle_val(ball, cross):
                 return
             
     # Determine which inner quadrant the ball is in
-    TopPoint = tuple(cross.arms[1].end)
-    BottomPoint = tuple(cross.arms[1].start)
-    LeftPoint = tuple(cross.arms[0].end)
-    RightPoint = tuple(cross.arms[0].start)
-
+    TopPoint = tuple(cross.arms[0].start)
+    BottomPoint = tuple(cross.arms[0].end)
+    LeftPoint = tuple(cross.arms[1].start)
+    RightPoint = tuple(cross.arms[1].end)
+    
     # Check if the ball is close to lines forming the inner quadrants
-    if Distance((ball.x, ball.y), TopPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), LeftPoint) < 100:
+    if Distance((ball.x, ball.y), TopPoint) < 70 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), LeftPoint) < 70:
         ball.obstacle = 13
         return
     
     # Check if the ball is in the top-right inner corner
-    elif Distance((ball.x, ball.y), TopPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), RightPoint) < 100:
+    elif Distance((ball.x, ball.y), TopPoint) < 70 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), RightPoint) < 70:
         ball.obstacle = 16
         return
     
     # Check if the ball is in the bottom-left inner corner
-    elif Distance((ball.x, ball.y), LeftPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), BottomPoint) < 100:
+    elif Distance((ball.x, ball.y), LeftPoint) < 70 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), BottomPoint) < 70:
         ball.obstacle = 14
         return
     
     # Check if the ball is in the bottom-right inner corner
-    elif Distance((ball.x, ball.y), BottomPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), RightPoint) < 100:
+    elif Distance((ball.x, ball.y), BottomPoint) < 70 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), RightPoint) < 70:
         ball.obstacle = 15
         return
     
@@ -220,7 +218,7 @@ def get_closest_quadrants(first_quadrant):
 
 def calc_obstacle_waypoints(ball, car, cross):
     cross_length = 100
-    waypoint_distance = 150 # Distance from ball location to put waypoint
+    waypoint_distance = 200 # Distance from ball location to put waypoint
     x,y = 1229, 900
 
     if ball.obstacle == 0:
@@ -255,8 +253,8 @@ def calc_obstacle_waypoints(ball, car, cross):
         if angle > 359:
             angle = angle - 360
         angle_rad = math.radians(angle)
-        waypoint_x = ball.x + waypoint_distance * math.cos(angle_rad)
-        waypoint_y = ball.y + waypoint_distance * math.sin(angle_rad)
+        waypoint_x = ball.x + waypoint_distance * math.sin(angle_rad)
+        waypoint_y = ball.y + waypoint_distance * math.cos(angle_rad)
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
     elif ball.obstacle == 10:
@@ -332,11 +330,12 @@ def calc_obstacle_waypoints(ball, car, cross):
                 add_additional_waypoint(ball, car, cross, (waypoint_distance+100))
 
 def add_additional_waypoint(ball, car, cross, waypoint_distance):
-    print("adding aditional waypoint")
-    first_waypoint = ball.waypoints[-1]
+    if len(ball.waypoints) == 0:
+        first_waypoint = Waypoint(ball.x, ball.y)
+    else:
+        first_waypoint = ball.waypoints[-1]
     first_quadrant = get_quadrant(first_waypoint, cross.x, cross.y)
     closest_quadrants = get_closest_quadrants(first_quadrant)
-    print("first waypoint in:", first_quadrant)
 
     potential_quadrants = []
     # for quadrant in closest_quadrants:
