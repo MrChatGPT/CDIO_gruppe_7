@@ -35,7 +35,7 @@ def click_event(event, x, y, flags, param):
         display_frame = frame.copy()
         cv2.circle(display_frame, (x, y), 5, (255, 0, 0), -1)
         cv2.imshow('image', display_frame)
-        print(f"Clicked at: ({x}, {y}) with HSV value: {hsv_value}")
+        #print(f"Clicked at: ({x}, {y}) with HSV value: {hsv_value}")
 
 # Function to create an HSV mask
 def create_hsv_mask(hsv_values, frame, buffer=15):
@@ -55,7 +55,7 @@ def create_hsv_mask(hsv_values, frame, buffer=15):
     min_hsv = np.array([min_h, min_s, min_v])
     max_hsv = np.array([max_h, max_s, max_v])
     
-    print(f"Min HSV: {min_hsv}, Max HSV: {max_hsv}")  # Print HSV ranges for verification
+    #print(f"Min HSV: {min_hsv}, Max HSV: {max_hsv}")  # Print HSV ranges for verification
     
     # Convert the frame to HSV
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -87,6 +87,10 @@ def select_colors_and_create_mask(image):
     cv2.namedWindow('image')
     cv2.setMouseCallback('image', click_event)
 
+    # List of colors
+    colors = ['white', 'orange', 'red', 'green']
+    color_index = 0  # Start with the first color in the list
+
     while True:
         # Update the display_frame with the current color text
         display_with_text = display_frame.copy()
@@ -98,13 +102,8 @@ def select_colors_and_create_mask(image):
         if key == ord('q'):
             break
         elif key == ord('w'):
-            current_color = 'white'
-        elif key == ord('o'):
-            current_color = 'orange'
-        elif key == ord('r'):
-            current_color = 'red'
-        elif key == ord('g'):
-            current_color = 'green'
+            color_index = (color_index + 1) % len(colors)  # next color
+            current_color = colors[color_index]
 
     cv2.destroyAllWindows()
 

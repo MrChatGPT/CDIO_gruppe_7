@@ -207,111 +207,13 @@ def detect_ball_colors(image):
     orange_mask = np.load('orange_mask.npy')
     red_mask = np.load('red_mask.npy')
     green_mask= np.load('green_mask.npy')
-
-    cv2.imshow('White Mask', white_mask)
-    cv2.imshow('Orange Mask', orange_mask)
-    cv2.imshow('Red Mask', red_mask)
-    cv2.imshow('Green Mask', green_mask)
     
-    # Set range for red color and  
-    # define mask 
-    #red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
-    #red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
-    #red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
-
-    #orange_lower = np.array([10, 183, 166], np.uint8) #HSV
-    #orange_upper = np.array([65, 255, 255], np.uint8) #HSV 65, 211, 255
-    #orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-
-    """
-    Attempt on the picture ending with 59, with both higher and lower values at the same time
-    BEST SO FAR
-    """
-    #ORIGINAL
-    #white_lower = np.array([ 10, 0, 200], np.uint8) #HSV 6, 0, 191
-    #white_upper = np.array([50, 100, 255], np.uint8) #HSV 179, 42, 255
-    #white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-    
-    """
-    Attempt on the picture ending with 46
-    """
-    blue_lower = np.array([95, 66, 141], np.uint8) #HSV
-    blue_upper = np.array([113, 150, 205], np.uint8) #HSV
-    blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper) 
-
-    # Set range for pink color and  
-    # define mask 
-    pink_lower = np.array([154,  62,  80], np.uint8) #HSV 
-    pink_upper = np.array([169, 105, 255], np.uint8) #HSV  
-    pink_mask = cv2.inRange(hsvFrame, pink_lower, pink_upper) 
-
-    # Set range for green color and  
-    # define mask 
-    #green_lower = np.array([50, 20, 110], np.uint8) #HSV   51,  87, 182
-    #green_upper = np.array([85, 200, 255], np.uint8) #HSV   89, 255 , 255
-    #green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
-
-
-
-    yellow_lower = np.array([20, 131, 199], np.uint8) #HSV  28,  82, 247   # 20,  40, 247 # 20, 131, 199
-    yellow_upper = np.array([ 50, 202, 255], np.uint8) #HSV 46, 172, 255   #  27, 202, 255
-    yellow_mask = cv2.inRange(hsvFrame, yellow_lower, yellow_upper) 
-
     orange_detected = []
     # point_in_orange_region = False
     #px, py = 1302, 166
    
 
     ###########################################################
-      
-    # Morphological Transform, Dilation 
-    # for each color and bitwise_and operator 
-    # between imageFrame and mask determines 
-    # to detect only that particular color 
-    kernel = np.ones((5, 5), "uint8") 
-      
-    # For red color 
-    red_mask = cv2.dilate(red_mask, kernel) 
-    res_red = cv2.bitwise_and(image, image,  
-                              mask = red_mask) 
-      
-    # For orange color 
-    orange_mask = cv2.dilate(orange_mask, kernel) 
-    res_orange = cv2.bitwise_and(image, image, 
-                                mask = orange_mask) 
-      
-
-    
-    # For blue color 
-    blue_mask = cv2.dilate(blue_mask, kernel) 
-    res_blue = cv2.bitwise_and(image, image, 
-                               mask = blue_mask) 
-   
-    # For pink color 
-    pink_mask = cv2.dilate(pink_mask, kernel) 
-    res_pink = cv2.bitwise_and(image, image,  
-                              mask = pink_mask) 
-    # # For green color 
-    green_mask = cv2.dilate(green_mask, kernel) 
-    res_green = cv2.bitwise_and(image, image, 
-                               mask = green_mask) 
-    
-    # # For yellow color 
-    yellow_mask = cv2.dilate(yellow_mask, kernel) 
-    res_yellow = cv2.bitwise_and(image, image, 
-                               mask = yellow_mask) 
-    
-
-
-    # Morphological Transform, Erosion followed by Dilation
-    # kernel = np.ones((9, 9), "uint8")
-    kernel = np.ones((6, 6), "uint8")
-    white_mask = cv2.erode(white_mask, kernel, iterations=1)
-    white_mask = cv2.dilate(white_mask, kernel, iterations=2)
-
- 
-
-
 
 
     # Creating contour to track red color 
@@ -456,26 +358,6 @@ def detect_ball_colors(image):
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
             
-    # # Creating contour to track yellow color 
-    contours, hierarchy = cv2.findContours(yellow_mask, 
-                                           cv2.RETR_TREE, 
-                                           cv2.CHAIN_APPROX_SIMPLE) 
-    for pic, contour in enumerate(contours): 
-        area = cv2.contourArea(contour) 
-        if(area > 800): 
-            x, y, w, h = cv2.boundingRect(contour) 
-            image = cv2.rectangle(image, (x, y), 
-                                       (x + w, y + h), 
-                                       (0, 0, 0), 2) 
-            print(f"(yellow x={x}, y={y}) w={w} h={h} area={area}")
-            # line_drawForPat(image, x, y, w, h, area)
-            cv2.putText(image, "yellow Colour", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        1.0, (0, 0, 0)) 
-
-
-
-
     # Program Termination 
     # cv2.imshow("Multiple Color Detection in Real-TIme utils", image) 
 
