@@ -120,8 +120,8 @@ def circle_detection(image):
     """
 
     #mindist=18
-    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
-                               param1=50, param2=24, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
+    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1.5, minDist=20, 
+                               param1=50, param2=30, minRadius=1, maxRadius=50) #minRadius=5, maxRadius=20 , param2= 28 ORIG
   ##
      # List to store circle data
     stored_circles = []
@@ -205,12 +205,12 @@ def detect_ball_colors(image):
     
     # Set range for red color and  
     # define mask 
-    red_lower = np.array([0, 165, 184], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
-    red_upper = np.array([10, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
+    red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
+    red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
-    orange_lower = np.array([16, 162, 215], np.uint8) #HSV
-    orange_upper = np.array([122, 255, 255], np.uint8) #HSV 65, 211, 255
+    orange_lower = np.array([10, 116, 207], np.uint8) #HSV
+    orange_upper = np.array([32, 255, 255], np.uint8) #HSV 65, 211, 255
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
     """
@@ -218,8 +218,8 @@ def detect_ball_colors(image):
     BEST SO FAR
     """
     #ORIGINAL
-    white_lower = np.array([ 10, 0, 203], np.uint8) #HSV 6, 0, 191
-    white_upper = np.array([37, 57, 255], np.uint8) #HSV 179, 42, 255
+    white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
+    white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
     """
@@ -235,11 +235,12 @@ def detect_ball_colors(image):
     pink_upper = np.array([169, 105, 255], np.uint8) #HSV  
     pink_mask = cv2.inRange(hsvFrame, pink_lower, pink_upper) 
 
+    # Set range for green color and  
+    # define mask 
     green_lower = np.array([54, 0, 194], np.uint8) #HSV   51,  87, 182
     green_upper = np.array([82, 255, 255], np.uint8) #HSV   89, 255 , 255
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
-    # Set range for green color and  
-    # define mask 
+
 
 
     yellow_lower = np.array([20, 131, 199], np.uint8) #HSV  28,  82, 247   # 20,  40, 247 # 20, 131, 199
@@ -458,7 +459,7 @@ def detect_ball_colors(image):
 
 
 
-
+            
 
 
     # # Creating contour to track yellow color 
@@ -491,6 +492,9 @@ def detect_ball_colors(image):
     #     cv2.destroyAllWindows() 
     #     break  
 
+
+
+
 def match_circles_and_contours(image, contours):
 
     #To store balls in separate arrays
@@ -522,10 +526,14 @@ def match_circles_and_contours(image, contours):
 
     return image, matched_circles
 
+
+
+
 def save_balls(circles, filename="balls.json"):
     balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
     with open(filename, 'w') as file:
         json.dump(balls, file, indent=4)
+
 
 def saveOrange_balls(balls, filename="orangeballs.json"):
     # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
@@ -551,6 +559,8 @@ def print_balls(filename="balls.json"):
 def save_Egg(egg, filename="egg.json"):
     with open(filename, 'w') as file:
         json.dump(egg, file, indent=4)
+
+
 
 def check_point_in_orange_region(contours):
     #To store balls in separate arrays
@@ -585,108 +595,6 @@ def rgb_to_hsv(rgb):
     color = np.uint8([[rgb]])
     hsv_color = cv2.cvtColor(color, cv2.COLOR_RGB2HSV)
     return hsv_color[0][0]
-
-def find_carv2(image, output_image_path='output_image.jpg'):
-    # Read the mask image
-    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    green_lower = np.array([54, 0, 194], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([82, 255, 255], np.uint8) #HSV   89, 255 , 255
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
-    
-    # Find contours in the mask
-    contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Debug: Draw all contours to visualize
-    debug_image = cv2.cvtColor(green_mask, cv2.COLOR_GRAY2BGR)
-    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
-    cv2.imwrite("debug_all_contours.jpg", debug_image)
-    
-    # Separate contours into front (squares) and back (rectangle)
-    front_contours = []
-    back_contour = None
-    max_area = 0
-    
-    # Filter out very small contours (noise)
-    min_contour_area = 100  # Adjust this threshold as needed
-    valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
-    
-    for contour in valid_contours:
-        area = cv2.contourArea(contour)
-        #print(f"Contour area: {area}")  # Debug: Print contour area
-        if area > max_area:
-            max_area = area
-            back_contour = contour
-        else:
-            front_contours.append(contour)
-    
-    # Debug: Log the largest contour area and number of front contours
-    #print(f"Largest contour area (back contour): {max_area}")
-    #print(f"Number of front contours: {len(front_contours)}")
-    
-    # Ensure we have exactly one back contour and two front contours
-    if back_contour is None or len(front_contours) != 2:
-        raise ValueError("Could not find the required front squares and back rectangle in the image.")
-    
-    # Calculate the center of the bounding box for all contours
-    min_x, min_y = float('inf'), float('inf')
-    max_x, max_y = float('-inf'), float('-inf')
-    for contour in valid_contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        min_x = min(min_x, x)
-        min_y = min(min_y, y)
-        max_x = max(max_x, x + w)
-        max_y = max(max_y, y + h)
-    
-    # Calculate the center of the bounding box
-    center_x = (min_x + max_x) // 2
-    center_y = (min_y + max_y) // 2
-    
-    # Calculate the centroid of the back (rectangle)
-    M = cv2.moments(back_contour)
-    back_x = int(M['m10'] / M['m00'])
-    back_y = int(M['m01'] / M['m00'])
-    
-    # Calculate the centroid of the front (average of two squares)
-    front_x = 0
-    front_y = 0
-    for contour in front_contours:
-        M = cv2.moments(contour)
-        front_x += int(M['m10'] / M['m00'])
-        front_y += int(M['m01'] / M['m00'])
-    front_x //= 2
-    front_y //= 2
-    
-    # Calculate the angle
-    # The angle is calculated with respect to the vertical direction (up is 180 degrees, down is 0 degrees)
-    angle_rad = math.atan2(front_x - back_x, back_y - front_y)
-    angle_deg = (math.degrees(angle_rad) + 180) % 360
-    
-   
-    
-    # Draw the centroids, car center, and direction arrow on the image for visualization
-    #cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
-    #cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
-    #cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
-    #cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
-    
-    # Save the result
-    #cv2.imwrite(output_image_path, image)
-    #print(f"Center location: {center_x, center_y}\n Angle: {angle_deg}")
-     # Save the data to robot.json
-    data = [[center_x, center_y, angle_deg]]
-    with open('robot.json', 'w') as json_file:
-        json.dump(data, json_file)
-
-    return (center_x, center_y, angle_deg)
-
-# Example usage
-# Assuming you have an image (mask) loaded as `image`
-# image = cv2.imread('path_to_image.png', cv2.IMREAD_GRAYSCALE)
-# center_x, center_y, angle_deg = find_carv2(image)
-# print(f'The center of the combined shapes is at: ({center_x}, {center_y}) with angle: {angle_deg} degrees')
-
-
-
 
 def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mask.jpg', green_mask_path='green_mask.jpg', center_weight=25):
     # Read the image
@@ -775,4 +683,3 @@ def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mas
         json.dump(data, json_file)
     
     return (adjusted_center_x, adjusted_center_y, angle_deg)
-
