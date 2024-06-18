@@ -120,8 +120,8 @@ def circle_detection(image):
     """
 
     #mindist=18
-    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1.5, minDist=20, 
-                               param1=50, param2=30, minRadius=1, maxRadius=50) #minRadius=5, maxRadius=20 , param2= 28 ORIG
+    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
+                               param1=50, param2=24, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
   ##
      # List to store circle data
     stored_circles = []
@@ -209,8 +209,8 @@ def detect_ball_colors(image):
     red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
-    orange_lower = np.array([10, 116, 207], np.uint8) #HSV
-    orange_upper = np.array([32, 255, 255], np.uint8) #HSV 65, 211, 255
+    orange_lower = np.array([10, 183, 166], np.uint8) #HSV
+    orange_upper = np.array([65, 255, 255], np.uint8) #HSV 65, 211, 255
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
     """
@@ -218,8 +218,8 @@ def detect_ball_colors(image):
     BEST SO FAR
     """
     #ORIGINAL
-    white_lower = np.array([ 0, 0, 209], np.uint8) #HSV 6, 0, 191
-    white_upper = np.array([100, 75, 255], np.uint8) #HSV 179, 42, 255
+    white_lower = np.array([ 10, 0, 200], np.uint8) #HSV 6, 0, 191
+    white_upper = np.array([50, 100, 255], np.uint8) #HSV 179, 42, 255
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
     """
@@ -237,8 +237,8 @@ def detect_ball_colors(image):
 
     # Set range for green color and  
     # define mask 
-    green_lower = np.array([54, 0, 194], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([82, 255, 255], np.uint8) #HSV   89, 255 , 255
+    green_lower = np.array([50, 20, 110], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([85, 200, 255], np.uint8) #HSV   89, 255 , 255
     green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
 
 
@@ -313,26 +313,49 @@ def detect_ball_colors(image):
     #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 5000): 
+        if area > 5000: 
             x, y, w, h = cv2.boundingRect(contour) 
-            # image = cv2.rectangle(image, (x, y),  
-            #                            (x + w, y + h),  
-            #                            (0, 0, 255), 2) 
-            # print(f"(x={x}, y={y}) w={w} h={h} area={area}") #
-            # if(area > 8000 and area < 15000):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-                                        
-            # if(area > 1250000 and area < 1460000):
-            #     box, min_area_rect = square_draw(image,x,y,w,h,area)
-            #     # image = cv2.drawContours(image, [box], 0, (0, 255, 0), 2)
-            #     # image = goal_draw(image, x, y)
+            if area > 6000 and area < 8000:  # area of cross is aprox 7000
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
                 
+                center = (int(rect[0][0]), int(rect[0][1]))
+                size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
+                angle = rect[2] + 45
                 
-              
-            cv2.putText(image, "Red Colour utils", (x, y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
-                        (0, 0, 255))     
+                # Create a rotation matrix
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                
+                # Calculate the end points of the cross lines
+                end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
+                        int(center[1] + size[0] * np.sin(np.radians(angle))))
+                end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
+                        int(center[1] - size[0] * np.sin(np.radians(angle))))
+                end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
+                end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
+                        int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
+                
+                # Draw the cross
+                cv2.line(image, end1, end2, (0, 0, 255), 2)
+                cv2.line(image, end3, end4, (0, 0, 255), 2)
+                
+                cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
+                
+                no_go_zones = []
+                no_go_zones.append([
+                    (end1, end2),
+                    (end3, end4)
+                ])
+
+                save_no_go_zones(no_go_zones)
+
+                    
+                
+                cv2.putText(image, "Red Colour utils", (x, y), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, 
+                            (0, 0, 255))     
     
     # Creating contour to track orange color 
     contours, hierarchy = cv2.findContours(orange_mask, 
@@ -407,39 +430,6 @@ def detect_ball_colors(image):
 
 
 
-    # # # Creating contour to track pink color 
-    # contours, hierarchy = cv2.findContours(pink_mask, 
-    #                                        cv2.RETR_TREE, 
-    #                                        cv2.CHAIN_APPROX_SIMPLE) 
-    # for pic, contour in enumerate(contours): 
-    #     area = cv2.contourArea(contour) 
-    #     if(area > 200): 
-    #         x, y, w, h = cv2.boundingRect(contour) 
-    #         image = cv2.rectangle(image, (x, y), 
-    #                                    (x + w, y + h), 
-    #                                    (0, 0, 0), 2) 
-    #         # print(f"(Pink objects: x={x}, y={y}) w={w} h={h} area={area}")
-              
-    #         cv2.putText(image, "Pink Colour", (x, y), 
-    #                     cv2.FONT_HERSHEY_SIMPLEX, 
-    #                     1.0, (0, 0, 0)) 
-    # # Creating contour to track blue color 
-    # contours, hierarchy = cv2.findContours(blue_mask, 
-    #                                        cv2.RETR_TREE, 
-    #                                        cv2.CHAIN_APPROX_SIMPLE) 
-    # for pic, contour in enumerate(contours): 
-    #     area = cv2.contourArea(contour) 
-    #     if(area > 300): 
-    #         x, y, w, h = cv2.boundingRect(contour) 
-    #         image = cv2.rectangle(image, (x, y), 
-    #                                    (x + w, y + h), 
-    #                                    (255, 85, 0), 2) 
-              
-    #         cv2.putText(image, "Blue Colour", (x, y), 
-    #                     cv2.FONT_HERSHEY_SIMPLEX, 
-    #                     1.0, (255, 85, 0)) 
-              
-
     # # Creating contour to track green color 
     contours, hierarchy = cv2.findContours(green_mask, 
                                            cv2.RETR_TREE, 
@@ -456,12 +446,6 @@ def detect_ball_colors(image):
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
             
-
-
-
-            
-
-
     # # Creating contour to track yellow color 
     contours, hierarchy = cv2.findContours(yellow_mask, 
                                            cv2.RETR_TREE, 
@@ -559,6 +543,10 @@ def print_balls(filename="balls.json"):
 def save_Egg(egg, filename="egg.json"):
     with open(filename, 'w') as file:
         json.dump(egg, file, indent=4)
+
+def save_no_go_zones(zones, filename="no_go_zones.json"):
+    with open(filename, 'w') as file:
+        json.dump(zones, file)
 
 
 
@@ -683,3 +671,104 @@ def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mas
         json.dump(data, json_file)
     
     return (adjusted_center_x, adjusted_center_y, angle_deg)
+
+def find_carv2(image, output_image_path='output_image.jpg'):
+    # Read the mask image
+    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+    green_lower = np.array([50, 20, 110], np.uint8) #HSV   51,  87, 182
+    green_upper = np.array([85, 200, 255], np.uint8) #HSV   89, 255 , 255
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+    
+    # Find contours in the mask
+    contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Debug: Draw all contours to visualize
+    debug_image = cv2.cvtColor(green_mask, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
+    cv2.imwrite("debug_all_contours.jpg", debug_image)
+    
+    # Separate contours into front (squares) and back (rectangle)
+    front_contours = []
+    back_contour = None
+    max_area = 0
+    
+    # Filter out very small contours (noise)
+    min_contour_area = 100  # Adjust this threshold as needed
+    valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
+    for contour in valid_contours:
+        area = cv2.contourArea(contour)
+        #print(f"Contour area: {area}")  # Debug: Print contour area
+        #Vi får 3 tal, i en vilkårlig rækkefølge. de to små skal appendes til front, den største skal være lig back_contour
+        if area > 4000:
+            back_contour = contour
+        else:
+            front_contours.append(contour)
+        
+    
+    # Debug: Log the largest contour area and number of front contours
+    #print(f"Largest contour area (back contour): {max_area}")
+    #print(f"Number of front contours: {len(front_contours)}")
+    
+    # Ensure we have exactly one back contour and two front contours
+    if len(front_contours) != 2:
+        print("car is goone")
+        return
+        #raise ValueError("Could not find the required front squares and back rectangle in the image.")
+    
+    # Calculate the center of the bounding box for all contours
+    min_x, min_y = float('inf'), float('inf')
+    max_x, max_y = float('-inf'), float('-inf')
+    for contour in valid_contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        min_x = min(min_x, x)
+        min_y = min(min_y, y)
+        max_x = max(max_x, x + w)
+        max_y = max(max_y, y + h)
+    
+    # Calculate the center of the bounding box
+    center_x = (min_x + max_x) // 2
+    center_y = (min_y + max_y) // 2
+    
+    # Calculate the centroid of the back (rectangle)
+    M = cv2.moments(back_contour)
+    back_x = int(M['m10'] / M['m00'])
+    back_y = int(M['m01'] / M['m00'])
+    
+    # Calculate the centroid of the front (average of two squares)
+    front_x = 0
+    front_y = 0
+    for contour in front_contours:
+        M = cv2.moments(contour)
+        front_x += int(M['m10'] / M['m00'])
+        front_y += int(M['m01'] / M['m00'])
+    front_x //= 2
+    front_y //= 2
+    
+    # Calculate the angle
+    # The angle is calculated with respect to the vertical direction (up is 180 degrees, down is 0 degrees)
+    angle_rad = math.atan2(front_x - back_x, back_y - front_y)
+    angle_deg = (math.degrees(angle_rad) + 180) % 360
+    
+   
+    
+    # Draw the centroids, car center, and direction arrow on the image for visualization
+    cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
+    cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
+    cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
+    cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
+    
+    # Save the result
+    cv2.imwrite(output_image_path, image)
+    #print(f"Center location: {center_x, center_y}\n Angle: {angle_deg}")
+     # Save the data to robot.json
+    data = [[center_x, center_y, angle_deg]]
+    with open('robot.json', 'w') as json_file:
+        json.dump(data, json_file)
+
+    return (center_x, center_y, angle_deg)
+
+# Example usage
+# Assuming you have an image (mask) loaded as `image`
+# image = cv2.imread('path_to_image.png', cv2.IMREAD_GRAYSCALE)
+# center_x, center_y, angle_deg = find_carv2(image)
+# print(f'The center of the combined shapes is at: ({center_x}, {center_y}) with angle: {angle_deg} degrees')
