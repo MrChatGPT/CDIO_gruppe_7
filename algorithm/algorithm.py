@@ -323,11 +323,12 @@ def calc_obstacle_waypoints(ball, car, cross):
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
     print("added one waypoint", len(ball.waypoints))
-
+    
     while is_crossed_by_line(car, ball.waypoints[-1], cross):
-            add_additional_waypoint(ball, car, cross, waypoint_distance)
+            add_additional_waypoint(ball, car, cross, (waypoint_distance+100))
 
 def add_additional_waypoint(ball, car, cross, waypoint_distance):
+    print("adding aditional waypoint")
     first_waypoint = ball.waypoints[-1]
     first_quadrant = get_quadrant(first_waypoint, cross.x, cross.y)
     closest_quadrants = get_closest_quadrants(first_quadrant)
@@ -346,7 +347,6 @@ def add_additional_waypoint(ball, car, cross, waypoint_distance):
     for x, y in potential_quadrants:
         waypoint = Waypoint(x, y)
         if not is_crossed_by_line(car, waypoint, cross):
-            print("adding aditional waypoint")
             ball.add_waypoint(waypoint)
             print(len(ball.waypoints))
             break

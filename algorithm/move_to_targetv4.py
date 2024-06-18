@@ -64,10 +64,11 @@ def get_car_data_from_json(file_path):
 def move_to_targetv4(camera_handler, ball):
     #ball.x, ball.y, ball.obstacle, ball.waypoints[x_størrelse].x, ball.waypoints[x_størrelse].y
     while(len(ball.waypoints)!=0):   
-        print(ball)
+        print("Før pop: ", ball)
         waypoint = ball.pop_waypoint()
+        print("Efter pop: ", ball)
         target_x, target_y = waypoint.x, waypoint.y
-        position_threshold = 1   
+        position_threshold = 10   
         flag_done = 0
         while not(flag_done):
             image = camera_handler._run_video()
@@ -95,18 +96,18 @@ def move_to_targetv4(camera_handler, ball):
             # Load car values into the car object
             current_x, current_y, current_angle = car.x, car.y, car.angle
             
-            print(f"Desired position: {target_x,target_y}\nMy position: ({current_x}, {current_y}), angle: {current_angle}")
+            #print(f"Desired position: {target_x,target_y}\nMy position: ({current_x}, {current_y}), angle: {current_angle}")
             
             # Calculate distance and desired angle
             distance = math.sqrt((target_x - current_x) ** 2 + (target_y - current_y) ** 2)
             
             desired_angle_rad = math.atan2(target_y-current_y, target_x-current_x)
-            print(f"Desired angle in rad: {desired_angle_rad}")
+            #print(f"Desired angle in rad: {desired_angle_rad}")
             desired_angle =  math.degrees(desired_angle_rad)
             desired_angle = desired_angle % 360
 
 
-            print(f"Desired angle in degrees:{desired_angle}\n")
+            #print(f"Desired angle in degrees:{desired_angle}\n")
             
 
             
@@ -114,16 +115,16 @@ def move_to_targetv4(camera_handler, ball):
             if angle_error > 180:
                 angle_error -= 360
             
-            if (distance < position_threshold) and (abs(angle_error)<angle_threshold):
-                print("Target reached!")
-                publish_controller_data(comswallow)  # Activate intake at target
+            if (distance < position_threshold):
+                #print("Target reached!")
+                #publish_controller_data(comswallow)  # Activate intake at target
                 flag_done = 1
                 break
                 
 
 
             # Angle correction
-            print(f"angle error: {abs(angle_error)}\n")
+            #print(f"angle error: {abs(angle_error)}\n")
             if abs(angle_error) > angle_threshold:
                 angle_correction = angle_pid.calculate(0, angle_error)
                 if angle_error > 0:#Der forventes at skulle skrues her: 
@@ -142,10 +143,12 @@ def move_to_targetv4(camera_handler, ball):
     target_x, target_y = ball.x, ball.y
     position_threshold = 176 
     flag_done = 0
+    print("all waypoints cleared, next stop THE BALL!")
     while not(flag_done):
             image = camera_handler._run_video()
             image = transform(image)
             car = find_carv2(image)
+            car = Car(car[0], car[1], car[2])
             
             # Initialize PID controllers
             Kp_angle, Ki_angle, Kd_angle = 0.001, 0, 0.05
@@ -167,18 +170,18 @@ def move_to_targetv4(camera_handler, ball):
             # Load car values into the car object
             current_x, current_y, current_angle = car.x, car.y, car.angle
             
-            print(f"Desired position: {target_x,target_y}\nMy position: ({current_x}, {current_y}), angle: {current_angle}")
+            #print(f"Desired position: {target_x,target_y}\nMy position: ({current_x}, {current_y}), angle: {current_angle}")
             
             # Calculate distance and desired angle
             distance = math.sqrt((target_x - current_x) ** 2 + (target_y - current_y) ** 2)
             
             desired_angle_rad = math.atan2(target_y-current_y, target_x-current_x)
-            print(f"Desired angle in rad: {desired_angle_rad}")
+            #print(f"Desired angle in rad: {desired_angle_rad}")
             desired_angle =  math.degrees(desired_angle_rad)
             desired_angle = desired_angle % 360
 
 
-            print(f"Desired angle in degrees:{desired_angle}\n")
+            #print(f"Desired angle in degrees:{desired_angle}\n")
             
 
             
@@ -187,7 +190,7 @@ def move_to_targetv4(camera_handler, ball):
                 angle_error -= 360
             
             if (distance < position_threshold) and (abs(angle_error)<angle_threshold):
-                print("Target reached!")
+                #print("Target reached!")
                 publish_controller_data(comswallow)  # Activate intake at target
                 flag_done = 1
                 break
@@ -195,7 +198,7 @@ def move_to_targetv4(camera_handler, ball):
 
 
             # Angle correction
-            print(f"angle error: {abs(angle_error)}\n")
+            #print(f"angle error: {abs(angle_error)}\n")
             if abs(angle_error) > angle_threshold:
                 angle_correction = angle_pid.calculate(0, angle_error)
                 if angle_error > 0:#Der forventes at skulle skrues her: 

@@ -27,7 +27,7 @@ def init():
     # for arena transform calibration
     image = camera_handler._run_video()
     
-    # find_corners(image)
+    #find_corners(image)
     return camera_handler
 
 camera_handler = init()
@@ -45,10 +45,6 @@ try:
         ball = SortByDistance()
         move_to_targetv4(camera_handler, ball)
         # cv2.imshow("LiveV2",image)
-        comstop = (0,0,0,0,0)
-        publish_controller_data(comstop) 
-        camera_handler.release_camera()
-        exit()
         
             
 finally:

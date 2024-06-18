@@ -626,11 +626,11 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     max_area = 0
     
     # Filter out very small contours (noise)
-    min_contour_area = 200  # Adjust this threshold as needed
+    min_contour_area = 1000  # Adjust this threshold as needed
     valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
     for contour in valid_contours:
         area = cv2.contourArea(contour)
-        # print(f"Contour area: {area}")  # Debug: Print contour area
+        #print(f"Contour area: {area}")  # Debug: Print contour area
         #Vi får 3 tal, i en vilkårlig rækkefølge. de to små skal appendes til front, den største skal være lig back_contour
         if area > 4000:
             back_contour = contour
