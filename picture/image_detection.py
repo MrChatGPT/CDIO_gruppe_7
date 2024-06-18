@@ -7,7 +7,7 @@ import random
 import imutils
 import argparse
 import json
-
+from autocalibratecolors import *
 
 
 # Function to check if a point is within any detected orange region
@@ -203,24 +203,34 @@ def detect_ball_colors(image):
     # color space 
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
     
+    white_mask = np.load('white_mask.npy')
+    orange_mask = np.load('orange_mask.npy')
+    red_mask = np.load('red_mask.npy')
+    green_mask= np.load('green_mask.npy')
+
+    cv2.imshow('White Mask', white_mask)
+    cv2.imshow('Orange Mask', orange_mask)
+    cv2.imshow('Red Mask', red_mask)
+    cv2.imshow('Green Mask', green_mask)
+    
     # Set range for red color and  
     # define mask 
-    red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
-    red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
-    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
+    #red_lower = np.array([0, 113, 180], np.uint8) #HSV   0, 113, 180 # 6, 128, 244
+    #red_upper = np.array([9, 255, 255], np.uint8) #HSV  9, 255, 255 # 10, 163, 255
+    #red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
-    orange_lower = np.array([10, 183, 166], np.uint8) #HSV
-    orange_upper = np.array([65, 255, 255], np.uint8) #HSV 65, 211, 255
-    orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
+    #orange_lower = np.array([10, 183, 166], np.uint8) #HSV
+    #orange_upper = np.array([65, 255, 255], np.uint8) #HSV 65, 211, 255
+    #orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
     """
     Attempt on the picture ending with 59, with both higher and lower values at the same time
     BEST SO FAR
     """
     #ORIGINAL
-    white_lower = np.array([ 10, 0, 200], np.uint8) #HSV 6, 0, 191
-    white_upper = np.array([50, 100, 255], np.uint8) #HSV 179, 42, 255
-    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
+    #white_lower = np.array([ 10, 0, 200], np.uint8) #HSV 6, 0, 191
+    #white_upper = np.array([50, 100, 255], np.uint8) #HSV 179, 42, 255
+    #white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
     """
     Attempt on the picture ending with 46
@@ -237,9 +247,9 @@ def detect_ball_colors(image):
 
     # Set range for green color and  
     # define mask 
-    green_lower = np.array([50, 20, 110], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([85, 200, 255], np.uint8) #HSV   89, 255 , 255
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+    #green_lower = np.array([50, 20, 110], np.uint8) #HSV   51,  87, 182
+    #green_upper = np.array([85, 200, 255], np.uint8) #HSV   89, 255 , 255
+    #green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
 
 
 

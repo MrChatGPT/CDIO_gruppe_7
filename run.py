@@ -8,9 +8,10 @@ from extra.color_calibration import *
 
 
 
+
 # run image recognition software
 def transform_and_detect(image):
-    # image = transform(image)
+    #image = transform(image)
     circle_detection(image) 
     image = detect_ball_colors(image)
     car = find_car(image,center_weight=150)
@@ -54,18 +55,21 @@ def init():
 #image = cv2.imread('extra/test/images/WIN_20240614_09_47_10_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240610_14_19_47_Pro.jpg')
 
-#image = cv2.imread('extra/test/images/WIN_20240618_11_27_31_Pro.jpg')
+image = cv2.imread('extra/test/images/WIN_20240618_11_27_31_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_27_44_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_27_54_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_17_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_27_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_37_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_44_Pro.jpg')
-image = cv2.imread('extra/test/images/WIN_20240618_11_28_53_Pro.jpg')
+#image = cv2.imread('extra/test/images/WIN_20240618_11_28_53_Pro.jpg')
 
 # /home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg
-#transform_and_detect(image)
-calibrateColors2(image)
+select_colors_and_create_mask(image)
+
+transform_and_detect(image)
+
+#calibrateColors2(image)
 
 try:
     while True:
