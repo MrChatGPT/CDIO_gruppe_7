@@ -38,7 +38,7 @@ def click_event(event, x, y, flags, param):
         #print(f"Clicked at: ({x}, {y}) with HSV value: {hsv_value}")
 
 # Function to create an HSV mask
-def create_hsv_mask(hsv_values, frame, buffer=15):
+def create_hsv_mask(hsv_values, frame, buffer=14):
     if not hsv_values:
         raise ValueError("No colors were selected. Please click on at least one color.")
     # Convert the list of HSV values to a NumPy array

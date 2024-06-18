@@ -50,22 +50,22 @@ def init():
 #     # Ensure the camera is released properly
 #     camera_handler.release_camera()
 
-# image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
-# image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_15_02_15_Pro.jpg')
+#image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg')
+#image = cv2.imread('/home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_15_02_15_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240614_09_47_10_Pro.jpg')
-#image = cv2.imread('extra/test/images/WIN_20240610_14_19_47_Pro.jpg')
+#image = cv2.imread('extra/test/images/WIN_20240613_12_26_57_Pro.jpg')
 
-image = cv2.imread('extra/test/images/WIN_20240618_11_27_31_Pro.jpg')
+#image = cv2.imread('extra/test/images/WIN_20240618_11_27_31_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_27_44_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_27_54_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_17_Pro.jpg')
-#image = cv2.imread('extra/test/images/WIN_20240618_11_28_27_Pro.jpg')
+image = cv2.imread('extra/test/images/WIN_20240618_11_28_27_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_37_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_44_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_53_Pro.jpg')
 
 # /home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg
-select_colors_and_create_mask(image)
+#select_colors_and_create_mask(image)
 
 transform_and_detect(image)
 

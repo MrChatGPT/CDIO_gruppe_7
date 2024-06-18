@@ -121,7 +121,7 @@ def circle_detection(image):
 
     #mindist=18
     circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=18, 
-                               param1=50, param2=24, minRadius=12, maxRadius=17) #minRadius=5, maxRadius=20 , param2= 28 ORIG
+                               param1=50, param2=24, minRadius=9, maxRadius=14) #minRadius=5, maxRadius=20 , param2= 28 ORIG
   ##
      # List to store circle data
     stored_circles = []
@@ -137,8 +137,8 @@ def circle_detection(image):
             cv2.circle(image, (x, y), 2, (0, 0, 0), 2)
             
             # Put text 'Ball' near the detected ball
-            # cv2.putText(image, 'Ball', (x - r, y - r),
-            #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            cv2.putText(image, 'Ball', (x - r, y - r),
+                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
             
             # print(f"'center': {x, y}, 'radius': {r}")
             # Store the circles data
@@ -208,6 +208,12 @@ def detect_ball_colors(image):
     red_mask = np.load('red_mask.npy')
     green_mask= np.load('green_mask.npy')
     
+#    cv2.imshow('White Mask', white_mask)
+#    cv2.imshow('Orange Mask', orange_mask)
+#    cv2.imshow('Red Mask', red_mask)
+#    cv2.imshow('Green Mask', green_mask)
+
+
     orange_detected = []
     # point_in_orange_region = False
     #px, py = 1302, 166
@@ -276,7 +282,7 @@ def detect_ball_colors(image):
       
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 300):
+        if(area > 200):
             x, y, w, h = cv2.boundingRect(contour) 
             # image = cv2.rectangle(image, (x, y),  
             #                            (x + w, y + h), 
@@ -319,14 +325,14 @@ def detect_ball_colors(image):
                                            cv2.CHAIN_APPROX_SIMPLE) 
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if(area > 450): 
+        if(area > 200): 
             x, y, w, h = cv2.boundingRect(contour) 
             # image = cv2.rectangle(image, (x, y), 
             #                            (x + w, y + h), 
             #                            (255, 255, 255), 2) 
-            # print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
+            print(f"(White objects: x={x}, y={y}) w={w} h={h} area={area}")
             #If a big white object is detected with size of the egg, draw an ellipse to specify the egg
-            if(area > 2000 and area < 4000): #before 2900
+            if(area > 1000 and area < 3000): #before 2900
                 image = egg_draw(image,x,y,w,h,area)
             # #If a big white object is detected with size of the car
             # if(area > 13000 and area < 22000):
@@ -566,10 +572,7 @@ def find_car(image, output_path='output_image.jpg', yellow_mask_path='yellow_mas
 
 def find_carv2(image, output_image_path='output_image.jpg'):
     # Read the mask image
-    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    green_lower = np.array([50, 20, 110], np.uint8) #HSV   51,  87, 182
-    green_upper = np.array([85, 200, 255], np.uint8) #HSV   89, 255 , 255
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+    green_mask= np.load('green_mask.npy')
     
     # Find contours in the mask
     contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
