@@ -61,7 +61,7 @@ def init():
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_27_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_37_Pro.jpg')
 #image = cv2.imread('extra/test/images/WIN_20240618_11_28_44_Pro.jpg')
-#image = cv2.imread('extra/test/images/WIN_20240618_11_28_53_Pro.jpg')
+image = cv2.imread('extra/test/images/WIN_20240618_11_28_53_Pro.jpg')
 
 # /home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg
 #transform_and_detect(image)
