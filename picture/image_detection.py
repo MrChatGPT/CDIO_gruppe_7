@@ -296,7 +296,7 @@ def detect_ball_colors(image):
             # image = cv2.rectangle(image, (x, y),  
             #                            (x + w, y + h), 
             #                            (0, 165, 255), 2)  #color of the rectangle, and 2 is the thickness
-            print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
+            #print(f"(Orange x={x}, y={y}) w={w} h={h} area={area}")
             orange_detected.append(contour)
             # check_point_in_orange_region(contours)
               
@@ -368,7 +368,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (0, 255, 0), 2) 
-            print(f"(Green x={x}, y={y}) w={w} h={h} area={area}")
+            #print(f"(Green x={x}, y={y}) w={w} h={h} area={area}")
             cv2.putText(image, "Green Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
