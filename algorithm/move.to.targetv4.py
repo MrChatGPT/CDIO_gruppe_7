@@ -114,16 +114,16 @@ def write_obstacle_val(ball, cross):
 
     # Converting the nested list that represents the points of the cross to a list
     
-    print(cross.arms[0].start)
-    print(cross.arms[0].end)
-    print(cross.arms[1].start)
     print(cross.arms[1].end)
+    print(cross.arms[1].start)
+    print(cross.arms[0].end)
+    print(cross.arms[0].start)
     # Defining the obstacle values inside the cross
     ObstaclePoints = {
-        tuple(cross.arms[0].start): 9,  # Top point 
-        tuple(cross.arms[0].end): 10,  # Bottom point  
-        tuple(cross.arms[1].start): 11,  # Left point 
-        tuple(cross.arms[1].end): 12   # Right point
+        tuple(cross.arms[1].end): 9,  # Top point 
+        tuple(cross.arms[1].start): 10,  # Bottom point  
+        tuple(cross.arms[0].end): 11,  # Left point 
+        tuple(cross.arms[0].start): 12   # Right point
     }
 
     # Check proximity to track corners
@@ -144,10 +144,10 @@ def write_obstacle_val(ball, cross):
                 return
             
     # Determine which inner quadrant the ball is in
-    TopPoint = tuple(cross.arms[0].start)
-    BottomPoint = tuple(cross.arms[0].end)
-    LeftPoint = tuple(cross.arms[1].start)
-    RightPoint = tuple(cross.arms[1].end)
+    TopPoint = tuple(cross.arms[1].end)
+    BottomPoint = tuple(cross.arms[1].start)
+    LeftPoint = tuple(cross.arms[0].end)
+    RightPoint = tuple(cross.arms[0].start)
 
     # Check if the ball is close to lines forming the inner quadrants
     if Distance((ball.x, ball.y), TopPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), LeftPoint) < 100:
@@ -156,17 +156,17 @@ def write_obstacle_val(ball, cross):
     
     # Check if the ball is in the top-right inner corner
     elif Distance((ball.x, ball.y), TopPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), RightPoint) < 100:
-        ball.obstacle = 14
+        ball.obstacle = 16
         return
     
     # Check if the ball is in the bottom-left inner corner
     elif Distance((ball.x, ball.y), LeftPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), BottomPoint) < 100:
-        ball.obstacle = 15
+        ball.obstacle = 14
         return
     
     # Check if the ball is in the bottom-right inner corner
     elif Distance((ball.x, ball.y), BottomPoint) < 100 and Distance((ball.x, ball.y), (cross.x, cross.y)) < 100 and Distance((ball.x, ball.y), RightPoint) < 100:
-        ball.obstacle = 16
+        ball.obstacle = 15
         return
     
     # Check proximity to obstacle points (outer points of the cross)
