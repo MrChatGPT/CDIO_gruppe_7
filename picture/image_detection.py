@@ -63,7 +63,6 @@ def egg_draw(image, x, y, w, h, area):
     # Draw the ellipse on the image
     image = cv2.ellipse(image, center_coordinates, axesLength, 
                         angle, startAngle, endAngle, (0, 255, 0), 3)
-    print(f"center_coordinates{center_coordinates}, axesLength{axesLength}, angle{angle}, startAngle{startAngle}, endAngle{endAngle}  ")
     # Create the dictionary
     egg = {
     "center_coordinates": center_coordinates,
@@ -446,7 +445,6 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (0, 255, 0), 2) 
-            print(f"(Green x={x}, y={y}) w={w} h={h} area={area}")
             cv2.putText(image, "Green Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
@@ -705,7 +703,7 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     with open('robot.json', 'w') as json_file:
         json.dump(data, json_file)
     #exit()
-    return (center_x, center_y, angle_deg)
+    return center_x, center_y, angle_deg
 
 
 
