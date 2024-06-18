@@ -27,7 +27,7 @@ def init():
     # for arena transform calibration
     image = camera_handler._run_video()
     
-    #find_corners(image)
+    # find_corners(image)
     return camera_handler
 
 camera_handler = init()

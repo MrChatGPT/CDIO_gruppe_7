@@ -322,27 +322,41 @@ def calc_obstacle_waypoints(ball, car, cross):
         waypoint_y = cross.y + waypoint_distance * math.sin(angle_rad)
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
-    print("added one waypoint", len(ball.waypoints))
-    
-    while is_crossed_by_line(car, ball.waypoints[-1], cross):
+
+    if len(ball.waypoints) == 0:
+        waypoint = Waypoint(ball.x, ball.y)
+        while is_crossed_by_line(car, waypoint, cross):
             add_additional_waypoint(ball, car, cross, (waypoint_distance+100))
+    else:
+        while is_crossed_by_line(car, ball.waypoints[-1], cross):
+                add_additional_waypoint(ball, car, cross, (waypoint_distance+100))
 
 def add_additional_waypoint(ball, car, cross, waypoint_distance):
     print("adding aditional waypoint")
     first_waypoint = ball.waypoints[-1]
     first_quadrant = get_quadrant(first_waypoint, cross.x, cross.y)
     closest_quadrants = get_closest_quadrants(first_quadrant)
+    print("first waypoint in:", first_quadrant)
 
     potential_quadrants = []
+    # for quadrant in closest_quadrants:
+    #     if quadrant == 1:
+    #         potential_quadrants.append((cross.x + waypoint_distance, cross.y - waypoint_distance))
+    #     elif quadrant == 2:
+    #         potential_quadrants.append((cross.x - waypoint_distance, cross.y - waypoint_distance))
+    #     elif quadrant == 3:
+    #         potential_quadrants.append((cross.x - waypoint_distance, cross.y + waypoint_distance))
+    #     elif quadrant == 4:
+    #         potential_quadrants.append((cross.x + waypoint_distance, cross.y + waypoint_distance))
     for quadrant in closest_quadrants:
         if quadrant == 1:
-            potential_quadrants.append((cross.x + waypoint_distance, cross.y - waypoint_distance))
+            potential_quadrants.append((900, 200))
         elif quadrant == 2:
-            potential_quadrants.append((cross.x - waypoint_distance, cross.y - waypoint_distance))
+            potential_quadrants.append((200, 200))
         elif quadrant == 3:
-            potential_quadrants.append((cross.x - waypoint_distance, cross.y + waypoint_distance))
+            potential_quadrants.append((200, 700))
         elif quadrant == 4:
-            potential_quadrants.append((cross.x + waypoint_distance, cross.y + waypoint_distance))
+            potential_quadrants.append((900, 700))
 
     for x, y in potential_quadrants:
         waypoint = Waypoint(x, y)
