@@ -80,16 +80,16 @@ def write_obstacle_val(ball, cross):
     # Defining the obstacle values for corners and edges of the track 
     TrackCorners = {
         (0, 0): 1,      # Top left corner 
-        (1250, 0): 2,   # Top right corner  
+        (1229, 0): 2,   # Top right corner  
         (0, 900): 3,    # Bottom left corner 
-        (1250, 900): 4  # Bottom right corner 
+        (1229, 900): 4  # Bottom right corner 
     } 
 
     TrackEdges = {
-        ((0, 0), (1250, 0)): 5,      # Top edge
+        ((0, 0), (1229, 0)): 5,      # Top edge
         ((0, 0), (0, 900)): 6,       # Left edge
-        ((0, 900), (1250, 900)): 7,  # Bottom edge
-        ((1250, 0), (1250, 900)): 8  # Right edge
+        ((0, 900), (1229, 900)): 7,  # Bottom edge
+        ((1229, 0), (1229, 900)): 8  # Right edge
     }
 
     # Converting the nested list that represents the points of the cross to a list
@@ -366,59 +366,6 @@ def add_additional_waypoint(ball, car, cross, waypoint_distance):
 
 
 
-def get_car_data_from_json(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-    if data and isinstance(data, list) and len(data) > 0:
-        car_data = data[0]
-        if len(car_data) == 3:
-            x, y, angle = car_data
-            return Car(x, y, angle)
-        else:
-            raise ValueError("Invalid car data structure in JSON file.")
-    else:
-        raise ValueError("Invalid JSON structure.")
-
-
-# Function to read ball positions from a JSON file
-def LoadBalls(filename="balls.json"):
-    # Get the project's root directory
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-    # Construct the path to the robot.json file in the root directory
-    json_file_path = os.path.join(project_root, filename)
-    
-    with open(json_file_path, 'r') as file:
-        data = json.load(file)
-        
-    # Convert the list of lists back to a list of tuples
-    BallsXY = [tuple(center) for center in data]
-    
-    return BallsXY
-
-
-# Function to read ball positions from a JSON file
-def LoadOrangeBall(filename="orangeballs.json"):
-    # Get the project's root directory
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-    # Construct the path to the robot.json file in the root directory
-    json_file_path = os.path.join(project_root, filename)
-    
-    with open(json_file_path, 'r') as file:
-        data = json.load(file)
-    
-    # Extract the first element and convert it to a tuple
-    if data and isinstance(data, list) and len(data) > 0:
-        OrangeBallXY = tuple(data[0])
-    else:
-        print("orange goone")
-        return (0,0)
-        #return (0,0)
-        #raise ValueError("Invalid JSON structure or data not found.")
-    
-    return OrangeBallXY
-
 # Function to read ball positions from a JSON file
 def LoadRobot(filename="robot.json"):
     # Get the project's root directory
@@ -449,48 +396,21 @@ def Distance(p1, p2):
 # This function is based on the key function lambda, where the ist will be sorted in descending order
 
 
-def SortByDistance():
-    RobotXY=LoadRobot()
-    BallsXY=LoadBalls()
-    OrangeBallXY = LoadOrangeBall()     
-    # Now we sort the balls based on their distance to the Robot
-    # Here we use the lam
-    SortedList = sorted(BallsXY, key=lambda ball: Distance(RobotXY, ball))
+def SortByDistance(car, white_balls, orange_balls, cross):
+    BallsXY = []
+    OrangeBallXY = (orange_balls[0].x, orange_balls[0].y)
+    for ball in white_balls:
+        BallsXY.append(ball.x, ball.y)
     
-    # Add the orange ball at the end
+    SortedList = sorted(BallsXY, key=lambda ball: Distance((car.x, car.y), (ball.x, ball.y)))
+    
     SortedList.append(OrangeBallXY)
-    #print(f"Shortest ball coordinat: [{SortedList[0]}]")
     
     #Find and create a ball object for target_position
-    ball = Ball(SortedList[0][0],SortedList[0][1])
-    print(f"Ball before obstacle values: {ball}")
-    car = get_car_data_from_json(os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 'robot.json'))
-    print(car)
+    ball = white_balls[0]
     #Set an obstacle number:
-    cross = LoadObstacles()
     write_obstacle_val(ball, cross)
-    print(f"Ball after obstacle values: {ball}")
     #calculate waypoints (even if obstacle == 0, if last ball is on opposite site of cross)
     calc_obstacle_waypoints(ball, car, cross)
     
-    print(f"Ball after obstacle values, and waypoints: {ball}")
-         
-        
     return ball
-
-
-
-
-# The values of the list
-#     SortedList = [
-#     (2, 3),     # Closest (Distance: 3.61)
-#     (1, 4),     # (Distance: 4.12)
-#     (5, 1),     # (Distance: 5.10)
-#     (6, 2),     # (Distance: 6.32)
-#     (4, 6),     # (Distance: 7.21)
-#     (3, 7),     # (Distance: 7.62)
-#     (8, 3),     # (Distance: 8.54)
-#     (7, 5),     # (Distance: 8.60)
-#     (9, 1),     # Furthest (Distance: 9.06)
-#     (7, 8)      # Orange Ball added at the end
-# ]
