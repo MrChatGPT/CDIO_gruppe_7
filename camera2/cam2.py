@@ -4,14 +4,17 @@ import math
 
 
 class Camera2:
-    def __init__(self):
-        self.hsv_ranges = {
-            'red': (np.array([0, 160, 0]), np.array([10, 255, 255])),
-            'white': (np.array([0, 0, 253]), np.array([57, 112, 255])),
-            'orange': (np.array([13, 186, 250]), np.array([180, 255, 255])),
-            'blue_LED': (np.array([121, 0, 254]), np.array([180, 255, 255])),
-            'LED': (np.array([85, 0, 250]), np.array([180, 255, 255]))
-        }
+    def __init__(self, hsv_ranges=None):
+        if hsv_ranges is None:
+            self.hsv_ranges = {
+                'red': (np.array([0, 160, 0]), np.array([10, 255, 255])),
+                'white': (np.array([0, 0, 253]), np.array([57, 112, 255])),
+                'orange': (np.array([13, 186, 250]), np.array([180, 255, 255])),
+                'blue_LED': (np.array([121, 0, 254]), np.array([180, 255, 255])),
+                'LED': (np.array([85, 0, 250]), np.array([180, 255, 255]))
+            }
+        else:
+            hsv_ranges = hsv_ranges
         self.morph = True
         self.morphed_frame = None
         self.frame = None

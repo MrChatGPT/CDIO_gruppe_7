@@ -107,9 +107,11 @@ def select_colors_and_create_mask(image):
     red_min, red_max = calculate_hsv_range(hsv_values_red)
     white_led_min, white_led_max = calculate_hsv_range(hsv_values_white_led)
     blue_led_min, blue_led_max = calculate_hsv_range(hsv_values_blue_led)
-    np.savez('white.npz', min=white_min,max=white_max)
-    np.savez('orange.npz',min=orange_min,max=orange_max)
-    np.savez('red.npz',min=red_min,max=red_max)
-    np.savez('wled.npy',min=white_led_min,max=white_led_max)
-    np.savez('bled.npy',min=blue_led_min,max=blue_led_max)
-
+    hsv_ranges = {
+        'red': (red_min,red_max),
+        'white': (white_min,white_max),
+        'orange': (orange_min,orange_max),
+        'blue_LED': (blue_led_min,blue_led_max),
+        'LED': (white_led_min,white_led_max)
+    }
+    np.savez('hsv_ranges.npz', **hsv_ranges)
