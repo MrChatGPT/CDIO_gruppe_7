@@ -388,30 +388,26 @@ def LoadRobot(filename="robot.json"):
 
 # Function to calculate the distance between the Robot and the balls
 # This function is based on the dictance formula: sqrt((x2-x1)^2 +(y2-y1)^2)
-
 def Distance(p1, p2):
     return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+
+def Distance_objects(car, ball):
+    return np.sqrt((car.x - ball.x)**2 + (car.y - ball.y))
 
 # Function to sort the positions of the balls based on their distance from the Robot 
 # This function is based on the key function lambda, where the ist will be sorted in descending order
 
-
 def SortByDistance(car, white_balls, orange_balls, cross):
-    print(car)
-    BallsXY = []
-    OrangeBallXY = (orange_balls[0].x, orange_balls[0].y)
-    for ball in white_balls:
-        BallsXY.append((ball.x, ball.y))
+    SortedList = sorted(white_balls, key=lambda ball: Distance_objects(car, ball))
     
-    SortedList = sorted(BallsXY, key=lambda ball: Distance((car.x, car.y), (ball.x, ball.y)))
+    SortedList.append(orange_balls)
     
-    SortedList.append(OrangeBallXY)
+    # Create a ball object for the target position (first in the sorted list)
+    ball = SortedList[0]
     
-    #Find and create a ball object for target_position
-    ball = white_balls[0]
-    #Set an obstacle number:
+    # Set an obstacle number
     write_obstacle_val(ball, cross)
-    #calculate waypoints (even if obstacle == 0, if last ball is on opposite site of cross)
+    # Calculate waypoints (even if obstacle == 0, if the last ball is on the opposite side of the cross)
     calc_obstacle_waypoints(ball, car, cross)
     
     return ball

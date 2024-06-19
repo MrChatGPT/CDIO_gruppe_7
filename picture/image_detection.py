@@ -40,6 +40,15 @@ class Cross:
         self.angle = angle
         self.arms = [self.Arm(*arm) for arm in arms]
 
+class Car:
+    def __init__(self, x, y, angle=0):
+        self.x = x
+        self.y = y
+        self.angle = angle
+
+    def __repr__(self):
+        return f"Car(x={self.x}, y={self.y}, angle={self.angle})"
+
 # Function to check if a point is within any detected orange region
 def check_point_in_orange_region(contours):
     # print_balls("balls.json")
@@ -447,18 +456,18 @@ def find_carv2(image, output_image_path='output_image.jpg'):
 
     angle_deg = (angle_deg)%360 
 
-    
-    # Draw the centroids, car center, and direction arrow on the image for visualization
-    cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
-    cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
-    cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
-    cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
+    car = Car(center_x, center_y, angle_deg)
     
     # DEBUG
+    # Draw the centroids, car center, and direction arrow on the image for visualization
+    # cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
+    # cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
+    # cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
+    # cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
     # cv2.imwrite(output_image_path, image)
 
     # Save the data to robot.json
-    data = [[center_x, center_y, angle_deg]]
-    with open('robot.json', 'w') as json_file:
-        json.dump(data, json_file)
-    return (center_x, center_y, angle_deg)
+    # data = [[center_x, center_y, angle_deg]]
+    # with open('robot.json', 'w') as json_file:
+    #     json.dump(data, json_file)
+    return car

@@ -53,11 +53,11 @@ def main():
 
     stored_circles = circle_detection(image)
     white_detected, orange_detected, cross = detect_ball_colors(image, stored_circles)
-    # print(stored_circles)
     white_balls, orange_balls = match_circles_and_contours(image, orange_detected, white_detected, stored_circles) # Returns list of balls
     car = find_carv2(image)
-    
     ball = SortByDistance(car, white_balls, orange_balls, cross)
+
+    print(car, ball)
 
 
 if __name__ == "__main__":
