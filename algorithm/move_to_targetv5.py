@@ -40,6 +40,12 @@ def get_car_data_from_json(file_path):
     else:
         raise ValueError("Invalid JSON structure.")
 
+pid_forwards = PID(0.5, 0.0001, 0.001, setpoint=0)  # Starting with small PID coefficients
+pid_forwards.output_limits = (-870, 870)
+
+pid_turn = PID(0.2, 0.01, 0.001, setpoint=0)  # Starting with small PID coefficients
+pid_turn.output_limits = (-158, 158) #180*0.88
+
 def move_to_targetv5(camera_handler, ball):
     while len(ball.waypoints) != 0:   
         print("Før pop: ", ball)
@@ -133,21 +139,14 @@ def move_to_targetv5(camera_handler, ball):
             break
             
         if abs(angle_error) > angle_threshold:
-            if abs(angle_error) > 100:
-                angle_correction = 0.4
-            elif abs(angle_error) > 50:
-                angle_correction = 0.25
-            else:
-                angle_correction = 0.11
-            if angle_error > 0:
-                publish_controller_data((0, 0, angle_correction, 0, 0))  # Tilt right
-            else:
-                publish_controller_data((0, 0, (-1 * angle_correction), 0, 0))  # Tilt left
+            pid_output = -pid_turn(angle_error) / 180
+            if pid_output < 0:
+                pid_output = (pid_output - 0.12)
+            elif pid_output > 0:
+                pid_output = (pid_output + 0.12)
+            publish_controller_data((0, 0, pid_output, 0, 0))
             continue
-        if distance > 800:
-            forward_speed = 0.5
-        elif distance > 500:
-            forward_speed = 0.3
-        else:
-            forward_speed = 0.15
-        publish_controller_data((0, forward_speed, 0, 0, 0))
+        pid_output = abs(pid_forwards(distance)/1000)
+        pid_output = pid_output + 0.12
+        
+        publish_controller_data((0, pid_output, 0, 0, 0))
