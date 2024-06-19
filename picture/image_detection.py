@@ -63,6 +63,7 @@ def egg_draw(image, x, y, w, h, area):
     # Draw the ellipse on the image
     image = cv2.ellipse(image, center_coordinates, axesLength, 
                         angle, startAngle, endAngle, (0, 255, 0), 3)
+    print(f"center_coordinates{center_coordinates}, axesLength{axesLength}, angle{angle}, startAngle{startAngle}, endAngle{endAngle}  ")
     # Create the dictionary
     egg = {
     "center_coordinates": center_coordinates,
@@ -204,8 +205,8 @@ def detect_ball_colors(image):
     
     # Set range for red color and  
     # define mask 
-    red_lower = np.array([0, 130, 157], np.uint8) #HSV_old  0, 113, 180
-    red_upper = np.array([15, 220, 255], np.uint8) #HSV_old  9, 255, 255
+    red_lower = np.array([0, 167, 157], np.uint8) #HSV_old  0, 113, 180
+    red_upper = np.array([15, 227, 255], np.uint8) #HSV_old  9, 255, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
     orange_lower = np.array([13, 135, 223], np.uint8) #HSV_old 5, 156, 184
@@ -264,8 +265,7 @@ def detect_ball_colors(image):
     red_mask = cv2.dilate(red_mask, kernel) 
     res_red = cv2.bitwise_and(image, image,  
                               mask = red_mask) 
-    red_debug = cv2.cvtColor(red_mask, cv2.COLOR_GRAY2BGR)
-    cv2.imwrite("debug_red_contours.jpg", red_debug)  
+      
     # For orange color 
     orange_mask = cv2.dilate(orange_mask, kernel) 
     res_orange = cv2.bitwise_and(image, image, 
@@ -316,11 +316,9 @@ def detect_ball_colors(image):
     #regarding the arena
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if area > 4000: 
+        if area > 5000: 
             x, y, w, h = cv2.boundingRect(contour) 
-            print (area)
-            if area > 6000 and area < 8000:  # area of cross is aprox 2500
-                
+            if area > 6000 and area < 8000:  # area of cross is aprox 7000
                 rect = cv2.minAreaRect(contour)
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
@@ -342,18 +340,15 @@ def detect_ball_colors(image):
                 end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
                         int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
                 
-                # List of all end points
-                points = [end1, end2, end3, end4]
-                print("fexaimxffdxaimx", points)
-                # Sort points based on y-values and x-values
-                temp1 = max(points, key=lambda p: p[1])  # Point with the highest y-value
-                temp2 = min(points, key=lambda p: p[1])  # Point with the lowest y-value
-                temp3 = max(points, key=lambda p: p[0])  # Point with the highest x-value
-                temp4 = min(points, key=lambda p: p[0])  # Point with the lowest x-value
+                # Draw the cross
+                cv2.line(image, end1, end2, (0, 0, 255), 2)
+                cv2.line(image, end3, end4, (0, 0, 255), 2)
+                
+                cv2.putText(image, "Red Colour", (int(rect[0][0]), int(rect[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))
                 
                 no_go_zones = [
-                    (temp2, temp1),
-                    (temp4, temp3),
+                    (end1, end2),
+                    (end3, end4),
                     (center, angle)
                 ]
                 
@@ -451,6 +446,7 @@ def detect_ball_colors(image):
             image = cv2.rectangle(image, (x, y), 
                                        (x + w, y + h), 
                                        (0, 255, 0), 2) 
+            print(f"(Green x={x}, y={y}) w={w} h={h} area={area}")
             cv2.putText(image, "Green Colour", (x, y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         1.0, (0, 255, 0)) 
@@ -632,11 +628,11 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     max_area = 0
     
     # Filter out very small contours (noise)
-    min_contour_area = 1000  # Adjust this threshold as needed
+    min_contour_area = 200  # Adjust this threshold as needed
     valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
     for contour in valid_contours:
         area = cv2.contourArea(contour)
-        #print(f"Contour area: {area}")  # Debug: Print contour area
+        # print(f"Contour area: {area}")  # Debug: Print contour area
         #Vi får 3 tal, i en vilkårlig rækkefølge. de to små skal appendes til front, den største skal være lig back_contour
         if area > 4000:
             back_contour = contour
@@ -709,7 +705,7 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     with open('robot.json', 'w') as json_file:
         json.dump(data, json_file)
     #exit()
-    return center_x, center_y, angle_deg
+    return (center_x, center_y, angle_deg)
 
 
 
