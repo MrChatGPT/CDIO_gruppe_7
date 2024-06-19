@@ -11,12 +11,10 @@ class Camera2:
         self.hsv_ranges = {
             'red': (np.array([0, 199, 234]), np.array([12, 255, 255])), 
             'white': (np.array([  9,   0, 253]), np.array([57,75,255])), 
-            'orange': (np.array([16, 187, 246]), np.array([43, 255, 255])), 
+            'orange': (np.array([13, 187, 246]), np.array([19, 255, 255])), 
             'blue_LED': (np.array([121,  42, 248]), np.array([167, 255, 255])), 
-            'LED': (np.array([102, 101, 234]), np.array([125, 255, 255]))
-            
-
-
+            'LED': (np.array([111,  31,  36]), np.array([161, 253, 255]))
+        }
 
             # 'red': (np.array([0, 160, 0]), np.array([10, 255, 255])),
             # 'white': (np.array([0, 0, 253]), np.array([57, 112, 255])),
@@ -29,9 +27,7 @@ class Camera2:
             #     'orange': (array([ 13, 125, 250]), array([180, 255, 255])), 
             #     'blue_LED': (array([110, 132, 231]), array([180, 252, 255])), 
             #     'LED': (array([ 47,   0, 250]), array([152,  59, 255]))}
-        }
-
-
+        
         self.morph = True
         self.morphed_frame = None
         self.frame = None
@@ -742,7 +738,6 @@ if __name__ == "__main__":
     camera.calibrate_color("white",video_path)
     camera.calibrate_color("orange",video_path)
     camera.calibrate_color("blue_LED",video_path)
-    
     camera.calibrate_color("LED",video_path)
     print("hsv_ranges: ", camera.hsv_ranges)
     camera.start_video_stream(video_path, morph=True, record=False)
