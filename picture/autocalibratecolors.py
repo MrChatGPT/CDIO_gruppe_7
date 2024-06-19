@@ -7,10 +7,12 @@ clicked_points = []
 hsv_values_white = []
 hsv_values_orange = []
 hsv_values_red = []
-hsv_values_green = []
+hsv_values_white_led = []
+hsv_values_blue_led = []
 frame = None
 display_frame = None
 current_color = 'white'  # Start with white as the default color
+
 
 # Function to handle mouse clicks
 def click_event(event, x, y, flags, param):
@@ -27,8 +29,11 @@ def click_event(event, x, y, flags, param):
             hsv_values_orange.append(hsv_value)
         elif current_color == 'red':
             hsv_values_red.append(hsv_value)
-        elif current_color == 'green':
-            hsv_values_green.append(hsv_value)
+        elif current_color == 'white_led':
+            hsv_values_white_led.append(hsv_value)
+        elif current_color == 'blue_led':
+            hsv_values_blue_led.append(hsv_value)
+
         
         display_frame = frame.copy()
         cv2.circle(display_frame, (x, y), 5, (255, 0, 0), -1)
@@ -46,20 +51,11 @@ def calculate_hsv_range(hsv_values, buffer=15):
     return np.array([min_h, min_s, min_v]), np.array([max_h, max_s, max_v])
 
 # Function to save the HSV ranges to a JSON file
-def save_hsv_ranges(hsv_values_white, hsv_values_orange, hsv_values_red, hsv_values_green):
-    white_min, white_max = calculate_hsv_range(hsv_values_white)
-    orange_min, orange_max = calculate_hsv_range(hsv_values_orange)
-    red_min, red_max = calculate_hsv_range(hsv_values_red)
-    green_min, green_max = calculate_hsv_range(hsv_values_green)
+#def save_hsv_ranges(hsv_values_white, hsv_values_orange, hsv_values_red, hsv_values_white_led, hsv_values_blue_led):
+   
 
-    hsv_ranges = {
-        'white': {'lower': white_min.tolist(), 'upper': white_max.tolist()},
-        'orange': {'lower': orange_min.tolist(), 'upper': orange_max.tolist()},
-        'red': {'lower': red_min.tolist(), 'upper': red_max.tolist()},
-        'green': {'lower': green_min.tolist(), 'upper': green_max.tolist()}
-    }
-    with open('hsv_ranges.json', 'w') as file:
-        json.dump(hsv_ranges, file)
+
+    
 
 # Function to load the HSV ranges from a JSON file
 def load_hsv_ranges(file_path):
@@ -88,7 +84,7 @@ def select_colors_and_create_mask(image):
     cv2.namedWindow('image')
     cv2.setMouseCallback('image', click_event)
 
-    colors = ['white', 'orange', 'red', 'green']
+    colors = ['white', 'orange', 'red', 'white_led', 'blue_led']
     color_index = 0  # Start with the first color in the list
 
     while True:
@@ -106,5 +102,14 @@ def select_colors_and_create_mask(image):
 
     cv2.destroyAllWindows()
 
-    save_hsv_ranges(hsv_values_white, hsv_values_orange, hsv_values_red, hsv_values_green)
+    white_min, white_max = calculate_hsv_range(hsv_values_white)
+    orange_min, orange_max = calculate_hsv_range(hsv_values_orange)
+    red_min, red_max = calculate_hsv_range(hsv_values_red)
+    white_led_min, white_led_max = calculate_hsv_range(hsv_values_white_led)
+    blue_led_min, blue_led_max = calculate_hsv_range(hsv_values_blue_led)
+    np.savez('white.npz', min=white_min,max=white_max)
+    np.savez('orange.npz',min=orange_min,max=orange_max)
+    np.savez('red.npz',min=red_min,max=red_max)
+    np.savez('wled.npy',min=white_led_min,max=white_led_max)
+    np.savez('bled.npy',min=blue_led_min,max=blue_led_max)
 
