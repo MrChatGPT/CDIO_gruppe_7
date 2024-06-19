@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 import math
+from picture.autocalibratecolors import *
+from algorithm.control import *
+from algorithm.utils import *
 
 
 class Camera2:
@@ -530,29 +533,37 @@ class Camera2:
     def preprocess_frame(self):
         self.frame = cv2.GaussianBlur(self.frame, (5, 5), 0)
 
+    def move_to_target_v6(self):
+        
+
     def start_video_stream(self, video_source, morph=True, record=False):
         self.morph = morph
-        cap = cv2.VideoCapture(3)
+        cap = cv2.VideoCapture(video_source)
         if not cap.isOpened():
             print(f"Error: Unable to open video source {video_source}")
             return
 
         first_valid_points_obtained = False
         out = None  # Initialize video writer as None
-
+        
         while True:
             ret, self.frame = cap.read()
             if not ret:
                 print("Error: Unable to read frame from video source")
                 break
 
-            self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
+            #self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
 
             if self.morph and not first_valid_points_obtained:
                 for _ in range(10):
                     ret, self.frame = cap.read()
                 self.frame = self.resize_with_aspect_ratio(
                     self.frame, width=640)
+                
+                select_colors_and_create_mask(self.frame)
+                # Load the HSV ranges from the file
+                loaded_hsv_ranges = np.load('hsv_ranges.npz')
+                self.hsvranges = {key: (loaded_hsv_ranges[key][0], loaded_hsv_ranges[key][1]) for key in loaded_hsv_ranges}
                 self.process_frame()
                 print("First set of valid points obtained.")
                 first_valid_points_obtained = True
@@ -573,6 +584,7 @@ class Camera2:
                 self.process_frame()
                 cv2.imshow('Processed Frame', self.morphed_frame)
                 cv2.imshow('Original Frame', self.frame)
+                self.move_to_targetv6()
 
                 # Initialize video writer with dynamic frame size
                 if out is None and record:

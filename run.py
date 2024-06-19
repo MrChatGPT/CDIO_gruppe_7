@@ -6,37 +6,23 @@ from algorithm.algorithm import *
 from algorithm.move_to_targetv4 import *
 from algorithm.utils import *
 from algorithm.control import *
+from picture.autocalibratecolors import *
 
 
-
-
-# run image recognition software
-# def transform_and_detect(image):
     
-    
-# initialize program
-def init():
-    camera_handler = CameraHandler()
-    client.connect()
-
-    # Start video in a separate thread
-    camera_handler.start_video()
-    time.sleep(0.5)
-    # for arena transform calibration
-    image = camera_handler._run_video()
-    
-    # find_corners(image)
-    return camera_handler
-
 # camera_handler = init()
 
 try:   
     while True:
-        camera = Camera2()
-        video_path = 3
-        camera.calibrate_color("red", video_path)
-        camera.start_video_stream(video_path, morph=True, record=False)
+        cap, frame
+        camera = Camera2(frame)
+        move_to_targetv6(camera.waypoint_for_closest_white_ball)
         
+        #camera.close
+        video_path = 3
+        #camera.calibrate_color("red", video_path)
+        camera.start_video_stream(video_path, morph=True, record=False)
+        camera.frame
         #ball = SortByDistance()
         move_to_targetv6()
         # cv2.imshow("LiveV2",image)
