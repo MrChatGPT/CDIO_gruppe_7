@@ -167,14 +167,13 @@ def detect_ball_colors(image, stored_circles):
     white_mask = cv2.dilate(white_mask, kernel, iterations=2)
 
     # Creating contour to track red color 
-    contours = cv2.findContours(red_mask, 
+    contours, hierarchy = cv2.findContours(red_mask, 
                                            cv2.RETR_TREE, 
-                                           cv2.CHAIN_APPROX_SIMPLE) 
+                                           cv2.CHAIN_APPROX_SIMPLE)
       
     ######################### Cross detection ##########################
-    for contour in enumerate(contours): 
+    for pic,contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        print(contour)
         if area > 5000: 
             x, y, w, h = cv2.boundingRect(contour) 
             if area > 6000 and area < 8000:  # area of cross is aprox 7000

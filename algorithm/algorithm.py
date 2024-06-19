@@ -397,10 +397,11 @@ def Distance(p1, p2):
 
 
 def SortByDistance(car, white_balls, orange_balls, cross):
+    print(car)
     BallsXY = []
     OrangeBallXY = (orange_balls[0].x, orange_balls[0].y)
     for ball in white_balls:
-        BallsXY.append(ball.x, ball.y)
+        BallsXY.append((ball.x, ball.y))
     
     SortedList = sorted(BallsXY, key=lambda ball: Distance((car.x, car.y), (ball.x, ball.y)))
     
