@@ -1,9 +1,7 @@
 from matplotlib import pyplot as plt 
 from typing import Tuple, Optional
 
-from picture.livefeed import *
-from picture.transform_arena import *
-from picture.image_detection import *
+from camera2.cam2 import *
 from algorithm.algorithm import *
 from algorithm.move_to_targetv4 import *
 from algorithm.utils import *
@@ -30,20 +28,17 @@ def init():
     # find_corners(image)
     return camera_handler
 
-camera_handler = init()
+# camera_handler = init()
 
 try:   
     while True:
-        image = camera_handler._run_video()
-        image = transform(image)
-        circle_detection(image) 
-        image = detect_ball_colors(image)
-        image = camera_handler._run_video()
-        image = transform(image)
-        car = find_carv2(image)
+        camera = Camera2()
+        video_path = 3
+        camera.calibrate_color("red", video_path)
+        camera.start_video_stream(video_path, morph=True, record=False)
         
-        ball = SortByDistance()
-        move_to_targetv4(camera_handler, ball)
+        #ball = SortByDistance()
+        move_to_targetv6()
         # cv2.imshow("LiveV2",image)
         
             
