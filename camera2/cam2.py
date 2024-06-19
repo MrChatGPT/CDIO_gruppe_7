@@ -7,17 +7,14 @@ from algorithm.utils import *
 
 
 class Camera2:
-    def __init__(self, hsv_ranges=None):
-        if hsv_ranges is None:
-            self.hsv_ranges = {
-                'red': (np.array([0, 160, 0]), np.array([10, 255, 255])),
-                'white': (np.array([0, 0, 253]), np.array([57, 112, 255])),
-                'orange': (np.array([13, 186, 250]), np.array([180, 255, 255])),
-                'blue_LED': (np.array([121, 0, 254]), np.array([180, 255, 255])),
-                'LED': (np.array([85, 0, 250]), np.array([180, 255, 255]))
-            }
-        else:
-            hsv_ranges = hsv_ranges
+    def __init__(self):
+        self.hsv_ranges = {
+            'red': (np.array([0, 160, 0]), np.array([10, 255, 255])),
+            'white': (np.array([0, 0, 253]), np.array([57, 112, 255])),
+            'orange': (np.array([13, 186, 250]), np.array([180, 255, 255])),
+            'blue_LED': (np.array([121, 0, 254]), np.array([180, 255, 255])),
+            'LED': (np.array([85, 0, 250]), np.array([180, 255, 255]))
+        }
         self.morph = True
         self.morphed_frame = None
         self.frame = None
@@ -534,8 +531,49 @@ class Camera2:
         self.frame = cv2.GaussianBlur(self.frame, (5, 5), 0)
 
     def move_to_target_v6(self):
+        #we're going for a waypoint:
+        if(self.angle_to_closest_waypoint > 5 or self.angle_to_closest_waypoint < 5):
+            if  self.angle_to_closest_waypoint > 100 or self.angle_to_closest_waypoint < 100:
+                angle_correction = 0.4
+            elif self.angle_to_closest_waypoint > 50 or self.angle_to_closest_waypoint < 50:
+                angle_correction = 0.25
+            else:
+                angle_correction = 0.11
+            if self.angle_to_closest_waypoint > 0:
+                publish_controller_data((0, 0, angle_correction, 0, 0))  # Tilt right
+            else:
+                publish_controller_data((0, 0, (-1 * angle_correction), 0, 0))  # Tilt left
+            return
+        if(self.distance_to_closest_waypoint > 10):   
+            if self.distance_to_closest_waypoint > 800:
+                forward_speed = 0.5
+            elif self.distance_to_closest_waypoint > 500:
+                forward_speed = 0.3
+            else:
+                forward_speed = 0.15
+            publish_controller_data((0, forward_speed, 0, 0, 0))
+            return
         
-
+        
+        #now we expect that the robot is on the waypoint!
+        if(self.angle_to_closest_ball > 5 or self.angle_to_closest_ball < 5):
+            if  self.angle_to_closest_ball > 100 or self.angle_to_closest_ball < 100:
+                angle_correction = 0.4
+            elif self.angle_to_closest_ball > 50 or self.angle_to_closest_ball < 50:
+                angle_correction = 0.25
+            else:
+                angle_correction = 0.11
+            if self.angle_to_closest_ball > 0:
+                publish_controller_data((0, 0, angle_correction, 0, 0))  # Tilt right
+            else:
+                publish_controller_data((0, 0, (-1 * angle_correction), 0, 0))  # Tilt left
+            return
+        if(self.distance_to_closest_ball > 160):   
+            forward_speed = 0.12
+            publish_controller_data((0, forward_speed, 0, 0, 0))
+            return
+        publish_controller_data((0, 0, 0, 1, 0))
+        
     def start_video_stream(self, video_source, morph=True, record=False):
         self.morph = morph
         cap = cv2.VideoCapture(video_source)
@@ -560,10 +598,11 @@ class Camera2:
                 self.frame = self.resize_with_aspect_ratio(
                     self.frame, width=640)
                 
-                select_colors_and_create_mask(self.frame)
-                # Load the HSV ranges from the file
-                loaded_hsv_ranges = np.load('hsv_ranges.npz')
-                self.hsvranges = {key: (loaded_hsv_ranges[key][0], loaded_hsv_ranges[key][1]) for key in loaded_hsv_ranges}
+                # select_colors_and_create_mask(self.frame)
+                # # Load the HSV ranges from the file
+                # loaded_hsv_ranges = np.load('hsv_ranges.npz')
+                # self.hsvranges = {key: (loaded_hsv_ranges[key][0], loaded_hsv_ranges[key][1]) for key in loaded_hsv_ranges}
+
                 self.process_frame()
                 print("First set of valid points obtained.")
                 first_valid_points_obtained = True
@@ -622,7 +661,7 @@ class Camera2:
 
         for _ in range(10):
             ret, self.frame = cap.read()
-        self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
+        #self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
         self.preprocess_frame()
         if not ret:
             print("Error: Unable to read frame from video source")
@@ -658,6 +697,9 @@ class Camera2:
             cv2.imshow(f'Original Frame {color}', self.frame)
             cv2.imshow(f'Binary Mask for {color}', mask)
 
+            np.savetxt(f"{color}_lower", lower_hsv)
+            np.savetxt(f"{color}_upper", upper_hsv)
+
             key = cv2.waitKey(1) & 0xFF
             if key == ord('a'):
                 self.hsv_ranges[color] = (lower_hsv, upper_hsv)
@@ -671,6 +713,10 @@ class Camera2:
 
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = 3
-    camera.calibrate_color("red", video_path)
+    video_path = 1
+    camera.calibrate_color("red",video_path)
+    camera.calibrate_color("white",video_path)
+    camera.calibrate_color("orange",video_path)
+    camera.calibrate_color("blue_LED",video_path)
+    camera.calibrate_color("LED",video_path)
     camera.start_video_stream(video_path, morph=True, record=False)

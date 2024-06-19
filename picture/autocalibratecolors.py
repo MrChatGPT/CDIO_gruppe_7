@@ -78,7 +78,7 @@ def select_colors_and_create_mask(image):
     global frame, display_frame, current_color
     #frame = cv2.imread(image)
     frame = image
-    display_frame = frame.copy()
+    #display_frame = frame.copy()
     if frame is None:
         raise ValueError(f"Image not found at path: {image}")
     cv2.namedWindow('image')
@@ -103,10 +103,41 @@ def select_colors_and_create_mask(image):
     cv2.destroyAllWindows()
 
     white_min, white_max = calculate_hsv_range(hsv_values_white)
+    mask = create_hsv_mask_from_ranges(white_min, white_max)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Debug: Draw all contours to visualize
+    debug_image = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
+    cv2.imwrite("contour_white.jpg", debug_image)
     orange_min, orange_max = calculate_hsv_range(hsv_values_orange)
+    mask = create_hsv_mask_from_ranges(orange_min, orange_max)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Debug: Draw all contours to visualize
+    debug_image = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
+    cv2.imwrite("contour_orange.jpg", debug_image)
     red_min, red_max = calculate_hsv_range(hsv_values_red)
+    mask = create_hsv_mask_from_ranges(red_min, red_max)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Debug: Draw all contours to visualize
+    debug_image = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
+    cv2.imwrite("contour_red.jpg", debug_image)
     white_led_min, white_led_max = calculate_hsv_range(hsv_values_white_led)
+    mask = create_hsv_mask_from_ranges(white_led_min, white_led_max)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Debug: Draw all contours to visualize
+    debug_image = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
+    cv2.imwrite("contour_wled.jpg", debug_image)
     blue_led_min, blue_led_max = calculate_hsv_range(hsv_values_blue_led)
+    mask = create_hsv_mask_from_ranges(blue_led_min, blue_led_max)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Debug: Draw all contours to visualize
+    debug_image = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
+    cv2.imwrite("contour_bled.jpg", debug_image)
+
     hsv_ranges = {
         'red': (red_min,red_max),
         'white': (white_min,white_max),
@@ -115,3 +146,8 @@ def select_colors_and_create_mask(image):
         'LED': (white_led_min,white_led_max)
     }
     np.savez('hsv_ranges.npz', **hsv_ranges)
+
+image_path = "test1.jpg"
+image = cv2.imread(image_path)
+
+select_colors_and_create_mask(image)
