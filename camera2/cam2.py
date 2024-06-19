@@ -656,6 +656,6 @@ class Camera2:
 
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = "3"
-    camera.calibrate_color("red", 3)
+    video_path = 3
+    camera.calibrate_color("red", video_path)
     camera.start_video_stream(video_path, morph=True, record=False)
