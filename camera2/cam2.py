@@ -529,7 +529,7 @@ class Camera2:
 
     def start_video_stream(self, video_source, morph=True, record=False):
         self.morph = morph
-        cap = cv2.VideoCapture(video_source)
+        cap = cv2.VideoCapture(3)
         if not cap.isOpened():
             print(f"Error: Unable to open video source {video_source}")
             return
@@ -656,5 +656,6 @@ class Camera2:
 
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/film_2.mp4"
+    video_path = "3"
+    camera.calibrate_color("red", 3)
     camera.start_video_stream(video_path, morph=True, record=False)
