@@ -202,10 +202,11 @@ def detect_ball_colors(image):
     # HSV(hue-saturation-value) 
     # color space 
     labFrame = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-    
-    lab_ranges = load_avg_lab_ranges('lab_ranges.json')
 
-    # Assuming 'frame' is a new image you want to process
+# Load the LAB ranges from the JSON file
+    lab_ranges = load_lab_ranges('lab_ranges.json')
+
+    # Assuming 'image' is a new image you want to process
     # Create masks for each color using the LAB ranges
     orange_lower = np.array(lab_ranges['orange']['lower'])
     orange_upper = np.array(lab_ranges['orange']['upper'])
@@ -223,15 +224,11 @@ def detect_ball_colors(image):
     red_upper = np.array(lab_ranges['red']['upper'])
     red_mask = cv2.inRange(labFrame, red_lower, red_upper)
 
-    led_lower = np.array(lab_ranges['led']['lower'])
-    led_upper = np.array(lab_ranges['led']['upper'])
-    led_mask = cv2.inRange(labFrame, led_lower, led_upper)
-
     cv2.imshow('Orange Mask', orange_mask)
     cv2.imshow('White Mask', white_mask)
     cv2.imshow('Green Mask', green_mask)
     cv2.imshow('Red Mask', red_mask)
-    cv2.imshow('LED', led_mask)
+
 
 
     orange_detected = []
