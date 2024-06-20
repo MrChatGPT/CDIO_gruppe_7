@@ -657,7 +657,7 @@ class Camera2:
             #        self.frame, width=resize)
 
             if self.morph and not first_valid_points_obtained:
-                for _ in range(100):
+                for _ in range(10):
                     ret, self.frame = cap.read()
 
                 # if resize:
@@ -727,7 +727,8 @@ class Camera2:
         cap = cv2.VideoCapture(video_path, cv2.CAP_V4L2)
 
         # Set the codec to MJPEG for high quality
-        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+        # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
 
         # Set the resolution to 1920x1080
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -740,7 +741,7 @@ class Camera2:
             print(f"Error: Unable to open video source {video_path}")
             return
 
-        for _ in range(100):
+        for _ in range(10):
             ret, self.frame = cap.read()
         # self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
         self.preprocess_frame()
@@ -800,11 +801,11 @@ def camera_process(queue, video_path):
 
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/film_2.mp4"
+    video_path = "/dev/video8"
     # video_path = "/home/madsr2d2/Downloads/film4.mp4"
     # video_path = '/dev/video8'
     # camera.calibrate_color('LED', video_path)
-    # camera.calibrate_color('blue_LED', video_path)
+    camera.calibrate_color('blue_LED', video_path)
     # camera.calibrate_color('red', video_path)
     # camera.calibrate_color('orange', video_path)
     # camera.calibrate_color('white', video_path)
