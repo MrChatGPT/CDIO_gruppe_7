@@ -49,44 +49,8 @@ class Car:
     def __repr__(self):
         return f"Car(x={self.x}, y={self.y}, angle={self.angle})"
 
-# Function to check if a point is within any detected orange region
-def check_point_in_orange_region(contours):
-    
-    # #To store balls in separate arrays
-    # white_balls = []
-    # orange_balls = []
-
-    # Check each ball coordinate
-    balls = load_balls("balls.json")
-    for px, py in balls:
-        point_in_orange_region = False
-        for contour in contours:
-            # Check if the point (px, py) is inside this contour
-            dist = cv2.pointPolygonTest(contour, (px, py), False)
-            if dist >= 0:
-                # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). IN IF")
-                point_in_orange_region = True
-                break  # Exit the loop if the point is found in any contour
-        # print(f"dist in pointPolygonTest is: {dist}.\n The point is ({px}, {py}). NOT IN IF")
-        # print(f"dist {dist}")
-    #     # if point_in_orange_region:
-    #     #     print(f"The point ({px}, {py}) is within an orange region.")
-    #     #     orange_balls.append((px, py))
-    #     # else:
-    #     #     print(f"The point ({px}, {py}) is not within any orange region.")
-    #     #     white_balls.append((px, py))
-
-    # saveOrange_balls(orange_balls)
-    # saveWhite_balls(white_balls)
-
+       
 def egg_draw(image, x, y, w, h, area):
-    # Load the ball coordinates
-    balls = load_balls("balls.json")
-    
-    # Check if any ball coordinates are within the given area
-    if is_ball_in_area(balls, x, y, w, h):
-        return image  # Skip drawing the ellipse if a ball is found in the area
-
     center_coordinates = (x + w//2, y + h//2)
     axesLength = (w//2, h//2)
     angle = 0
@@ -100,10 +64,6 @@ def egg_draw(image, x, y, w, h, area):
     "startAngle": startAngle,
     "endAngle": endAngle
     }
-    
-    # Put text 'Egg' near the detected egg
-    cv2.putText(image, 'Egg', (center_coordinates[0] - 10, center_coordinates[1] - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
     
     return image
 
@@ -184,10 +144,9 @@ def detect_ball_colors(image, stored_circles):
     cross = Cross(0,0,0,[(0,0)])
     for pic,contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        
         if area > 3000: 
             x, y, w, h = cv2.boundingRect(contour) 
-            if area > 3000 and area < 8000:  # area of cross is aprox 7000
+            if area > 6500 and area < 8000:  # area of cross is aprox 7000
                 rect = cv2.minAreaRect(contour)
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
@@ -195,6 +154,8 @@ def detect_ball_colors(image, stored_circles):
                 center = (int(rect[0][0]), int(rect[0][1]))
                 size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
                 angle = rect[2] + 45
+                while angle >= 90:
+                    angle = angle - 90
                 
                 # Create a rotation matrix
                 M = cv2.getRotationMatrix2D(center, angle, 1.0)
@@ -208,11 +169,26 @@ def detect_ball_colors(image, stored_circles):
                         int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
                 end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
                         int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
-                
-                # DEBUG: Draw the cross
-                # cv2.line(image, end1, end2, (0, 0, 255), 2)
-                # cv2.line(image, end3, end4, (0, 0, 255), 2)
-                cross = Cross(center[0],center[1], angle, [(end1, end2), (end3, end4)])
+                points = [end1, end2, end3, end4]
+
+                # Sort points by y-value
+                points_sorted_by_y = sorted(points, key=lambda p: p[1])
+
+                # p1 = lowest y, p2 = highest y
+                p1 = points_sorted_by_y[0]
+                p2 = points_sorted_by_y[-1]
+
+                # Remove p1 and p2 from the list
+                remaining_points = [p for p in points if p != p1 and p != p2]
+
+                # Sort the remaining points by x-value
+                remaining_points_sorted_by_x = sorted(remaining_points, key=lambda p: p[0])
+
+                # p3 = lowest x, p4 = highest x
+                p3 = remaining_points_sorted_by_x[0]
+                p4 = remaining_points_sorted_by_x[-1]
+                print(p1,p2,p3,p4, angle)
+                cross = Cross(center[0],center[1], angle, [(p1, p2), (p3, p4)])
     
     if cross.x == 0:
         print("no cross detected")
@@ -266,7 +242,7 @@ def detect_ball_colors(image, stored_circles):
                 "startAngle": startAngle,
                 "endAngle": endAngle
                 }
-                save_Egg(egg) # I dont know if we need this
+                # save_Egg(egg) # I dont know if we need this
               
     return white_detected, orange_detected, cross
 
@@ -291,89 +267,7 @@ def match_circles_and_contours(image, orange_detected, white_detected, stored_ci
             if x <= cx <= x + w and y <= cy <= y + h:
                 white_balls.append(Ball(cx, cy))
 
-    # saveOrange_balls(orange_balls)
-    # saveWhite_balls(white_balls)
-
-
     return white_balls, orange_balls
-
-            
-    
-    
-    saveOrange_balls(orange_balls)
-    saveWhite_balls(white_balls)
-
-
-    return image, matched_circles
-
-
-
-
-def save_balls(circles, filename="balls.json"):
-    balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
-    with open(filename, 'w') as file:
-        json.dump(balls, file, indent=4)
-
-
-def saveOrange_balls(balls, filename="orangeballs.json"):
-    # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
-    with open(filename, 'w') as file:
-        json.dump(balls, file, indent=4)
-
-def saveWhite_balls(balls, filename="whiteballs.json"):
-    # balls = [(int(circle['center'][0]), int(circle['center'][1])) for circle in circles]
-    with open(filename, 'w') as file:
-        json.dump(balls, file, indent=4)
-        
-def load_balls(filename="balls.json"):
-    with open(filename, 'r') as file:
-        balls = json.load(file)
-    # Convert the list of lists back to a list of tuples
-    return [tuple(center) for center in balls]
-
-def print_balls(filename="balls.json"):
-    balls = load_balls(filename)
-    for ball in balls:
-        print(ball)
-
-def save_Egg(egg, filename="egg.json"):
-    with open(filename, 'w') as file:
-        json.dump(egg, file, indent=4)
-
-def save_no_go_zones(zones, filename="no_go_zones.json"):
-    with open(filename, 'w') as file:
-        json.dump(zones, file)
-
-
-
-def check_point_in_orange_region(contours):
-    #To store balls in separate arrays
-    white_balls = []
-    orange_balls = []
-
-    # Check each ball coordinate
-    balls = load_balls("balls.json")
-    for px, py in balls:
-        point_in_orange_region = False
-        for contour in contours:
-            # Check if the point (px, py) is inside this contour
-            dist = cv2.pointPolygonTest(contour, (px, py), False)
-            if dist >= 0:
-                point_in_orange_region = True
-                break  # Exit the loop if the point is found in any contour
-
-        if point_in_orange_region:
-            orange_balls.append((px, py))
-        else:
-            white_balls.append((px, py))
-
-
-    saveOrange_balls(orange_balls)
-    saveWhite_balls(white_balls)
-
-def save_no_go_zones(zones, filename="no_go_zones.json"):
-    with open(filename, 'w') as file:
-        json.dump(zones, file)
 
 def rgb_to_hsv(rgb):
     color = np.uint8([[rgb]])

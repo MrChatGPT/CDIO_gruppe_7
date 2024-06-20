@@ -190,7 +190,6 @@ class MQTTClient:
     def publish(self, topic, message):
         # use json.dumps to serialize dictionary to a JSON formatted string
         self.client.publish(topic, json.dumps(message))
-        # print(f"Message published: {topic} {message}", flush=True)
 
     def disconnect(self):
         self.client.loop_stop()  # Stop the loop only if loop_start was used

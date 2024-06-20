@@ -3,7 +3,7 @@ from time import sleep
 import numpy as np 
 import os
 import math
-
+import time
 
 class Waypoint:
     def __init__(self, x, y):
@@ -21,7 +21,6 @@ class Ball:
         self.waypoints = []
 
     def add_waypoint(self, waypoint):
-        print(f"Waypoint added at: {waypoint}, on {self}")
         self.waypoints.append(waypoint)
 
     def clear_waypoints(self):
@@ -53,22 +52,6 @@ class Cross:
         self.y = y
         self.angle = angle
         self.arms = [self.Arm(*arm) for arm in arms]
-
-
-
-
-# Function to read obstacle coordinates from a json file
-def LoadObstacles(filename="no_go_zones.json"):
-    with open(filename, 'r') as file:
-        data = json.load(file)
-        cross_angle = data[2][1]
-        cross_center = data[2][0]
-        arms = []
-        arms.append(data[0])
-        arms.append(data[1])
-        cross = Cross(cross_center[0], cross_center[1], cross_angle, arms)
-        print(arms[0], arms[1])
-    return cross
 
 # Function to calculate the distance 
 def Distance(p1, p2):
@@ -189,7 +172,6 @@ def do_intersect(p1, q1, p2, q2):
         return True
 
     return False
-
 def is_crossed_by_line(car, waypoint, cross):
     for segment in cross.arms:
         if do_intersect((car.x, car.y), (waypoint.x, waypoint.y), segment.start, segment.end):
@@ -320,11 +302,14 @@ def calc_obstacle_waypoints(ball, car, cross):
         waypoint_y = cross.y + waypoint_distance * math.sin(angle_rad)
         waypoint = Waypoint(waypoint_x, waypoint_y)
         ball.add_waypoint(waypoint)
-
+    
     if len(ball.waypoints) == 0:
         waypoint = Waypoint(ball.x, ball.y)
         while is_crossed_by_line(car, waypoint, cross):
+            print("Hello", ball)
+            time.sleep(3)
             add_additional_waypoint(ball, car, cross, (waypoint_distance+100))
+            waypoint = ball.waypoints[-1]
     else:
         while is_crossed_by_line(car, ball.waypoints[-1], cross):
                 add_additional_waypoint(ball, car, cross, (waypoint_distance+100))
@@ -363,44 +348,22 @@ def add_additional_waypoint(ball, car, cross, waypoint_distance):
             ball.add_waypoint(waypoint)
             break
 
-
-
-# Function to read ball positions from a JSON file
-def LoadRobot(filename="robot.json"):
-    # Get the project's root directory
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-    # Construct the path to the robot.json file in the root directory
-    json_file_path = os.path.join(project_root, filename)
-    
-    with open(json_file_path, 'r') as file:
-        data = json.load(file)
-    
-    # Extract the first two values from the first element in the list
-    if data and isinstance(data, list) and len(data) > 0:
-        RobotXY = tuple(data[0][:2])
-    else:
-        raise ValueError("Invalid JSON structure or data not found.")
-    
-    return RobotXY
-
-
 # Function to calculate the distance between the Robot and the balls
 # This function is based on the dictance formula: sqrt((x2-x1)^2 +(y2-y1)^2)
 def Distance(p1, p2):
     return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
 def Distance_objects(car, ball):
-    return np.sqrt((car.x - ball.x)**2 + (car.y - ball.y))
+    return np.sqrt((car.x - ball.x)**2 + (car.y - ball.y)**2)
 
 # Function to sort the positions of the balls based on their distance from the Robot 
 # This function is based on the key function lambda, where the ist will be sorted in descending order
 
 def SortByDistance(car, white_balls, orange_balls, cross):
     SortedList = sorted(white_balls, key=lambda ball: Distance_objects(car, ball))
-    
     SortedList.append(orange_balls)
-    
+    print(len(SortedList))
+   
     # Create a ball object for the target position (first in the sorted list)
     ball = SortedList[0]
     
@@ -409,4 +372,5 @@ def SortByDistance(car, white_balls, orange_balls, cross):
     # Calculate waypoints (even if obstacle == 0, if the last ball is on the opposite side of the cross)
     calc_obstacle_waypoints(ball, car, cross)
     
-    return ball
+    
+    return SortedList

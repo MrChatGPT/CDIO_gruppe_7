@@ -49,31 +49,6 @@ def publish_controller_data(command: Optional[Tuple[float, float, float, int, in
 if __name__ == "__main__":
     controller.start()  
     client.connect()
-    # do a test run of the controller with different commands
-    #com1 = (0, 0.5, 0, 0, 0) # drive forward 
-    #com2 = (0, -0.5, 0, 0, 0) # drive backwards 
-    #com3 = (0, 0, 0.5, 0, 0) # rotate right
-    #com4 = (0, 0, -0.5, 0, 0) # rotate left
-    #com5 = (0, 0, 0, 0, 0) # stop
-    #sleep(2)
-    #print("forward")
-    #publish_controller_data(com1)
-    #sleep(2)
-    #print("backward")
-    #publish_controller_data(com2)
-    #sleep(2)
-    #print("rotate right")
-    #publish_controller_data(com3)
-    #sleep(2)
-    #print("rotate left")
-    #publish_controller_data(com4)
-    #sleep(2)
-    #print("stop")
-    #publish_controller_data(com5)
-
-        # publish_controller_data(0.1, 0.1,   0.1,   0,    0)
-    #                          x,    y,   phi,  eat,  eject
-    #publish_controller_data(0.1,0.1,0.1,0,0)
     import json
     #from time import sleep
     import numpy as np 
@@ -266,53 +241,7 @@ if __name__ == "__main__":
     # Function to sort the positions of the balls based on their distance from the Robot 
     # This function is based on the key function lambda, where the ist will be sorted in descending order
 
-    def SortByDistance(RobotXY, BallsXY):
-
-        # Now we sort the balls based on their distance to the Robot
-        # Here we use the lam
-        SortedList = sorted(BallsXY, key=lambda ball: Distance(RobotXY, ball))
-
-        # Add the orange ball at the end
-        SortedList.append(OrangeBallXY)
-
-        return SortedList
-
-
-        # The values of the list
-    #     SortedList = [
-    #     (2, 3),     # Closest (Distance: 3.61)
-    #     (1, 4),     # (Distance: 4.12)
-    #     (5, 1),     # (Distance: 5.10)
-    #     (6, 2),     # (Distance: 6.32)
-    #     (4, 6),     # (Distance: 7.21)
-    #     (3, 7),     # (Distance: 7.62)
-    #     (8, 3),     # (Distance: 8.54)
-    #     (7, 5),     # (Distance: 8.60)
-    #     (9, 1),     # Furthest (Distance: 9.06)
-    #     (7, 8)      # Orange Ball added at the end
-    # ]
-
-
-    # Example to pass the Ball position as a parameter
-    def ProcessFirstBall(BallPosition):
-        print(f"This Ball position will be used to control the robot: {BallPosition}")
     
-
-
-    # Example of sorted list of balls by their distance to the Robot 
-    print("Unsorted list:", BallsXY)
-    SortedExample = SortByDistance(RobotXY, BallsXY.copy())
-    print("Sorted list:", SortedExample)
-
-    # Testing function parameter
-    FirstBallPosition = SortedExample[0]
-    #ProcessFirstBall(FirstBallPosition)
-
-    # Patric's function
-
-    sleep(2)
-
-    move_to_target(FirstBallPosition)
 
 
 

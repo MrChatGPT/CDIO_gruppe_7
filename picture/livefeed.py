@@ -23,9 +23,7 @@ class CameraHandler:
         self.thread.start()
 
     def _run_video(self):
-        #print("Video started. Press 'q' to stop.")
         while self.running:
-            # Capture frame-by-frame
             ret, frame = self.cap.read()
 
             if not ret:

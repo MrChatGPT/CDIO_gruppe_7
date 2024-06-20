@@ -47,8 +47,6 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
         if angle_error > 180:
             angle_error -= 360
             
-        print(angle_error,distance)
-        
         if distance < position_threshold and abs(angle_error) < angle_threshold:
             publish_controller_data((0, 0, 0, 1, 0))
             time.sleep(0.5)
@@ -95,7 +93,6 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
 
 def move_to_target(camera_handler, ball):
     # handling all waypoints
-    print(ball)
     while len(ball.waypoints) != 0:   
         waypoint = ball.pop_waypoint()
         print("Going for waypoint at:", waypoint)
