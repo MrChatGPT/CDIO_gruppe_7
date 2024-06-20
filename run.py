@@ -635,36 +635,39 @@ class Camera2:
     def move_to_targetv6(self):
         #print("HSV-ranges: ",self.hsv_ranges)
         #time.sleep(5)
-        if(abs(self.angle_to_closest_waypoint) > 1):
-            print("angle to waypoint is off,")
-            if  abs(self.angle_to_closest_waypoint) > 170:
-                angle_correction = 0.4 #Hvis vinkel er større end abs(170)(180-171)
-            elif abs(self.angle_to_closest_waypoint) > 80:
-                angle_correction = 0.3 #Hvis vinkel er større end abs(80) (170-81)
-            elif abs(self.angle_to_closest_waypoint) > 20:
-                angle_correction = 0.2 #Hvis vinkel er større end abs(20) (80-21 grader off)
-            else:
-                angle_correction = 0.11 #hvis vinkel er mindre end abs(20)
-            if self.angle_to_closest_waypoint > 0:
-                #publish_controller_data((0, 0, angle_correction, 0, 0))  # Tilt right
-                print("tilting right with: ", angle_correction)
-            else:
-                #publish_controller_data((0, 0, (-1 * angle_correction), 0, 0))  # Tilt left
-                print("tilting left with: ", angle_correction)
-            return
-        if(self.distance_to_closest_waypoint > 10):
-            print("distance to waypoint is off with: ", self.distance_to_closest_waypoint)   
-            if self.distance_to_closest_waypoint > 800:
-                forward_speed = 0.5
-            elif self.distance_to_closest_waypoint > 50:
-                forward_speed = 0.3
-            else:
-                forward_speed = 0.15
-            print("Moving forward with: ", forward_speed)
-            # publish_controller_data((0, forward_speed, 0, 0, 0))
-            return
+        if (abs(self.distance_to_closest_waypoint)):    
+            if(abs(self.angle_to_closest_waypoint) > 1):
+                print("angle to waypoint is off,")
+                if  abs(self.angle_to_closest_waypoint) > 170:
+                    angle_correction = 0.12 #Hvis vinkel er større end abs(170)(180-171)
+                elif abs(self.angle_to_closest_waypoint) > 80:
+                    angle_correction = 0.12 #Hvis vinkel er større end abs(80) (170-81)
+                elif abs(self.angle_to_closest_waypoint) > 30:
+                    angle_correction = 0.12 #Hvis vinkel er større end abs(20) (80-21 grader off)
+                else:
+                    angle_correction = 0.11 #hvis vinkel er mindre end abs(20)
+                if self.angle_to_closest_waypoint > 0:
+                    publish_controller_data((0, 0, angle_correction, 0, 0))  # Tilt right
+                    print("tilting right with: ", angle_correction)
+                else:
+                    publish_controller_data((0, 0, (-1 * angle_correction), 0, 0))  # Tilt left
+                    print("tilting left with: ", angle_correction)
+                return
+            publish_controller_data((0,0,0,0,0))
+            if(self.distance_to_closest_waypoint > 10):
+                print("distance to waypoint is off with: ", self.distance_to_closest_waypoint)   
+                
+                if self.distance_to_closest_waypoint > 800:
+                    forward_speed = 0.5
+                elif self.distance_to_closest_waypoint > 50:
+                    forward_speed = 0.3
+                else:
+                    forward_speed = 0.15
+                print("Moving forward with: ", forward_speed)
+                publish_controller_data((0, forward_speed, 0, 0, 0))
+                return
         
-        
+        publish_controller_data((0,0,0,0,0))
         #now we expect that the robot is on the waypoint!
         if(abs(self.angle_to_closest_ball) > 5):
             if  abs(self.angle_to_closest_ball) > 100:
@@ -675,20 +678,19 @@ class Camera2:
                 angle_correction = 0.11
             if self.angle_to_closest_ball > 0:
                 print("Tilting right with: ", angle_correction)
-                #publish_controller_data((0, 0, angle_correction, 0, 0))  # Tilt right
+                publish_controller_data((0, 0, angle_correction, 0, 0))  # Tilt right
             else:
                 print("tilting left with: ", angle_correction)
-                #publish_controller_data((0, 0, (-1 * angle_correction), 0, 0))  # Tilt left
+                publish_controller_data((0, 0, (-1 * angle_correction), 0, 0))  # Tilt left
             return
+        publish_controller_data((0,0,0,0,0))
         if(self.distance_to_closest_ball > 160):   
             forward_speed = 0.12
             print("Moving slowly forward untill ",self.distance_to_closest_ball)
-            #publish_controller_data((0, forward_speed, 0, 0, 0))
+            publish_controller_data((0, forward_speed, 0, 0, 0))
             return
-        #publish_controller_data((0, 0, 0, 1, 0))
+        publish_controller_data((0, 0, 0, 1, 0))
         print("we fucking did it boys!")
-        
-
         return
 
     def preprocess_frame(self):
@@ -703,7 +705,7 @@ class Camera2:
 
         first_valid_points_obtained = False
         out = None  # Initialize video writer as None
-
+        sleep(0.2)
         while True:
             # sleep(0.5)
             ret, self.frame = cap.read()
@@ -1583,6 +1585,7 @@ class Camera2:
 
 
 if __name__ == "__main__":
+    client.connect()
     camera = Camera2()
     # video_path = 1
     video_path = 1#"camera2/test2.mp4"
