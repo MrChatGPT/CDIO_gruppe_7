@@ -46,37 +46,26 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
         
         if angle_error > 180:
             angle_error -= 360
-        print(angle_error)
+            
+        print(angle_error,distance)
         
-        if distance < position_threshold and abs(angle_error) < angle_threshold + 2:
+        if distance < position_threshold and abs(angle_error) < angle_threshold:
             publish_controller_data((0, 0, 0, 1, 0))
+            time.sleep(0.5)
             return
-        if distance < 500:
-            angle_threshold = angle_threshold + 5
-        # if abs(angle_error) > angle_threshold:
-        #     pid_output = - pid_turn(angle_error) / 250 # now it should go between -0.72 and +0.72
-
-        #     if pid_output < 0:
-        #         pid_output = (pid_output - 0.12) # at most -0.84
-
-        #     elif pid_output >= 0:
-        #         pid_output = (pid_output + 0.12)
-
-        #     if abs(angle_error) < 5: # ultra slow motion activated
-        #         publish_controller_data((0, 0, pid_output, 0, 0))
-        #         time.sleep(0.05)
-        #         publish_controller_data((0, 0, 0, 0, 0))
-        #         continue
-        #     publish_controller_data((0, 0, pid_output, 0, 0))
-        #     continue
+        if distance > 500:
+            angle_threshold = 10
+        
         if abs(angle_error) > angle_threshold:
             if angle_error > 130:
-                turn_speed = 0.8
+                turn_speed = 0.5
             elif angle_error > 60:
-                turn_speed = 0.4
-            elif angle_error > 20:
                 turn_speed = 0.2
+            elif angle_error > 20:
+                turn_speed = 0.15
             elif angle_error > 5:
+                turn_speed = 0.12
+            elif angle_error > 0:
                 turn_speed = 0.12
                 publish_controller_data((0, 0, turn_speed, 0, 0))
                 time.sleep(0.05)
@@ -91,11 +80,11 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
             elif angle_error > -20:
                 turn_speed = -0.2
             elif angle_error > -60:
-                turn_speed = 0.4
+                turn_speed = -0.25
             else:
-                turn_speed = -0.8
-            print("Hello", turn_speed)
+                turn_speed = -0.4
             publish_controller_data((0, 0, turn_speed, 0, 0))
+            continue
             
 
         pid_output = abs(pid_forwards(distance - position_threshold)/1000)
@@ -110,10 +99,10 @@ def move_to_target(camera_handler, ball):
     while len(ball.waypoints) != 0:   
         waypoint = ball.pop_waypoint()
         print("Going for waypoint at:", waypoint)
-        move(camera_handler, waypoint, position_threshold=200, angle_threshold=7)
+        move(camera_handler, waypoint, position_threshold=220, angle_threshold=7)
     
     print("all waypoints cleared, next stop THE BALL!")
     waypoint = Waypoint(ball.x, ball.y)
-    move(camera_handler, waypoint, position_threshold=150, angle_threshold=1)
+    move(camera_handler, waypoint, position_threshold=160, angle_threshold=1)
     
     print("Ball has been collected")

@@ -138,16 +138,16 @@ def circle_detection(image):
 def detect_ball_colors(image, stored_circles):
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
     ############ Thresholds #####################
-    red_lower = np.array([0, 167, 157], np.uint8) #HSV_old  0, 113, 180
-    red_upper = np.array([15, 227, 255], np.uint8) #HSV_old  9, 255, 255
+    red_lower = np.array([0, 113, 180], np.uint8) #HSV_old  0, 113, 180
+    red_upper = np.array([9, 255, 255], np.uint8) #HSV_old  9, 255, 255
     red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
 
     orange_lower = np.array([13, 135, 223], np.uint8) #HSV_old 5, 156, 184
     orange_upper = np.array([44, 255, 255], np.uint8) #HSV_old 50, 255, 255
     orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
 
-    white_lower = np.array([0, 0, 200], np.uint8) #HSV_old 15, 0, 200
-    white_upper = np.array([179, 50, 255], np.uint8) #HSV_old 41, 59, 255
+    white_lower = np.array([0, 0, 243], np.uint8) #HSV_old 15, 0, 200
+    white_upper = np.array([203, 61, 255], np.uint8) #HSV_old 41, 59, 255
     white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
     green_lower = np.array([44, 56, 141], np.uint8) #HSV_old   72, 130, 187
@@ -181,11 +181,14 @@ def detect_ball_colors(image, stored_circles):
                                            cv2.CHAIN_APPROX_SIMPLE)
       
     ######################### Cross detection ##########################
+    [[[752, 344], [741, 209]], [[679, 282], [814, 271]], [[747, 277], 85.38935089111328]]
+    cross = Cross(0,0,0,[(0,0)])
     for pic,contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
-        if area > 5000: 
+        
+        if area > 3000: 
             x, y, w, h = cv2.boundingRect(contour) 
-            if area > 6000 and area < 8000:  # area of cross is aprox 7000
+            if area > 3000 and area < 8000:  # area of cross is aprox 7000
                 rect = cv2.minAreaRect(contour)
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
@@ -211,7 +214,9 @@ def detect_ball_colors(image, stored_circles):
                 # cv2.line(image, end1, end2, (0, 0, 255), 2)
                 # cv2.line(image, end3, end4, (0, 0, 255), 2)
                 cross = Cross(center[0],center[1], angle, [(end1, end2), (end3, end4)])
-                                
+    
+    if cross.x == 0:
+        print("no cross detected")
  
     ################## Detect orange balls ######################
     contours, hierarchy = cv2.findContours(orange_mask, 
