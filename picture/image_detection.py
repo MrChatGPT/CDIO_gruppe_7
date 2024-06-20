@@ -201,27 +201,38 @@ def detect_ball_colors(image):
     # BGR(RGB color space) to  
     # HSV(hue-saturation-value) 
     # color space 
-    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+    labFrame = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     
-    hsv_ranges = load_hsv_ranges('hsv_ranges.json')
+    lab_ranges = load_avg_lab_ranges('lab_ranges.json')
 
-# Assuming 'frame' is a new image you want to process
-    orange_lower = np.array(hsv_ranges['orange']['lower'])
-    orange_upper = np.array(hsv_ranges['orange']['upper'])
-    orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper)
+    # Assuming 'frame' is a new image you want to process
+    # Create masks for each color using the LAB ranges
+    orange_lower = np.array(lab_ranges['orange']['lower'])
+    orange_upper = np.array(lab_ranges['orange']['upper'])
+    orange_mask = cv2.inRange(labFrame, orange_lower, orange_upper)
 
-    white_lower = np.array(hsv_ranges['white']['lower'])
-    white_upper = np.array(hsv_ranges['white']['upper'])
-    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper)
+    white_lower = np.array(lab_ranges['white']['lower'])
+    white_upper = np.array(lab_ranges['white']['upper'])
+    white_mask = cv2.inRange(labFrame, white_lower, white_upper)
 
-    green_lower = np.array(hsv_ranges['green']['lower'])
-    green_upper = np.array(hsv_ranges['green']['upper'])
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+    green_lower = np.array(lab_ranges['green']['lower'])
+    green_upper = np.array(lab_ranges['green']['upper'])
+    green_mask = cv2.inRange(labFrame, green_lower, green_upper)
 
-    red_lower = np.array(hsv_ranges['red']['lower'])
-    red_upper = np.array(hsv_ranges['red']['upper'])
-    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
-      
+    red_lower = np.array(lab_ranges['red']['lower'])
+    red_upper = np.array(lab_ranges['red']['upper'])
+    red_mask = cv2.inRange(labFrame, red_lower, red_upper)
+
+    led_lower = np.array(lab_ranges['led']['lower'])
+    led_upper = np.array(lab_ranges['led']['upper'])
+    led_mask = cv2.inRange(labFrame, led_lower, led_upper)
+
+    cv2.imshow('Orange Mask', orange_mask)
+    cv2.imshow('White Mask', white_mask)
+    cv2.imshow('Green Mask', green_mask)
+    cv2.imshow('Red Mask', red_mask)
+    cv2.imshow('LED', led_mask)
+
 
     orange_detected = []
     # point_in_orange_region = False
