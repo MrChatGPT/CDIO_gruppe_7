@@ -12,10 +12,16 @@ def test_webcam():
         return
 
     print("Press 'q' to exit.")
-
+    flag = True
     while True:
         # Capture frame-by-frame
-        ret, frame = cap.read()
+        # skip 50 frames to get a new frame
+        if flag:
+            for i in range(20):
+                ret, frame = cap.read()
+            flag = False
+        else:
+            ret, frame = cap.read()
 
         if not ret:
             print(

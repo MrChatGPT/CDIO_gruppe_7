@@ -768,6 +768,7 @@ class Camera2:
                            hsv_upper[2], 255, nothing)
 
         while True:
+            ret, self.frame = cap.read()
             h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
             s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
             v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
