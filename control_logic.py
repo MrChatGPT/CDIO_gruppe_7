@@ -56,7 +56,7 @@ class ControlLogic:
 
 if __name__ == "__main__":
     queue = Queue(maxsize=10)  # Set a reasonable max size for the queue
-    video_path = 1#"/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/film_2.mp4"
+    video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/film_2.mp4"
 
     # Initialize the Controller directly, which includes the MQTT client initialization
     broker_url = '192.168.1.101'

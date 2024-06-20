@@ -638,7 +638,7 @@ class Camera2:
 
     def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None):
         self.morph = morph
-        cap = cv2.VideoCapture(video_source)
+        cap = cv2.VideoCapture(video_source, cv2.CAP_V4L2)
         if not cap.isOpened():
             print(f"Error: Unable to open video source {video_source}")
             return
@@ -657,7 +657,7 @@ class Camera2:
             #        self.frame, width=resize)
 
             if self.morph and not first_valid_points_obtained:
-                for _ in range(10):
+                for _ in range(100):
                     ret, self.frame = cap.read()
 
                 # if resize:
@@ -724,12 +724,23 @@ class Camera2:
         def nothing(x):
             pass
 
-        cap = cv2.VideoCapture(video_path)
+        cap = cv2.VideoCapture(video_path, cv2.CAP_V4L2)
+
+        # Set the codec to MJPEG for high quality
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+
+        # Set the resolution to 1920x1080
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+        # Set the frame rate to 30 FPS
+        cap.set(cv2.CAP_PROP_FPS, 30)
+
         if not cap.isOpened():
             print(f"Error: Unable to open video source {video_path}")
             return
 
-        for _ in range(10):
+        for _ in range(100):
             ret, self.frame = cap.read()
         # self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
         self.preprocess_frame()
@@ -739,8 +750,7 @@ class Camera2:
 
         cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
         cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
-        cv2.namedWindow(f'Binary mask for {color}',cv2.WINDOW_NORMAL)
-
+        cv2.namedWindow(f'Binary mask for {color}', cv2.WINDOW_NORMAL)
 
         hsv_lower, hsv_upper = self.hsv_ranges[color]
         cv2.createTrackbar('H Lower', 'Calibration',
@@ -784,12 +794,6 @@ class Camera2:
 
 def camera_process(queue, video_path):
     camera = Camera2()
-    # camera.calibrate_color('red', video_path)
-    # camera.calibrate_color('white', video_path)
-    # camera.calibrate_color('orange', video_path)
-    # camera.calibrate_color('blue_LED', video_path)
-    # camera.calibrate_color('LED', video_path)
-    # print("HSV-Ranges: ", camera.hsv_ranges)
     camera.start_video_stream(video_path, queue=queue,
                               morph=True, record=False, resize=640)
 
