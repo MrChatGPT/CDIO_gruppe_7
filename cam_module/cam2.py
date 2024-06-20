@@ -11,12 +11,13 @@ import queue
 class Camera2:
     def __init__(self):
         self.hsv_ranges = {
-            'red': (np.array([0, 158, 232]), np.array([180, 255, 255])),
+            'red': (np.array([0, 158, 232]), np.array([14, 255, 255])),
             'white': (np.array([0, 0, 251]), np.array([52, 76, 255])),
             'orange': (np.array([13, 186, 184]), np.array([54, 255, 255])),
-            'blue_LED': (np.array([104, 98, 18]), np.array([136, 255, 255])),
-            'LED': (np.array([97, 0, 233]), np.array([165, 255, 255]))
+            'blue_LED': (np.array([90, 105, 108]), np.array([108, 178, 255])),
+            'LED': (np.array([105, 18, 233]), np.array([165, 255, 255]))
         }
+        # HSV-Ranges:  {'red': (array([  0, 158, 232]), array([ 14, 255, 255])), 'white': (array([  0,   0, 251]), array([ 52,  76, 255])), 'orange': (array([ 13, 186, 184]), array([ 54, 255, 255])), 'blue_LED': (array([ 90, 105, 108]), array([108, 178, 255])), 'LED': (array([105,  18, 233]), array([165, 255, 255]))}
         self.morph = True
         self.orange_blob_detected = False
         self.morphed_frame = None
@@ -471,8 +472,7 @@ class Camera2:
             sorted_indices = np.argsort(np.linalg.norm(
                 led_centers_array - blue_led_center, axis=1))
             sorted_led_centers = led_centers_array[sorted_indices]
-
-            b1, b2, f1, f2 = sorted_led_centers[0], sorted_led_centers[2], sorted_led_centers[1], sorted_led_centers[3]
+            b1, b2, f1, f2 = sorted_led_centers[0], sorted_led_centers[1], sorted_led_centers[2], sorted_led_centers[3]
 
             back_center = (b1 + b2) / 2
             front_center = (f1 + f2) / 2
@@ -737,7 +737,11 @@ class Camera2:
             print("Error: Unable to read frame from video source")
             return
 
-        cv2.namedWindow('Calibration')
+        cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
+        cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
+        cv2.namedWindow(f'Binary mask for {color}',cv2.WINDOW_NORMAL)
+
+
         hsv_lower, hsv_upper = self.hsv_ranges[color]
         cv2.createTrackbar('H Lower', 'Calibration',
                            hsv_lower[0], 180, nothing)
@@ -780,6 +784,12 @@ class Camera2:
 
 def camera_process(queue, video_path):
     camera = Camera2()
+    # camera.calibrate_color('red', video_path)
+    # camera.calibrate_color('white', video_path)
+    # camera.calibrate_color('orange', video_path)
+    # camera.calibrate_color('blue_LED', video_path)
+    # camera.calibrate_color('LED', video_path)
+    # print("HSV-Ranges: ", camera.hsv_ranges)
     camera.start_video_stream(video_path, queue=queue,
                               morph=True, record=False, resize=640)
 
