@@ -51,7 +51,6 @@ class Car:
 
 # Function to check if a point is within any detected orange region
 def check_point_in_orange_region(contours):
-    # print_balls("balls.json")
     
     # #To store balls in separate arrays
     # white_balls = []

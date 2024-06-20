@@ -64,7 +64,7 @@ def initialize():
 
 #for testing with pictures
 # def main():
-image = cv2.imread('extra/test\images\image.png') 
+image = cv2.imread('extra/test\images/aaaaa.jpg') 
 # find_corners(image)
 image = transform(image)
 
@@ -86,7 +86,11 @@ for ob in orange_balls:
 for arm in cross.arms:
     plt.plot([arm.start[0], arm.end[0]], [arm.start[1], arm.end[1]], 'go-')
 plt.plot(car.x, car.y, 'bo')
-
+plt.plot(ball.x, ball.y, 'mo')
+if len(ball.waypoints) < 0:
+    print("asica")
+    plt.plot(ball.waypoints[0].x, ball.waypoints[0].y, 'mo')
+    
 car_angle_radians = np.radians(car.angle)
 vector_length = 50
 vector_end_x = car.x + vector_length * np.cos(car_angle_radians)
