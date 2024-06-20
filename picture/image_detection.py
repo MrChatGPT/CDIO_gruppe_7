@@ -383,31 +383,23 @@ def rgb_to_hsv(rgb):
 
 def find_carv2(image, output_image_path='output_image.jpg'):
     # Read the mask image
-    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    green_lower = np.array([44, 56, 141], np.uint8) #HSV_old   72, 130, 187
-    green_upper = np.array([179, 255, 255], np.uint8) #HSV_old   129, 241, 255
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    green_lower = np.array([44, 56, 141], np.uint8)
+    green_upper = np.array([179, 255, 255], np.uint8)
+    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
     
     # Find contours in the mask
     contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    ################ Debug: Draw all contours to visualize #############
-    # debug_image = cv2.cvtColor(green_mask, cv2.COLOR_GRAY2BGR)
-    # cv2.drawContours(debug_image, contours, -1, (0, 0, 255), 2)
-    # cv2.imwrite("debug_all_contours.jpg", debug_image)
-    
     # Separate contours into front (squares) and back (rectangle)
     front_contours = []
     back_contour = None
-    max_area = 0
     
     # Filter out very small contours (noise)
     min_contour_area = 200  # Adjust this threshold as needed
     valid_contours = [contour for contour in contours if cv2.contourArea(contour) > min_contour_area]
     for contour in valid_contours:
         area = cv2.contourArea(contour)
-        # print(f"Contour area: {area}")  # Debug: Print contour area
-        #Vi får 3 tal, i en vilkårlig rækkefølge. de to små skal appendes til front, den største skal være lig back_contour
         if area > 4000:
             back_contour = contour
         else:
@@ -415,10 +407,10 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     
     # Ensure we have exactly one back contour and two front contours
     if len(front_contours) != 2:
-        print("car is goone")
+        print("car is gone")
         return
     
-    # Calculate the center of the bounding box for all contours
+    # Calculate the bounding box for all contours
     min_x, min_y = float('inf'), float('inf')
     max_x, max_y = float('-inf'), float('-inf')
     for contour in valid_contours:
@@ -433,22 +425,25 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     center_y = (min_y + max_y) // 2
     
     # Calculate the centroid of the back (rectangle)
-    M = cv2.moments(back_contour)
-    back_x = int(M['m10'] / M['m00'])
-    back_y = int(M['m01'] / M['m00'])
+    x, y, w, h = cv2.boundingRect(back_contour)
+    back_x = x + w // 2
+    back_y = y + h // 2
     
     # Calculate the centroid of the front (average of two squares)
     front_x = 0
     front_y = 0
     for contour in front_contours:
-        M = cv2.moments(contour)
-        front_x += int(M['m10'] / M['m00'])
-        front_y += int(M['m01'] / M['m00'])
+        x, y, w, h = cv2.boundingRect(contour)
+        front_x += x + w // 2
+        front_y += y + h // 2
     front_x //= 2
     front_y //= 2
+
+
+
     
     # Calculate the angle
-    angle_rad = math.atan2(front_y - back_y, front_x - back_x)
+    angle_rad = math.atan2(front_y - center_y, front_x - center_x)
     
     angle_deg = math.degrees(angle_rad)
 
