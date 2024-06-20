@@ -521,7 +521,7 @@ class Camera2:
                         self.find_white_blobs()
 
                         self.draw_detected_features()
-            else:
+            elif self.waypoint_distance:
                 self.morphed_frame = self.frame.copy()
                 contours, _ = self.mask_and_find_contours(
                     self.frame, color='red')
@@ -535,6 +535,21 @@ class Camera2:
                 self.find_blobs('blue_LED', num_points=1)
                 self.find_robot()
                 self.find_white_blobs()
+                self.draw_detected_features()
+            else:
+                self.morphed_frame = self.frame.copy()
+                contours, _ = self.mask_and_find_contours(
+                    self.frame, color='red')
+                sorted_contours = self.sort_contours_by_length(
+                    contours, min_length=50, reverse=True)
+                if len(sorted_contours) > 2:
+                    cross_contour = sorted_contours[2]
+                    self.fit_rotated_cross_to_contour(cross_contour)
+                self.find_blobs('LED', num_points=4)
+                #self.find_blobs('orange', num_points=1)
+                self.find_blobs('blue_LED', num_points=1)
+                self.find_robot()
+                #self.find_white_blobs()
                 self.draw_detected_features()
         except Exception as e:
             print(f"Error processing frame: {e}")
