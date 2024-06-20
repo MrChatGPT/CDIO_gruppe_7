@@ -9,11 +9,18 @@ from algorithm.utils import *
 class Camera2:
     def __init__(self):
         self.hsv_ranges = {
-            'red': (np.array([0, 199, 234]), np.array([12, 255, 255])), 
-            'white': (np.array([  9,   0, 253]), np.array([57,75,255])), 
-            'orange': (np.array([13, 187, 246]), np.array([19, 255, 255])), 
-            'blue_LED': (np.array([121,  42, 248]), np.array([167, 255, 255])), 
-            'LED': (np.array([111,  31,  36]), np.array([161, 253, 255]))
+            'red': (np.array([  0, 162, 222]), np.array([ 12, 255, 255])), #klokken 10-12
+            'white': (np.array([  0,   0, 243]), np.array([ 203,  61, 255])), 
+            'orange': (np.array([ 13, 157, 246]), np.array([ 42, 255, 255])), 
+            'blue_LED': (np.array([108, 100,  16]), np.array([138, 255, 255])), 
+            'LED': (np.array([42,   0, 235]), np.array([212,  87, 255]))
+            
+            #dark outside:
+            # 'red': (np.array([0, 199, 234]), np.array([12, 255, 255])), 
+            # 'white': (np.array([  9,   0, 253]), np.array([57,75,255])), 
+            # 'orange': (np.array([13, 187, 246]), np.array([19, 255, 255])), 
+            # 'blue_LED': (np.array([121,  42, 248]), np.array([167, 255, 255])), 
+            # 'LED': (np.array([111,  31,  36]), np.array([161, 253, 255]))
         }
 
             # 'red': (np.array([0, 160, 0]), np.array([10, 255, 255])),
@@ -684,26 +691,23 @@ class Camera2:
 
         for _ in range(10):
             ret, self.frame = cap.read()
-        #self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
-        #self.preprocess_frame()
         if not ret:
             print("Error: Unable to read frame from video source")
             return
 
-        cv2.namedWindow('Calibration')
+        # Create resizable windows
+        cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
+        cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
+        cv2.namedWindow(f'Binary Mask for {color}', cv2.WINDOW_NORMAL)
+
+        # Create trackbars
         hsv_lower, hsv_upper = self.hsv_ranges[color]
-        cv2.createTrackbar('H Lower', 'Calibration',
-                           hsv_lower[0], 255, nothing)
-        cv2.createTrackbar('S Lower', 'Calibration',
-                           hsv_lower[1], 255, nothing)
-        cv2.createTrackbar('V Lower', 'Calibration',
-                           hsv_lower[2], 255, nothing)
-        cv2.createTrackbar('H Upper', 'Calibration',
-                           hsv_upper[0], 255, nothing)
-        cv2.createTrackbar('S Upper', 'Calibration',
-                           hsv_upper[1], 255, nothing)
-        cv2.createTrackbar('V Upper', 'Calibration',
-                           hsv_upper[2], 255, nothing)
+        cv2.createTrackbar('H Lower', 'Calibration', hsv_lower[0], 255, nothing)
+        cv2.createTrackbar('S Lower', 'Calibration', hsv_lower[1], 255, nothing)
+        cv2.createTrackbar('V Lower', 'Calibration', hsv_lower[2], 255, nothing)
+        cv2.createTrackbar('H Upper', 'Calibration', hsv_upper[0], 255, nothing)
+        cv2.createTrackbar('S Upper', 'Calibration', hsv_upper[1], 255, nothing)
+        cv2.createTrackbar('V Upper', 'Calibration', hsv_upper[2], 255, nothing)
 
         while True:
             h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
@@ -717,23 +721,30 @@ class Camera2:
             hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
             hsv = self.equalize_histogram(hsv)
             mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+            # cv2.imshow(f'Calibration', cv2.WINDOW_NORMAL)
             cv2.imshow(f'Original Frame {color}', self.frame)
             cv2.imshow(f'Binary Mask for {color}', mask)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord('a'):
                 self.hsv_ranges[color] = (lower_hsv, upper_hsv)
+                cap.release()
+                cv2.destroyAllWindows()
                 break
             elif key == ord('q'):
+                cap.release()
+                cv2.destroyAllWindows()
                 break
+            elif key == ord('r'):
+                ret, self.frame = cap.read()   
 
-        cap.release()
-        cv2.destroyAllWindows()
+        
 
 
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = 1
+    # video_path = 1
+    video_path = "camera2/test2.mp4"
     camera.calibrate_color("red",video_path)
     camera.calibrate_color("white",video_path)
     camera.calibrate_color("orange",video_path)
