@@ -35,7 +35,7 @@ def click_event(event, x, y, flags, param):
         cv2.imshow('image', display_frame)
 
 # Function to calculate the min and max LAB values with buffer
-def calculate_lab_range(lab_values, buffer=10):
+def calculate_lab_range(lab_values, buffer=15):
     lab_array = np.array(lab_values)
     min_l = max(lab_array[:, 0].min() - buffer, 0)
     max_l = min(lab_array[:, 0].max() + buffer, 255)

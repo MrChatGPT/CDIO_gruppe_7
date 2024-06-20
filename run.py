@@ -65,11 +65,11 @@ def init():
 
 image = cv2.imread('extra/test/images/Screenshot 2024-06-20 160936.png')
 # /home/slothie/fullbranch/CDIO_gruppe_7/extra/test/images/WIN_20240610_14_26_12_Pro.jpg
-select_colors_and_create_mask(image)
+#select_colors_and_create_mask(image)
 
-transform_and_detect(image)
+#transform_and_detect(image)
 
-#calibrateColors2(image)
+calibrateColorsLAB(image)
 
 try:
     while True:

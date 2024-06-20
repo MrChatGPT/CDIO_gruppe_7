@@ -71,13 +71,13 @@ def calibrateColors2(image):
     cv2.createTrackbar('V Upper', 'HSV Calibration', 255, 255, nothing)
 
     # Convert image to HSV for better color segmentation
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
 
     while True:
         # Get current positions of the trackbars
         h_lower = cv2.getTrackbarPos('H Lower', 'HSV Calibration')
-        s_lower = cv2.getTrackbarPos('S Lower', 'HSV Calibration')
-        v_lower = cv2.getTrackbarPos('V Lower', 'HSV Calibration')
+        s_lower = cv2.getTrackbarPos('L Lower', 'HSV Calibration')
+        v_lower = cv2.getTrackbarPos('B Lower', 'HSV Calibration')
         h_upper = cv2.getTrackbarPos('H Upper', 'HSV Calibration')
         s_upper = cv2.getTrackbarPos('S Upper', 'HSV Calibration')
         v_upper = cv2.getTrackbarPos('V Upper', 'HSV Calibration')
@@ -101,5 +101,57 @@ def calibrateColors2(image):
             print("Final HSV Upper:", upper_hsv)
             break
 
+def calibrateColorsLAB(image):
+    """Function to calibrate the LAB threshold values for detecting colors."""
+
+    def nothing(x):
+        pass
+
+    cv2.namedWindow('LAB Calibration')
+
+    # Creating trackbars for each LAB component
+    cv2.createTrackbar('L Lower', 'LAB Calibration', 0, 255, nothing)
+    cv2.createTrackbar('A Lower', 'LAB Calibration', 0, 255, nothing)
+    cv2.createTrackbar('B Lower', 'LAB Calibration', 0, 255, nothing)
+    cv2.createTrackbar('L Upper', 'LAB Calibration', 255, 255, nothing)
+    cv2.createTrackbar('A Upper', 'LAB Calibration', 255, 255, nothing)
+    cv2.createTrackbar('B Upper', 'LAB Calibration', 255, 255, nothing)
+
+    # Convert image to LAB for better color segmentation
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+
+    while True:
+        # Get current positions of the trackbars
+        l_lower = cv2.getTrackbarPos('L Lower', 'LAB Calibration')
+        a_lower = cv2.getTrackbarPos('A Lower', 'LAB Calibration')
+        b_lower = cv2.getTrackbarPos('B Lower', 'LAB Calibration')
+        l_upper = cv2.getTrackbarPos('L Upper', 'LAB Calibration')
+        a_upper = cv2.getTrackbarPos('A Upper', 'LAB Calibration')
+        b_upper = cv2.getTrackbarPos('B Upper', 'LAB Calibration')
+
+        # Create the LAB range based on trackbar positions
+        lower_lab = np.array([l_lower, a_lower, b_lower], np.uint8)
+        upper_lab = np.array([l_upper, a_upper, b_upper], np.uint8)
+
+        # Mask the image to only include colors within the specified range
+        mask = cv2.inRange(lab, lower_lab, upper_lab)
+        result = cv2.bitwise_and(image, image, mask=mask)
+
+        # Display the calibration result
+        cv2.imshow('LAB Calibration', result)
+
+        # Press 'q' to quit
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            print("Final LAB Lower:", lower_lab)
+            print("Final LAB Upper:", upper_lab)
+            break
+
+    cv2.destroyAllWindows()
+    return lower_lab, upper_lab
+
+# Example usage:
+# Assuming 'image' is a loaded image in BGR format
+# lower_lab, upper_lab = calibrateColors2(image)
 
         
