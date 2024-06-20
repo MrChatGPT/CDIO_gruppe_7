@@ -211,13 +211,7 @@ def detect_ball_colors(image, stored_circles):
                 # cv2.line(image, end1, end2, (0, 0, 255), 2)
                 # cv2.line(image, end3, end4, (0, 0, 255), 2)
                 cross = Cross(center[0],center[1], angle, [(end1, end2), (end3, end4)])
-                # no_go_zones = [
-                #     (end1, end2),
-                #     (end3, end4),
-                #     (center, angle)
-                # ]
-                
-                # save_no_go_zones(no_go_zones)                
+                                
  
     ################## Detect orange balls ######################
     contours, hierarchy = cv2.findContours(orange_mask, 
@@ -270,7 +264,6 @@ def detect_ball_colors(image, stored_circles):
                 }
                 save_Egg(egg) # I dont know if we need this
               
-
     return white_detected, orange_detected, cross
 
 

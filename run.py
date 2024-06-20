@@ -16,36 +16,34 @@ def initialize():
     time.sleep(1)
     
     # Calibrate arena transform
-    image = camera_handler._run_video()
-    find_corners(image)
+    # image = camera_handler._run_video()
+    # find_corners(image)
     
     return camera_handler
 
 def process_frame(camera_handler: CameraHandler):
     """Process a single frame of the video feed."""
-    image = camera_handler._run_video()
-    image = transform(image)
-    stored_circles = circle_detection(image)
-    white_detected, orange_detected, cross = detect_ball_colors(image, stored_circles)
-    white_balls, orange_balls = match_circles_and_contours(image, orange_detected, white_detected, stored_circles) # Returns list of balls
-    print("White balls: ", white_balls)
-    car = find_carv2(image)
     
-    ball = SortByDistance(car, white_balls, orange_balls, cross)
-    move_to_target(camera_handler, ball)
 
-def main():
-    """Main function to start the program."""
-    camera_handler = initialize()
+camera_handler = initialize()
 
-    try:
-        while True:
-            process_frame(camera_handler)
-    finally:
-        # Ensure the camera is released properly
-        camera_handler.release_camera()
-        comstop = (0, 0, 0, 0, 0)
-        publish_controller_data(comstop)
+try:
+    while True:
+        image = camera_handler._run_video()
+        image = transform(image)
+        stored_circles = circle_detection(image)
+        white_detected, orange_detected, cross = detect_ball_colors(image, stored_circles)
+        white_balls, orange_balls = match_circles_and_contours(image, orange_detected, white_detected, stored_circles) # Returns list of balls
+        print("White balls: ", white_balls)
+        car = find_carv2(image)
+        
+        ball = SortByDistance(car, white_balls, orange_balls, cross)
+        move_to_target(camera_handler, ball)
+finally:
+    # Ensure the camera is released properly
+    camera_handler.release_camera()
+    comstop = (0, 0, 0, 0, 0)
+    publish_controller_data(comstop)
 
 #for testing with pictures
 # def main():
@@ -60,7 +58,3 @@ def main():
 #     ball = SortByDistance(car, white_balls, orange_balls, cross)
 
 #     print(car, ball)
-
-
-if __name__ == "__main__":
-    main()
