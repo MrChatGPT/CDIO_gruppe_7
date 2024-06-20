@@ -38,7 +38,6 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
         image = camera_handler._run_video()
         image = transform(image)
         car = find_carv2(image)
-        car = Car(car[0], car[1], car[2])
 
         distance = math.sqrt((waypoint.x - car.x) ** 2 + (waypoint.y - car.y) ** 2)
 
@@ -47,6 +46,7 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
         angle_error = (desired_angle - car.angle) % 360
         if angle_error > 180:
             angle_error -= 360
+        print("Distance, angle_error:", distance, angle_error)
         
         if distance < position_threshold and abs(angle_error) < angle_threshold:
             publish_controller_data((0, 0, 0, 1, 0))
@@ -61,15 +61,16 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
             elif pid_output > 0:
                 pid_output = (pid_output + 0.12)
 
-            if angle_error < 5: # ultra slow motion activated
+            if abs(angle_error) < 5: # ultra slow motion activated
                 publish_controller_data((0, 0, pid_output, 0, 0))
-                time.sleep(0.05)
+                time.sleep(0.1)
                 publish_controller_data((0, 0, pid_output, 0, 0))
                 continue
-
+            print(pid_output)
             publish_controller_data((0, 0, pid_output, 0, 0))
             continue
 
+        print("We driving")
         pid_output = abs(pid_forwards(distance - position_threshold)/1000)
         pid_output = pid_output + 0.12
         

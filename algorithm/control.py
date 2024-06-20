@@ -103,7 +103,7 @@ if __name__ == "__main__":
         else:
             raise ValueError("Invalid JSON structure.")
 
-    def move_to_target(target_position):
+    def move_to_target3(target_position):
         # load car values into the car object
         car_file_path = 'robot.json'
         file_path = os.path.join(os.path.dirname(__file__), car_file_path)
