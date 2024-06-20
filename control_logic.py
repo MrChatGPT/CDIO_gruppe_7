@@ -29,8 +29,10 @@ class ControlLogic:
             time.sleep(0.1)
 
     def process_data(self, data):
+        #logic for waypoint:
         waypoint = data.get('vector_to_waypoint_robot_frame')
         distance_to_waypoint = data.get('distance_to_closest_waypoint')
+       
         if waypoint is not None:
             print(f"Moving to waypoint: {waypoint}")
             print(f"Distance to waypoint: {distance_to_waypoint}")
@@ -44,14 +46,47 @@ class ControlLogic:
             x = waypoint[1] * speed
             rotation = 0
             print(f"Control data: x={x}, y={y}, rotation={rotation}")
+            return
 
-    #         self.controller.publish_control_data(x, y, rotation)
-    #     else:
-    #         self.stop_robot()
+        #         self.controller.publish_control_data(x, y, rotation)
+        #     else:
+        #         self.stop_robot()
 
-    # def stop_robot(self):
-    #     # Stop the robot if no waypoint
-    #     self.controller.publish_control_data(0, 0, 0)
+        # def stop_robot(self):
+        #     # Stop the robot if no waypoint
+        #     self.controller.publish_control_data(0, 0, 0)
+        #----------------- Here we assume that the robot is on top of the waypoint ---------------------
+        #logic for ball: 
+        distance_to_ball = data.get('distance_to_closest_ball')
+        ball = data.get('vector_to_ball_robot_frame')
+        angle_err = data.get('angle_to_closest_ball')
+        if ball is not None:
+            print("Moving to ball: ", distance_to_ball)
+            speed = self.pid(-distance_to_ball)
+            print(f"Speed: {speed}")
+            #Angle_err {0..180} & {-180..-0}
+            if angle_err > 1:
+                self.controller.publish_control_data(0,0,-0.12)
+                return
+            elif angle_err < -1:
+                self.controller.publish_control_data(0,0,0.12)
+                return
+            if abs(angle_err) < 1:
+                self.controller.publish_control_data(0,0.12,0)
+                return
+            if (distance_to_ball) < 160:
+                self.controller.publish_control_data(0,0,0,1,0)
+                #sæt evt. et dummy waypoint i et hjørne så vi forcer billedet til at blive opdateret (lappeløsning)....
+                return
+        
+        print("\n\n\nVi burde aldrig se det her print weeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n\n\n")
+            
+
+
+            
+
+            
+            
 
 
 if __name__ == "__main__":
