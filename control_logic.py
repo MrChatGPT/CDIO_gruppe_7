@@ -55,6 +55,7 @@ class ControlLogic:
         # def stop_robot(self):
         #     # Stop the robot if no waypoint
         #     self.controller.publish_control_data(0, 0, 0)
+
         #----------------- Here we assume that the robot is on top of the waypoint ---------------------
         #logic for ball: 
         distance_to_ball = data.get('distance_to_closest_ball')
@@ -66,10 +67,10 @@ class ControlLogic:
             print(f"Speed: {speed}")
             #Angle_err {0..180} & {-180..-0}
             if angle_err > 1:
-                self.controller.publish_control_data(0,0,-0.12)
+                self.controller.publish_control_data(0,0,0.11)
                 return
             elif angle_err < -1:
-                self.controller.publish_control_data(0,0,0.12)
+                self.controller.publish_control_data(0,0,-0.11)
                 return
             if abs(angle_err) < 1:
                 self.controller.publish_control_data(0,0.12,0)
