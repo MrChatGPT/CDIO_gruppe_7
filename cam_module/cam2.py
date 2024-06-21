@@ -1,6 +1,6 @@
 from calendar import c
 
-from sklearn import kernel_approximation
+#from sklearn import kernel_approximation
 import cv2
 import numpy as np
 import math
@@ -747,8 +747,8 @@ class Camera2:
             pass
 
         self.cap = cv2.VideoCapture(video_path)
-        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
-        self.cap.set(cv2.CAP_PROP_FPS, 30)
+        #self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
+        #self.cap.set(cv2.CAP_PROP_FPS, 30)
 
         if not self.cap.isOpened():
             print(f"Error: Unable to open video source {video_path}")
@@ -819,16 +819,18 @@ class Camera2:
 
 def camera_process(queue, video_path):
     camera = Camera2()
+    
     camera.start_video_stream(video_path, queue=queue,
                               morph=True, record=False, resize=640)
 
 
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = "/home/madsr2d2/sem4/CDIO_1/CDIO_gruppe_7/cam_module/testMovie.mp4"
+    # video_path = "/home/madsr2d2/sem4/CDIO_1/CDIO_gruppe_7/cam_module/testMovie.mp4"
     # video_path = "/dev/video8"
     # video_path = "/home/madsr2d2/Downloads/film4.mp4"
     # video_path = '/dev/video8'
+    video_path = 'testMovie.mp4'
     # camera.calibrate_color('green', video_path)
     # camera.calibrate_color('blue', video_path)
     camera.calibrate_color('red', video_path)

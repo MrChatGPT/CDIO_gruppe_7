@@ -89,7 +89,15 @@ class ControlLogic:
                 return
             if (distance_to_ball) < 160:
                 self.controller.publish_control_data(0,0,0,1,0)
-                #sæt evt. et dummy waypoint i et hjørne så vi forcer billedet til at blive opdateret (lappeløsning)....
+                
+                
+                
+                
+                
+                
+                
+                
+                
                 return
         
         print("\n\n\nVi burde aldrig se det her print weeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n\n\n")
