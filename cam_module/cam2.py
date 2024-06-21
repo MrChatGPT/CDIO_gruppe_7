@@ -13,11 +13,11 @@ import queue
 class Camera2:
     def __init__(self):
         self.hsv_ranges = {
-            'red': (np.array([0, 158, 232]), np.array([14, 255, 255])),
+            'red': (np.array([0, 77, 98]), np.array([60, 255, 255])),
             'white': (np.array([0, 0, 251]), np.array([52, 76, 255])),
             'orange': (np.array([13, 186, 184]), np.array([54, 255, 255])),
             'blue': (np.array([90, 105, 108]), np.array([108, 178, 255])),
-            'green': (np.array([105, 18, 233]), np.array([165, 255, 255]))
+            'green': (np.array([57, 18, 41]), np.array([165, 255, 255]))
         }
         # HSV-Ranges:  {'red': (array([  0, 158, 232]), array([ 14, 255, 255])), 'white': (array([  0,   0, 251]), array([ 52,  76, 255])), 'orange': (array([ 13, 186, 184]), array([ 54, 255, 255])), 'blue': (array([ 90, 105, 108]), array([108, 178, 255])), 'green': (array([105,  18, 233]), array([165, 255, 255]))}
         self.cap = None
@@ -53,6 +53,10 @@ class Camera2:
         self.vector_to_ball_robot_frame = []
         self.vector_to_waypoint_robot_frame = []
         self.orange_ball_size = 0
+        self.robot_critical_length = 50  # cm
+        # x,y values for the center of the robot
+        self.robot_center_correction = [0, 0]
+        self.robot_center_angle_correction = 0  # degrees
 
     def get_data(self):
         """
@@ -475,6 +479,9 @@ class Camera2:
                     map(int, center)), 8, (255, 255, 255), -1)
             self.robot_center = np.mean(self.green_centers, axis=0)
 
+            # Correct the robot center
+            self.robot_center = self.robot_center + self.robot_center_correction
+
         if len(self.green_centers) >= 3:
             green_centers_array = np.array(self.green_centers)
             back_center = green_centers_array[0]
@@ -489,6 +496,10 @@ class Camera2:
             # Normalize the direction vector
             self.robot_direction = direction / np.linalg.norm(direction)
 
+            # Correct the robot direction
+            self.robot_direction = np.dot(
+                np.array([[np.cos(self.robot_center_angle_correction), -np.sin(self.robot_center_angle_correction)], [np.sin(self.robot_center_angle_correction), np.cos(self.robot_center_angle_correction)]]), self.robot_direction)
+
             # Debug statements
             # print(f"green centers: {self.green_centers}")
             # print(f"Sorted green centers: {sorted_green_centers}")
@@ -501,7 +512,7 @@ class Camera2:
 
     def process_frame(self):
         try:
-            self.preprocess_frame()
+            # self.preprocess_frame()
             if self.morph:
                 contours, _ = self.mask_and_find_contours(
                     self.frame, color='red', close=True, open=True, erode=False)
@@ -583,12 +594,6 @@ class Camera2:
                     cv2.line(self.morphed_frame, tuple(
                         map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
 
-        # Draw blue green centers
-        # if self.blue_centers:
-        #     for center in self.blue_centers:
-        #         cv2.circle(self.morphed_frame, tuple(
-        #             map(int, center)), 8, (255, 0, 0), -1)
-
         if self.blocked_ball_centers:
             for center in self.blocked_ball_centers:
                 cv2.circle(self.morphed_frame, tuple(
@@ -625,8 +630,14 @@ class Camera2:
             center = tuple(map(int, self.robot_center))
             cv2.circle(self.morphed_frame, center, 5, (255, 0, 0), -1)
             if self.robot_direction is not None:
+
+                # scale the robot direction vector by the critical length converted to pixels
+                scale_factor = self.robot_critical_length * \
+                    max(self.morphed_frame.shape[0],
+                        self.morphed_frame.shape[1]) / self.arena_dimensions[0]
+
                 end_points = (center, tuple(
-                    map(int, self.robot_center + 50 * self.robot_direction)))
+                    map(int, self.robot_center + scale_factor * self.robot_direction)))
                 cv2.arrowedLine(self.morphed_frame,
                                 end_points[0], end_points[1], (255, 0, 0), 2)
 
@@ -783,7 +794,6 @@ class Camera2:
                            hsv_upper[2], 255, nothing)
 
         while True:
-            
             self.preprocess_frame()
 
             h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
@@ -912,7 +922,7 @@ if __name__ == "__main__":
     camera.calibrate_color('green', video_path)
     # camera.calibrate_color('blue', video_path)
     camera.calibrate_color('red', video_path)
-    # camera.calibrate_color('orange', video_path)
-    # camera.calibrate_color('white', video_path)
+    camera.calibrate_color('orange', video_path)
+    camera.calibrate_color('white', video_path)
     camera.start_video_stream(video_path, morph=True,
                               record=False, resize=None)
