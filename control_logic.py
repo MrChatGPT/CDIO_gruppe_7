@@ -89,16 +89,16 @@ class ControlLogic:
                 return
             if (distance_to_ball) < 160:
                 self.controller.publish_control_data(0,0,0,1,0)
-                
-                
-                
-                
-                
-                
-                
-                
-                
+                sleep(0.1)
+                self.controller.publish_control_data(0,0,0,0,0)
+                sleep(0.1)
+                self.controller.publish_control_data(0,0,0.12,0)
+                sleep(0.1)
+                self.controller.publish_control_data(0,0.15,0,0,0)
                 return
+
+
+            
         
         print("\n\n\nVi burde aldrig se det her print weeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\n\n\n")
             
@@ -112,8 +112,8 @@ class ControlLogic:
 
 if __name__ == "__main__":
     queue = Queue(maxsize=10)  # Set a reasonable max size for the queue
-    video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/film_2.mp4"
-
+    # video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/film_2.mp4"
+    video_path = 1
     # Initialize the Controller directly, which includes the MQTT client initialization
     broker_url = '192.168.1.101'
     broker_port = 1883

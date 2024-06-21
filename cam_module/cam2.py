@@ -751,11 +751,14 @@ class Camera2:
 
         self.cap = cv2.VideoCapture(video_path)
 
+
+
         if not self.cap.isOpened():
             print(f"Error: Unable to open video source {video_path}")
             return
 
         # Capture the first frame
+        sleep(0.5)
         ret, self.frame = self.cap.read()
         if not ret:
             print("Error: Unable to read frame from video source")
@@ -780,6 +783,7 @@ class Camera2:
                            hsv_upper[2], 255, nothing)
 
         while True:
+            
             self.preprocess_frame()
 
             h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
@@ -889,7 +893,11 @@ class Camera2:
 
 def camera_process(queue, video_path):
     camera = Camera2()
-
+    camera.calibrate_color('green', video_path)
+    camera.calibrate_color('blue', video_path)
+    camera.calibrate_color('red', video_path)
+    camera.calibrate_color('orange', video_path)
+    camera.calibrate_color('white', video_path)
     camera.start_video_stream(video_path, queue=queue,
                               morph=True, record=False, resize=640)
 
