@@ -365,7 +365,8 @@ def messi():
 
 def SortByDistance(car, white_balls, orange_balls, cross):
     SortedList = sorted(white_balls, key=lambda ball: Distance_objects(car, ball))
-    SortedList.append(orange_balls[0])
+    if len(orange_balls) > 0:
+        SortedList.append(orange_balls[0])
     #DEBUG
     # SortedList = SortedList[2:]
     # print(len(SortedList))

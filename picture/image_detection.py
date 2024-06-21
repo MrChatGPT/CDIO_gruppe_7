@@ -159,16 +159,16 @@ def detect_ball_colors(image, stored_circles):
                 
                 # Create a rotation matrix
                 M = cv2.getRotationMatrix2D(center, angle, 1.0)
-                
+                cross_enlargement = 120
                 # Calculate the end points of the cross lines
-                end1 = (int(center[0] + size[0] * np.cos(np.radians(angle))),
-                        int(center[1] + size[0] * np.sin(np.radians(angle))))
-                end2 = (int(center[0] - size[0] * np.cos(np.radians(angle))),
-                        int(center[1] - size[0] * np.sin(np.radians(angle))))
-                end3 = (int(center[0] + size[1] * np.cos(np.radians(angle + 90))),
-                        int(center[1] + size[1] * np.sin(np.radians(angle + 90))))
-                end4 = (int(center[0] - size[1] * np.cos(np.radians(angle + 90))),
-                        int(center[1] - size[1] * np.sin(np.radians(angle + 90))))
+                end1 = (int(center[0] + (size[0] + cross_enlargement) * np.cos(np.radians(angle))),
+                        int(center[1] + (size[0] + cross_enlargement) * np.sin(np.radians(angle))))
+                end2 = (int(center[0] - (size[0] + cross_enlargement) * np.cos(np.radians(angle))),
+                        int(center[1] - (size[0] + cross_enlargement) * np.sin(np.radians(angle))))
+                end3 = (int(center[0] + (size[1] + cross_enlargement) * np.cos(np.radians(angle + 90))),
+                        int(center[1] + (size[1] + cross_enlargement) * np.sin(np.radians(angle + 90))))
+                end4 = (int(center[0] - (size[1] + cross_enlargement) * np.cos(np.radians(angle + 90))),
+                        int(center[1] - (size[1] + cross_enlargement) * np.sin(np.radians(angle + 90))))
                 points = [end1, end2, end3, end4]
 
                 # Sort points by y-value
@@ -341,16 +341,16 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     angle_deg = math.degrees(angle_rad)
 
     angle_deg = (angle_deg)%360 
-
+    angle_deg = angle_deg -4
     car = Car(center_x, center_y, angle_deg)
     
     # DEBUG
     # Draw the centroids, car center, and direction arrow on the image for visualization
-    # cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
-    # cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
-    # cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
-    # cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
-    # cv2.imwrite(output_image_path, image)
+    cv2.circle(image, (back_x, back_y), 5, (0, 0, 255), -1)  # Back centroid (red)
+    cv2.circle(image, (front_x, front_y), 5, (0, 255, 0), -1)  # Front centroid (green)
+    cv2.circle(image, (center_x, center_y), 5, (255, 0, 0), -1)  # Car center (blue)
+    cv2.arrowedLine(image, (back_x, back_y), (front_x, front_y), (255, 0, 0), 2)  # Direction arrow (blue)
+    #cv2.imwrite(output_image_path, image)
 
     # Save the data to robot.json
     # data = [[center_x, center_y, angle_deg]]

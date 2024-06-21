@@ -14,6 +14,7 @@ def simulate(white_balls, orange_balls, cross, car, ball):
     for arm in cross.arms:
         plt.plot([arm.start[0], arm.end[0]], [arm.start[1], arm.end[1]], 'go-')
     plt.plot(car.x, car.y, 'bo')
+    print("Ball: ",ball)
     plt.plot(ball.x, ball.y, 'mo')
     if len(ball.waypoints) > 0:
         for waypoint in ball.waypoints:

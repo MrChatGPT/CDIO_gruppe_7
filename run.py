@@ -39,47 +39,46 @@ def initialize():
     
     # Calibrate arena transform
     image = camera_handler._run_video()
-    find_corners(image)
+    # find_corners(image)
     
     return camera_handler
 
-   
+camera_handler = initialize()
 
-# camera_handler = initialize()
-
-# try:
-    
-#     while True:
-#         image = camera_handler._run_video()
-#         image = transform(image)
-#         stored_circles = circle_detection(image)
-#         white_detected, orange_detected, cross = detect_ball_colors(image, stored_circles)
-#         white_balls, orange_balls = match_circles_and_contours(image, orange_detected, white_detected, stored_circles) # Returns list of balls
-#         car = find_carv2(image)
+try:
+    while True:
+        image = camera_handler._run_video()
+        image = transform(image)
+        stored_circles = circle_detection(image)
+        white_detected, orange_detected, cross = detect_ball_colors(image, stored_circles)
+        white_balls, orange_balls = match_circles_and_contours(image, orange_detected, white_detected, stored_circles) # Returns list of balls
+        car = find_carv2(image)
         
-#         ball = SortByDistance(car, white_balls, orange_balls, cross)
-#         move_to_target(camera_handler, ball)
+        ball = SortByDistance(car, white_balls, orange_balls, cross)
+        ball = ball[0]
+        simulate(white_balls, orange_balls, cross, car, ball)
+        move_to_target(camera_handler, ball)
         
-#         
-# finally:
-#     # Ensure the camera is released properly
-#     camera_handler.release_camera()
-#     comstop = (0, 0, 0, 0, 0)
-#     publish_controller_data(comstop)
+        
+finally:
+    # Ensure the camera is released properly
+    camera_handler.release_camera()
+    comstop = (0, 0, 0, 0, 0)
+    publish_controller_data(comstop)
 
 
 
 ################ #for testing with pictures ####################
-image = cv2.imread('extra/test\images\image.png') 
+# image = cv2.imread('extra/test\images\image.png') 
 # find_corners(image)
-image = transform(image)
-stored_circles = circle_detection(image)
-white_detected, orange_detected, cross = detect_ball_colors(image, stored_circles)
-white_balls, orange_balls = match_circles_and_contours(image, orange_detected, white_detected, stored_circles) # Returns list of balls
-print(cross.angle)
-white_balls = []
-car = find_carv2(image)
-sorted_list = SortByDistance(car, white_balls, orange_balls, cross)
-ball = sorted_list[0]
-print(ball)
-simulate(white_balls, orange_balls, cross, car, ball)
+# image = transform(image)
+# stored_circles = circle_detection(image)
+# white_detected, orange_detected, cross = detect_ball_colors(image, stored_circles)
+# white_balls, orange_balls = match_circles_and_contours(image, orange_detected, white_detected, stored_circles) # Returns list of balls
+# print(cross.angle)
+# white_balls = []
+# car = find_carv2(image)
+# sorted_list = SortByDistance(car, white_balls, orange_balls, cross)
+# ball = sorted_list[0]
+# print(ball)
+# simulate(white_balls, orange_balls, cross, car, ball)

@@ -46,7 +46,7 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
         
         if angle_error > 180:
             angle_error -= 360
-            
+        print(angle_error)
         if distance < position_threshold and abs(angle_error) < angle_threshold:
             publish_controller_data((0, 0, 0, 1, 0))
             time.sleep(0.5)
@@ -56,7 +56,7 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
         
         if abs(angle_error) > angle_threshold:
             if angle_error > 130:
-                turn_speed = 0.5
+                turn_speed = 0.4
             elif angle_error > 60:
                 turn_speed = 0.2
             elif angle_error > 20:
@@ -76,9 +76,9 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
                 publish_controller_data((0, 0, 0, 0, 0))
                 continue
             elif angle_error > -20:
-                turn_speed = -0.2
+                turn_speed = -0.15
             elif angle_error > -60:
-                turn_speed = -0.25
+                turn_speed = -0.20
             else:
                 turn_speed = -0.4
             publish_controller_data((0, 0, turn_speed, 0, 0))
@@ -88,7 +88,7 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
         pid_output = abs(pid_forwards(distance - position_threshold)/1000)
         pid_output = pid_output + 0.12
         
-        publish_controller_data((0, pid_output, 0, 0, 0))
+        publish_controller_data((0, 0.12, 0, 0, 0))
 
 
 def move_to_target(camera_handler, ball):
@@ -96,10 +96,10 @@ def move_to_target(camera_handler, ball):
     while len(ball.waypoints) != 0:   
         waypoint = ball.pop_waypoint()
         print("Going for waypoint at:", waypoint)
-        move(camera_handler, waypoint, position_threshold=220, angle_threshold=7)
+        move(camera_handler, waypoint, position_threshold=80, angle_threshold=7)
     
     print("all waypoints cleared, next stop THE BALL!")
     waypoint = Waypoint(ball.x, ball.y)
-    move(camera_handler, waypoint, position_threshold=160, angle_threshold=1)
+    move(camera_handler, waypoint, position_threshold=155, angle_threshold=1)
     
     print("Ball has been collected")
