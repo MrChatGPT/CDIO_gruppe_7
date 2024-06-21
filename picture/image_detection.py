@@ -111,7 +111,7 @@ def detect_ball_colors(image, stored_circles):
     white_lower = np.array(lab_ranges['white']['lower'])
     white_upper = np.array(lab_ranges['white']['upper'])
     white_mask = cv2.inRange(labFrame, white_lower, white_upper)
-
+    
     green_lower = np.array(lab_ranges['green']['lower'])
     green_upper = np.array(lab_ranges['green']['upper'])
     green_mask = cv2.inRange(labFrame, green_lower, green_upper)
@@ -304,10 +304,18 @@ def rgb_to_hsv(rgb):
 
 def find_carv2(image, output_image_path='output_image.jpg'):
     # Read the mask image
-    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    green_lower = np.array([44, 56, 141], np.uint8)
-    green_upper = np.array([179, 255, 255], np.uint8)
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
+    # color space 
+    lab_ranges = load_lab_ranges('lab_ranges.json')
+    labFrame = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+
+    green_lower = np.array(lab_ranges['green']['lower'])
+    green_upper = np.array(lab_ranges['green']['upper'])
+    green_mask = cv2.inRange(labFrame, green_lower, green_upper)
+
+    # hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # green_lower = np.array([44, 56, 141], np.uint8)
+    # green_upper = np.array([179, 255, 255], np.uint8)
+    # green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
     
     # Find contours in the mask
     contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
