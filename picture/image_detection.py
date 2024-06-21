@@ -434,7 +434,7 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     angle_deg = math.degrees(angle_rad)
 
     angle_deg = (angle_deg)%360 
-    angle_deg = angle_deg -4
+    # angle_deg = angle_deg -4
     car = Car(center_x, center_y, angle_deg)
     
     # DEBUG

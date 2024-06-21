@@ -86,9 +86,9 @@ def move(camera_handler, waypoint, position_threshold, angle_threshold):
             
 
         pid_output = abs(pid_forwards(distance - position_threshold)/1000)
-        pid_output = pid_output + 0.12
+        pid_output = pid_output / 2 + 0.12
         
-        publish_controller_data((0, 0.12, 0, 0, 0))
+        publish_controller_data((0, pid_output, 0, 0, 0))
 
 
 def move_to_target(camera_handler, ball):

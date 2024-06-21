@@ -354,9 +354,10 @@ def Distance_objects(car, ball):
     return np.sqrt((car.x - ball.x)**2 + (car.y - ball.y)**2)
 
 
-def messi():
+def morten_hjulmand(car, cross):
     print("ads")
-    ball = Ball(1220, 450, 8)
+    ball = Ball(1230, 450, 8)
+    calc_obstacle_waypoints(ball, car, cross)
 
 
 
@@ -365,18 +366,21 @@ def messi():
 
 def SortByDistance(car, white_balls, orange_balls, cross):
     SortedList = sorted(white_balls, key=lambda ball: Distance_objects(car, ball))
-    if len(orange_balls) > 0:
-        SortedList.append(orange_balls[0])
+    
     #DEBUG
     # SortedList = SortedList[2:]
     # print(len(SortedList))
 
     # Create a ball object for the target position (first in the sorted list)
-    ball = SortedList[0]
 
     if len(SortedList) == 0:
-        print("No more balls")
-        messi()
+        if len(orange_balls) > 0:
+            SortedList.append(orange_balls[0])
+        else:
+            print("No more balls")
+            morten_hjulmand(car, cross)
+            exit
+    ball = SortedList[0]
 
     # Set an obstacle number
     write_obstacle_val(ball, cross)

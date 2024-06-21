@@ -40,7 +40,7 @@ def initialize():
     
     # Calibrate arena transform
     image = camera_handler._run_video()
-    # find_corners(image)
+    find_corners(image)
     # select_colors_and_create_mask(image)
     
     return camera_handler
