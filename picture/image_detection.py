@@ -7,7 +7,7 @@ import random
 import imutils
 import argparse
 import json
-from autocalibratecolors import *
+from picture.autocalibratecolors import *
 
 class Ball:
     def __init__(self, x, y, obstacle=0):
@@ -111,7 +111,23 @@ def detect_ball_colors(image, stored_circles):
     white_lower = np.array(lab_ranges['white']['lower'])
     white_upper = np.array(lab_ranges['white']['upper'])
     white_mask = cv2.inRange(labFrame, white_lower, white_upper)
+    contours, hierarchy = cv2.findContours(white_mask, 
+                                           cv2.RETR_TREE, 
+                                           cv2.CHAIN_APPROX_SIMPLE) 
     
+    #---------------------------SAVE WHITE_CONTOUR------------------------------
+    
+    
+    # output_image = cv2.cvtColor(white_mask, cv2.COLOR_GRAY2BGR)
+
+    # # Step 4: Draw the contours on the output image
+    # cv2.drawContours(output_image, contours, -1, (0, 255, 0), 2)
+
+    # # Step 5: Save the resulting image
+    # cv2.imwrite('output_image_white_contour.jpg', output_image)
+
+    #---------------------------SAVE WHITE_CONTOUR------------------------------
+
     green_lower = np.array(lab_ranges['green']['lower'])
     green_upper = np.array(lab_ranges['green']['upper'])
     green_mask = cv2.inRange(labFrame, green_lower, green_upper)
@@ -166,7 +182,20 @@ def detect_ball_colors(image, stored_circles):
     contours, hierarchy = cv2.findContours(red_mask, 
                                            cv2.RETR_TREE, 
                                            cv2.CHAIN_APPROX_SIMPLE)
-      
+
+    #---------------------------SAVE RED_CONTOUR------------------------------
+    
+    # output_image = cv2.cvtColor(red_mask, cv2.COLOR_GRAY2BGR)
+
+    # # Step 4: Draw the contours on the output image
+    # cv2.drawContours(output_image, contours, -1, (0, 255, 0), 2)
+
+    # # Step 5: Save the resulting image
+    # cv2.imwrite('output_image_red_contour.jpg', output_image)
+
+    #---------------------------SAVE RED_CONTOUR------------------------------
+
+
     ######################### Cross detection ##########################
     [[[752, 344], [741, 209]], [[679, 282], [814, 271]], [[747, 277], 85.38935089111328]]
     cross = Cross(0,0,0,[(0,0)])
@@ -226,6 +255,18 @@ def detect_ball_colors(image, stored_circles):
                                            cv2.RETR_TREE, 
                                            cv2.CHAIN_APPROX_SIMPLE) 
       
+
+    #---------------------------SAVE ORANGE_CONTOUR------------------------------  
+    # output_image = cv2.cvtColor(orange_mask, cv2.COLOR_GRAY2BGR)
+
+    # # Step 4: Draw the contours on the output image
+    # cv2.drawContours(output_image, contours, -1, (0, 255, 0), 2)
+
+    # # Step 5: Save the resulting image
+    # cv2.imwrite('output_image_orange_contour.jpg', output_image)
+
+    #---------------------------SAVE ORANGE_CONTOUR------------------------------
+
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
         if(area > 300):
@@ -250,6 +291,9 @@ def detect_ball_colors(image, stored_circles):
     contours, hierarchy = cv2.findContours(white_mask, 
                                            cv2.RETR_TREE, 
                                            cv2.CHAIN_APPROX_SIMPLE) 
+    
+
+
     for pic, contour in enumerate(contours): 
         area = cv2.contourArea(contour) 
         if(area > 450): 
@@ -311,7 +355,7 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     green_lower = np.array(lab_ranges['green']['lower'])
     green_upper = np.array(lab_ranges['green']['upper'])
     green_mask = cv2.inRange(labFrame, green_lower, green_upper)
-
+    
     # hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # green_lower = np.array([44, 56, 141], np.uint8)
     # green_upper = np.array([179, 255, 255], np.uint8)
@@ -320,6 +364,19 @@ def find_carv2(image, output_image_path='output_image.jpg'):
     # Find contours in the mask
     contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
+
+    #---------------------------SAVE CAR_CONTOUR------------------------------
+
+    # output_image = cv2.cvtColor(green_mask, cv2.COLOR_GRAY2BGR)
+
+    # # Step 4: Draw the contours on the output image
+    # cv2.drawContours(output_image, contours, -1, (0, 255, 0), 2)
+
+    # # Step 5: Save the resulting image
+    # cv2.imwrite('output_image_green_contour.jpg', output_image)
+
+    #---------------------------SAVE CAR_CONTOUR------------------------------
+
     # Separate contours into front (squares) and back (rectangle)
     front_contours = []
     back_contour = None
