@@ -1,6 +1,6 @@
 from calendar import c
 
-#from sklearn import kernel_approximation
+# from sklearn import kernel_approximation
 import cv2
 import numpy as np
 import math
@@ -35,7 +35,7 @@ class Camera2:
         self.orange_blob_centers = []
         self.blocked_orange_blobs = []
         self.blue_centers = []
-        self.green_center = []
+        self.green_centers = []
         self.last_cross_angle = 0
         self.M = None
         self.last_valid_points = None
@@ -71,7 +71,7 @@ class Camera2:
             'orange_blob_centers': self.orange_blob_centers,
             'blocked_orange_blobs': self.blocked_orange_blobs,
             'blue_centers': self.blue_centers,
-            'green_center': self.green_center,
+            'green_centers': self.green_centers,
             'angle_to_closest_ball': self.angle_to_closest_ball,
             'distance_to_closest_ball': self.distance_to_closest_ball,
             'angle_to_closest_waypoint': self.angle_to_closest_waypoint,
@@ -227,12 +227,12 @@ class Camera2:
             sorted_contours[1:11] if len(sorted_contours) > 1 else [])
 
         # Remove balls close to the green centers
-        if self.green_center:
-            green_center = np.mean(np.array(self.green_center), axis=0)
+        if self.green_centers:
+            green_centers = np.mean(np.array(self.green_centers), axis=0)
             green_radius = np.mean(
-                [np.linalg.norm(np.array(center) - green_center) for center in self.green_center])
+                [np.linalg.norm(np.array(center) - green_centers) for center in self.green_centers])
             self.white_ball_centers = [center for center in self.white_ball_centers if np.linalg.norm(
-                np.array(center) - green_center) > self.robot_scale_factor * green_radius]
+                np.array(center) - green_centers) > self.robot_scale_factor * green_radius]
 
         # Sort white balls by their distance to the robot center
         if self.robot_center is not None:
@@ -463,33 +463,35 @@ class Camera2:
         elif color == 'blue':
             self.blue_centers = centers
         elif color == 'green':
-            self.green_center = centers
+            self.green_centers = centers
         return bool(centers)
 
     def find_robot(self):
-        if self.green_center and self.blue_centers:
-            self.robot_center = np.mean(self.green_center, axis=0)
+        if self.green_centers:
 
-        if len(self.green_center) >= 4 and self.blue_centers:
-            green_center_array = np.array(self.green_center)
-            blue_center = np.array(self.blue_centers[0])
+            # draw green centers
+            for center in self.green_centers:
+                cv2.circle(self.morphed_frame, tuple(
+                    map(int, center)), 8, (255, 255, 255), -1)
+            self.robot_center = np.mean(self.green_centers, axis=0)
 
-            sorted_indices = np.argsort(np.linalg.norm(
-                green_center_array - blue_center, axis=1))
-            sorted_green_center = green_center_array[sorted_indices]
-            b1, b2, f1, f2 = sorted_green_center[0], sorted_green_center[
-                1], sorted_green_center[2], sorted_green_center[3]
+        if len(self.green_centers) >= 3:
+            green_centers_array = np.array(self.green_centers)
+            back_center = green_centers_array[0]
+            front_point_1 = green_centers_array[1]
+            front_point_2 = green_centers_array[2]
 
-            back_center = (b1 + b2) / 2
-            front_center = (f1 + f2) / 2
+            front_center = (front_point_1 + front_point_2) / 2
+
+            # sort green cenmters af after length
 
             direction = front_center - back_center
             # Normalize the direction vector
             self.robot_direction = direction / np.linalg.norm(direction)
 
             # Debug statements
-            # print(f"green centers: {self.green_center}")
-            # print(f"Sorted green centers: {sorted_green_center}")
+            # print(f"green centers: {self.green_centers}")
+            # print(f"Sorted green centers: {sorted_green_centers}")
             # print(f"Back center: {back_center}")
             # print(f"Front center: {front_center}")
             # print(f"Direction (unnormalized): {direction}")
@@ -520,7 +522,7 @@ class Camera2:
                             self.fit_rotated_cross_to_contour(
                                 transformed_contour)
 
-                        self.find_blobs('green', num_points=4)
+                        self.find_blobs('green', num_points=3)
                         self.find_blobs('orange', num_points=1)
                         self.find_blobs('blue', num_points=1)
                         self.find_robot()
@@ -536,7 +538,7 @@ class Camera2:
                 if len(sorted_contours) > 2:
                     cross_contour = sorted_contours[2]
                     self.fit_rotated_cross_to_contour(cross_contour)
-                self.find_blobs('green', num_points=4)
+                self.find_blobs('green', num_points=3)
                 self.find_blobs('orange', num_points=1)
                 self.find_blobs('blue', num_points=1)
                 self.find_robot()
@@ -582,10 +584,10 @@ class Camera2:
                         map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
 
         # Draw blue green centers
-        if self.blue_centers:
-            for center in self.blue_centers:
-                cv2.circle(self.morphed_frame, tuple(
-                    map(int, center)), 8, (255, 0, 0), -1)
+        # if self.blue_centers:
+        #     for center in self.blue_centers:
+        #         cv2.circle(self.morphed_frame, tuple(
+        #             map(int, center)), 8, (255, 0, 0), -1)
 
         if self.blocked_ball_centers:
             for center in self.blocked_ball_centers:
@@ -614,8 +616,8 @@ class Camera2:
             cv2.circle(self.morphed_frame, tuple(
                 map(int, self.orange_blob_centers[0])), 20, (0, 140, 255), 3)
 
-        if self.green_center:
-            for center in self.green_center:
+        if self.green_centers:
+            for center in self.green_centers:
                 cv2.circle(self.morphed_frame, tuple(
                     map(int, center)), 8, (255, 255, 255), -1)
 
@@ -743,20 +745,25 @@ class Camera2:
         cv2.destroyAllWindows()
 
     def calibrate_color(self, color, video_path=None):
+
         def nothing(x):
             pass
 
         self.cap = cv2.VideoCapture(video_path)
-        #self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
-        #self.cap.set(cv2.CAP_PROP_FPS, 30)
 
         if not self.cap.isOpened():
             print(f"Error: Unable to open video source {video_path}")
             return
 
+        # Capture the first frame
+        ret, self.frame = self.cap.read()
+        if not ret:
+            print("Error: Unable to read frame from video source")
+            return
+
         cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
         cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
-        cv2.namedWindow(f'Binary mask for {color}', cv2.WINDOW_NORMAL)
+        cv2.namedWindow(f'Binary Mask for {color}', cv2.WINDOW_NORMAL)
 
         hsv_lower, hsv_upper = self.hsv_ranges[color]
         cv2.createTrackbar('H Lower', 'Calibration',
@@ -773,10 +780,6 @@ class Camera2:
                            hsv_upper[2], 255, nothing)
 
         while True:
-            ret, self.frame = self.cap.read()
-            if not ret:
-                print("Error: Unable to read frame from video source")
-                break
             self.preprocess_frame()
 
             h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
@@ -785,41 +788,108 @@ class Camera2:
             h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
             s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
             v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
+
             lower_hsv = np.array([h_lower, s_lower, v_lower])
             upper_hsv = np.array([h_upper, s_upper, v_upper])
+
             hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
             hsv = self.equalize_histogram(hsv)
             mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
-
-            # eliptical kernal for morphological operations
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-            # opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-            # closing = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-
-            # getContours(mask, frame)
-            contours, _ = cv2.findContours(
-                mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-            # draw contours on the mask
-            cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
 
             cv2.imshow(f'Original Frame {color}', self.frame)
             cv2.imshow(f'Binary Mask for {color}', mask)
 
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('a'):
+            if key == ord('a'):  # Accept the calibration
                 self.hsv_ranges[color] = (lower_hsv, upper_hsv)
                 break
-            elif key == ord('q'):
+            elif key == ord('q'):  # Quit without saving
                 break
+
         cv2.destroyAllWindows()
+        # self.cap.release()
+
+    # def calibrate_color(self, color, video_path=None):
+    #     def nothing(x):
+    #         pass
+
+    #     self.cap = cv2.VideoCapture(video_path)
+    #     # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
+    #     # self.cap.set(cv2.CAP_PROP_FPS, 30)
+
+    #     if not self.cap.isOpened():
+    #         print(f"Error: Unable to open video source {video_path}")
+    #         return
+
+    #     cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
+    #     cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
+    #     cv2.namedWindow(f'Binary mask for {color}', cv2.WINDOW_NORMAL)
+
+    #     hsv_lower, hsv_upper = self.hsv_ranges[color]
+    #     cv2.createTrackbar('H Lower', 'Calibration',
+    #                        hsv_lower[0], 180, nothing)
+    #     cv2.createTrackbar('S Lower', 'Calibration',
+    #                        hsv_lower[1], 255, nothing)
+    #     cv2.createTrackbar('V Lower', 'Calibration',
+    #                        hsv_lower[2], 255, nothing)
+    #     cv2.createTrackbar('H Upper', 'Calibration',
+    #                        hsv_upper[0], 180, nothing)
+    #     cv2.createTrackbar('S Upper', 'Calibration',
+    #                        hsv_upper[1], 255, nothing)
+    #     cv2.createTrackbar('V Upper', 'Calibration',
+    #                        hsv_upper[2], 255, nothing)
+
+    #     run_flag = True
+
+    #     while run_flag:
+    #         ret, self.frame = self.cap.read()
+    #         if not ret:
+    #             print("Error: Unable to read frame from video source")
+    #             break
+
+    #         self.preprocess_frame()
+
+    #         h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
+    #         s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
+    #         v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
+    #         h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
+    #         s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
+    #         v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
+    #         lower_hsv = np.array([h_lower, s_lower, v_lower])
+    #         upper_hsv = np.array([h_upper, s_upper, v_upper])
+    #         hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+    #         hsv = self.equalize_histogram(hsv)
+    #         mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+
+    #         # eliptical kernal for morphological operations
+    #         # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    #         # opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    #         # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    #         # closing = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+    #         # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+
+    #         # getContours(mask, frame)
+    #         # contours, _ = cv2.findContours(
+    #         #            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    #         # draw contours on the mask
+    #         # cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
+
+    #         cv2.imshow(f'Original Frame {color}', self.frame)
+    #         cv2.imshow(f'Binary Mask for {color}', mask)
+
+    #         key = cv2.waitKey(1) & 0xFF
+    #         if key == ord('a'):
+    #             self.hsv_ranges[color] = (lower_hsv, upper_hsv)
+    #             break
+    #         elif key == ord('q'):
+    #             break
+    #     cv2.destroyAllWindows()
 
 
 def camera_process(queue, video_path):
     camera = Camera2()
-    
+
     camera.start_video_stream(video_path, queue=queue,
                               morph=True, record=False, resize=640)
 
@@ -831,7 +901,7 @@ if __name__ == "__main__":
     # video_path = "/home/madsr2d2/Downloads/film4.mp4"
     # video_path = '/dev/video8'
     video_path = 'testMovie.mp4'
-    # camera.calibrate_color('green', video_path)
+    camera.calibrate_color('green', video_path)
     # camera.calibrate_color('blue', video_path)
     camera.calibrate_color('red', video_path)
     # camera.calibrate_color('orange', video_path)
