@@ -4,7 +4,7 @@ import cv2
 def test_webcam():
     # Open a connection to the webcam using the V4L2 backend
     # camPath = "/dev/video9"
-    path = "/dev/video8"
+    path = "/dev/video9"
     cap = cv2.VideoCapture(path, cv2.CAP_V4L2)
 
     if not cap.isOpened():

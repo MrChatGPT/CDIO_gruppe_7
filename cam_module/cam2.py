@@ -13,11 +13,11 @@ import queue
 class Camera2:
     def __init__(self):
         self.hsv_ranges = {
-            'red': (np.array([0, 77, 98]), np.array([60, 255, 255])),
-            'white': (np.array([0, 0, 251]), np.array([52, 76, 255])),
-            'orange': (np.array([13, 186, 184]), np.array([54, 255, 255])),
+            'red': (np.array([0, 128, 117]), np.array([180, 255, 255])),
+            'white': (np.array([0, 0, 251]), np.array([180, 38, 255])),
+            'orange': (np.array([13, 143, 255]), np.array([54, 255, 255])),
             'blue': (np.array([90, 105, 108]), np.array([108, 178, 255])),
-            'green': (np.array([57, 18, 41]), np.array([165, 255, 255]))
+            'green': (np.array([45, 66, 198]), np.array([150, 255, 255]))
         }
         # HSV-Ranges:  {'red': (array([  0, 158, 232]), array([ 14, 255, 255])), 'white': (array([  0,   0, 251]), array([ 52,  76, 255])), 'orange': (array([ 13, 186, 184]), array([ 54, 255, 255])), 'blue': (array([ 90, 105, 108]), array([108, 178, 255])), 'green': (array([105,  18, 233]), array([165, 255, 255]))}
         self.cap = None
@@ -46,7 +46,7 @@ class Camera2:
         self.distance_to_closest_ball = None
         self.angle_to_closest_waypoint = None
         self.distance_to_closest_waypoint = None
-        self.arena_dimensions = (180, 120)  # (width, height) in cm
+        self.arena_dimensions = (166.8, 122)  # (width, height) in cm
         self.waypoint_for_closest_white_ball = None
         self.waypoint_for_closest_orange_ball = None
         self.waypoint_distance = 20  # distance from ball center to waypoint in cm
@@ -57,6 +57,7 @@ class Camera2:
         # x,y values for the center of the robot
         self.robot_center_correction = [0, 0]
         self.robot_center_angle_correction = 0  # degrees
+        self.corner_tolerance = 20  # percentage
 
     def get_data(self):
         """
@@ -94,7 +95,7 @@ class Camera2:
         hsv = self.equalize_histogram(hsv)
         mask = cv2.inRange(hsv, hsv_lower, hsv_upper)
 
-        kernel1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        kernel1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         kernel2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         if open:
             mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel1)
@@ -103,9 +104,9 @@ class Camera2:
         if erode:
             mask = cv2.erode(mask, kernel2, iterations=1)
 
-        contours, _ = cv2.findContours(
+        contours, hierarchy = cv2.findContours(
             mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        return contours, mask
+        return contours, hierarchy
 
     def find_sharpest_corners(self, contour, num_corners=4, epsilon_factor=0.02):
         epsilon = epsilon_factor * cv2.arcLength(contour, True)
@@ -131,7 +132,7 @@ class Camera2:
         rect = self.order_points(pts)
         if self.last_valid_points is not None:
             deviation = self.percentage_deviation(rect, self.last_valid_points)
-            if deviation > 20:
+            if deviation > self.corner_tolerance:
                 print(
                     f"Rejected morph points due to excessive deviation: {deviation:.2f}%")
                 if self.M is not None:
@@ -447,7 +448,7 @@ class Camera2:
     def find_blobs(self, color, num_points):
         target_frame = self.morphed_frame if self.morph else self.frame
         contours, _ = self.mask_and_find_contours(
-            target_frame, color=color, close=True, open=True, erode=False)
+            target_frame, color=color, close=False, open=False, erode=False)
         sorted_contours = self.sort_contours_by_length(
             contours, min_length=10, reverse=True)
 
@@ -510,51 +511,144 @@ class Camera2:
         else:
             self.robot_direction = None
 
+    def find_longest_child_contour(self, contours, hierarchy, depth=1):
+        """
+        Find the longest child contour starting from the specified depth.
+
+        :param contours: List of contours found by cv2.findContours.
+        :param hierarchy: Hierarchy returned by cv2.findContours.
+        :param depth: Depth level to start the search. Default is 1.
+        :return: The longest child contour starting from the specified depth.
+        """
+        if not contours or hierarchy is None:
+            return None
+
+        if len(hierarchy.shape) != 3 or hierarchy.shape[2] != 4:
+            print("Error: Invalid hierarchy shape.")
+            return None
+
+        hierarchy = hierarchy[0]  # Simplify the hierarchy reference
+
+        # Find the top contour (parent contour with no parent)
+        top_contour_idx = next(
+            (i for i, h in enumerate(hierarchy) if h[3] == -1), None)
+
+        if top_contour_idx is None:
+            return None
+
+        def find_longest_child(contour_idx):
+            max_length = 0
+            longest_child_contour = None
+            child_idx = hierarchy[contour_idx][2]
+
+            while child_idx != -1:
+                current_length = cv2.arcLength(contours[child_idx], True)
+                if current_length > max_length:
+                    max_length = current_length
+                    longest_child_contour = child_idx
+                child_idx = hierarchy[child_idx][0]
+
+            return longest_child_contour
+
+        current_contour_idx = top_contour_idx
+
+        for _ in range(depth):
+            if current_contour_idx is None:
+                return None
+            current_contour_idx = find_longest_child(current_contour_idx)
+
+        if current_contour_idx is None:
+            return None
+
+        return contours[current_contour_idx]
+
+    # function to resise the frame keeping the aspect ratio
+    def resize_frame(self, frame, width=None, height=None, inter=cv2.INTER_AREA):
+        # initialize the dimensions of the frame to be resized and
+        # grab the image size
+        dim = None
+        (h, w) = frame.shape[:2]
+
+        # if both the width and height are None, then return the
+        # original frame
+        if width is None and height is None:
+            return frame
+
+        # check to see if the width is None
+        if width is None:
+            # calculate the ratio of the height and construct the
+            # dimensions
+            r = height / float(h)
+            dim = (int(w * r), height)
+
+        # otherwise, the height is None
+        else:
+            # calculate the ratio of the width and construct the
+            # dimensions
+            r = width / float(w)
+            dim = (width, int(h * r))
+
+        # resize the frame
+        resized = cv2.resize(frame, dim, interpolation=inter)
+
+        # return the resized frame
+        return resized
+
     def process_frame(self):
         try:
-            # self.preprocess_frame()
+            self.preprocess_frame()
             if self.morph:
-                contours, _ = self.mask_and_find_contours(
-                    self.frame, color='red', close=True, open=True, erode=False)
+                contours, hierarchy = self.mask_and_find_contours(
+                    self.frame, color='red', close=False, open=False, erode=False)
+
                 sorted_contours = self.sort_contours_by_length(
-                    contours, min_length=50, reverse=True)
+                    contours, min_length=100, reverse=True)
+
                 if len(sorted_contours) > 2:
+
                     arena_contour, cross_contour = sorted_contours[1], sorted_contours[2]
+
+                    # arena_contour = self.find_longest_child_contour(
+                    #     contours, hierarchy, depth=1)
+                    # cross_contour = self.find_longest_child_contour(
+                    #     contours, hierarchy, depth=2)
                     corners = self.find_sharpest_corners(arena_contour)
+
                     if corners is not None and len(corners) == 4:
                         corners = np.array([corner.ravel()
                                             for corner in corners], dtype="float32")
-                        if not self.four_point_transform(self.frame, corners):
-                            print("Skipping frame due to invalid morph points.")
-                            return
-                        if cross_contour is not None:
-                            transformed_contour = cv2.perspectiveTransform(
-                                cross_contour.reshape(-1, 1, 2).astype(np.float32), self.M).astype(int)
-                            self.fit_rotated_cross_to_contour(
-                                transformed_contour)
 
-                        self.find_blobs('green', num_points=3)
-                        self.find_blobs('orange', num_points=1)
-                        self.find_blobs('blue', num_points=1)
-                        self.find_robot()
-                        self.find_white_blobs()
-                        self.draw_detected_features()
+                        if self.four_point_transform(self.frame, corners):
 
-            elif self.waypoint_distance:
-                self.morphed_frame = self.frame.copy()
-                contours, _ = self.mask_and_find_contours(
-                    self.frame, color='red')
-                sorted_contours = self.sort_contours_by_length(
-                    contours, min_length=50, reverse=True)
-                if len(sorted_contours) > 2:
-                    cross_contour = sorted_contours[2]
-                    self.fit_rotated_cross_to_contour(cross_contour)
-                self.find_blobs('green', num_points=3)
-                self.find_blobs('orange', num_points=1)
-                self.find_blobs('blue', num_points=1)
-                self.find_robot()
-                self.find_white_blobs()
+                            if cross_contour is not None:
+                                transformed_contour = cv2.perspectiveTransform(
+                                    cross_contour.reshape(-1, 1, 2).astype(np.float32), self.M).astype(int)
+                                self.fit_rotated_cross_to_contour(
+                                    transformed_contour)
+
+                            self.find_blobs('green', num_points=3)
+                            self.find_blobs('orange', num_points=1)
+                            self.find_blobs('blue', num_points=1)
+                            self.find_robot()
+                            self.find_white_blobs()
+
                 self.draw_detected_features()
+
+            # elif self.waypoint_distance:
+            #    self.morphed_frame = self.frame.copy()
+            #    contours, _ = self.mask_and_find_contours(
+            #        self.frame, color='red')
+            #    sorted_contours = self.sort_contours_by_length(
+            #        contours, min_length=50, reverse=True)
+            #    if len(sorted_contours) > 2:
+            #        cross_contour = sorted_contours[2]
+            #        self.fit_rotated_cross_to_contour(cross_contour)
+            #    self.find_blobs('green', num_points=3)
+            #    self.find_blobs('orange', num_points=1)
+            #    self.find_blobs('blue', num_points=1)
+            #    self.find_robot()
+            #    self.find_white_blobs()
+            #    self.draw_detected_features()
             else:
                 self.morphed_frame = self.frame.copy()
                 contours, _ = self.mask_and_find_contours(
@@ -655,18 +749,6 @@ class Camera2:
             cv2.putText(self.morphed_frame, f"{self.distance_to_closest_waypoint:.1f} cm",
                         tuple(map(int, nearest_waypoint[0])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
 
-    def resize_with_aspect_ratio(self, image, width=None, height=None, inter=cv2.INTER_AREA):
-        h, w = image.shape[:2]
-        if width is None and height is None:
-            return image
-        if width is None:
-            r = height / float(h)
-            dim = (int(w * r), height)
-        else:
-            r = width / float(w)
-            dim = (width, int(h * r))
-        return cv2.resize(image, dim, interpolation=inter)
-
     def preprocess_frame(self):
         self.frame = cv2.GaussianBlur(self.frame, (5, 5), 0)
 
@@ -674,95 +756,107 @@ class Camera2:
         self.morph = morph
 
         if self.cap is None:
-            self.cap = cv2.VideoCapture(video_source)
+            self.cap = cv2.VideoCapture(video_source, cv2.CAP_V4L2)
             if not self.cap.isOpened():
                 print(f"Error: Unable to open video source {video_source}")
                 return
-            self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
-            self.cap.set(cv2.CAP_PROP_FPS, 30)
+            self.cap.set(cv2.CAP_PROP_FPS, 40)
+            # sleep to alow camera to adjust to lighting conditions
+            sleep(5)
 
         first_valid_points_obtained = False
         out = None  # Initialize video writer as None
 
         while True:
-            ret, self.frame = self.cap.read()
-            if not ret:
-                print("Error: Unable to read frame from video source")
-                break
+            try:
+                ret, self.frame = self.cap.read()
+                if not ret:
+                    print("Error: Unable to read frame from video source")
+                    break
 
-            if self.morph and not first_valid_points_obtained:
-                for _ in range(10):
+                if resize:
+                    self.frame = self.resize_frame(self.frame, width=resize)
+
+                if self.morph and not first_valid_points_obtained:
+                    # Capture the first frame
                     ret, self.frame = self.cap.read()
                     if not ret:
                         print("Error: Unable to read frame from video source")
                         break
 
-                self.process_frame()
+                    self.process_frame()
 
-                # check if last_valid_points is not None
-                if self.last_valid_points is not None:
-                    for pt in self.last_valid_points:
-                        pt = tuple(map(int, pt))
-                        cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
-                    cv2.imshow('Initial Frame', self.frame)
-                    key = cv2.waitKey(0) & 0xFF
-                    if key == ord('r'):
-                        first_valid_points_obtained = False
-                        continue
-                    elif key == ord('a'):
-                        cv2.destroyWindow('Initial Frame')
-                        first_valid_points_obtained = True
-                        continue
-                    elif key == ord('q'):
+                    # check if last_valid_points is not None
+                    if self.last_valid_points is not None:
+                        for pt in self.last_valid_points:
+                            pt = tuple(map(int, pt))
+                            cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
+                        cv2.imshow('Initial Frame', self.frame)
+                        key = cv2.waitKey(0) & 0xFF
+                        if key == ord('r'):
+                            first_valid_points_obtained = False
+                            continue
+                        elif key == ord('a'):
+                            cv2.destroyWindow('Initial Frame')
+                            first_valid_points_obtained = True
+                            continue
+                        elif key == ord('q'):
+                            break
+                else:
+                    self.process_frame()
+                    cv2.imshow('Processed Frame', self.morphed_frame)
+                    cv2.imshow('Original Frame', self.frame)
+
+                    # Initialize video writer with dynamic frame size
+                    if out is None and record:
+                        frame_height, frame_width = self.morphed_frame.shape[:2]
+                        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                        out = cv2.VideoWriter(
+                            'processed_output.mp4', fourcc, 40.0, (frame_width, frame_height))
+                        if not out.isOpened():
+                            print("Error: Unable to open video writer")
+                            break
+
+                    # Write the processed frame to the video file
+                    if self.morphed_frame is not None and record:
+                        out.write(self.morphed_frame)
+
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
-            else:
-                self.process_frame()
-                cv2.imshow('Processed Frame', self.morphed_frame)
-                cv2.imshow('Original Frame', self.frame)
 
-                # Initialize video writer with dynamic frame size
-                if out is None and record:
-                    frame_height, frame_width = self.morphed_frame.shape[:2]
-                    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                    out = cv2.VideoWriter(
-                        'processed_output.mp4', fourcc, 40.0, (frame_width, frame_height))
-                    if not out.isOpened():
-                        print("Error: Unable to open video writer")
-                        break
+                    # pause the video stream if 'p' is pressed
+                    if cv2.waitKey(1) & 0xFF == ord('p'):
+                        sleep(1)
+                        cv2.waitKey(-1)
 
-                # Write the processed frame to the video file
-                if self.morphed_frame is not None and record:
-                    out.write(self.morphed_frame)
+                # Send data to the queue
+                if queue is not None and self.morphed_frame is not None:
+                    data = self.get_data()
+                    try:
+                        queue.put_nowait(data)
+                    except:
+                        pass
 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-
-                # pause the video stream if 'p' is pressed
-                if cv2.waitKey(1) & 0xFF == ord('p'):
-                    sleep(1)
-                    cv2.waitKey(-1)
-
-            # Send data to the queue
-            if queue is not None and self.morphed_frame is not None:
-                data = self.get_data()
-                try:
-                    queue.put_nowait(data)
-                except:
-                    pass
+            # catch keyborad interrupt and release the video source
+            except KeyboardInterrupt:
+                print("Keyboard interrupt detected.")
+                break
 
         self.cap.release()
         if out:
             out.release()
         cv2.destroyAllWindows()
 
-    def calibrate_color(self, color, video_path=None):
-
+    def calibrate_color(self, colors, video_path=None, resize=None):
         def nothing(x):
             pass
 
-        self.cap = cv2.VideoCapture(video_path)
-
-
+        try:
+            self.cap = cv2.VideoCapture(video_path, cv2.CAP_V4L2)
+            self.cap.set(cv2.CAP_PROP_FPS, 40)
+        except Exception as e:
+            print(f"Error: Unable to open video source {video_path}")
+            return
 
         if not self.cap.isOpened():
             print(f"Error: Unable to open video source {video_path}")
@@ -775,130 +869,90 @@ class Camera2:
             print("Error: Unable to read frame from video source")
             return
 
-        cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
-        cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
-        cv2.namedWindow(f'Binary Mask for {color}', cv2.WINDOW_NORMAL)
+            # Read the first frame to get its size
+            ret, self.frame = self.cap.read()
+            if not ret:
+                print("Error: Unable to read frame from video source")
+                return
 
-        hsv_lower, hsv_upper = self.hsv_ranges[color]
-        cv2.createTrackbar('H Lower', 'Calibration',
-                           hsv_lower[0], 180, nothing)
-        cv2.createTrackbar('S Lower', 'Calibration',
-                           hsv_lower[1], 255, nothing)
-        cv2.createTrackbar('V Lower', 'Calibration',
-                           hsv_lower[2], 255, nothing)
-        cv2.createTrackbar('H Upper', 'Calibration',
-                           hsv_upper[0], 180, nothing)
-        cv2.createTrackbar('S Upper', 'Calibration',
-                           hsv_upper[1], 255, nothing)
-        cv2.createTrackbar('V Upper', 'Calibration',
-                           hsv_upper[2], 255, nothing)
+            if resize:
+                self.frame = self.resize_frame(self.frame, width=resize)
 
         while True:
             self.preprocess_frame()
 
-            h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
-            s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
-            v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
-            h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
-            s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
-            v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
+            # Adjust window sizes to match the frame size
+            cv2.resizeWindow(
+                f'Original Frame {color}', frame_width, frame_height)
+            cv2.resizeWindow(
+                f'Processed Frame {color}', frame_width, frame_height)
+            cv2.resizeWindow(
+                f'Binary Mask for {color}', frame_width, frame_height)
+            # Arbitrary size for the calibration window
+            cv2.resizeWindow('Calibration', 200, 200)
 
-            lower_hsv = np.array([h_lower, s_lower, v_lower])
-            upper_hsv = np.array([h_upper, s_upper, v_upper])
+            hsv_lower, hsv_upper = self.hsv_ranges[color]
+            cv2.createTrackbar('H Lower', 'Calibration',
+                               hsv_lower[0], 180, nothing)
+            cv2.createTrackbar('S Lower', 'Calibration',
+                               hsv_lower[1], 255, nothing)
+            cv2.createTrackbar('V Lower', 'Calibration',
+                               hsv_lower[2], 255, nothing)
+            cv2.createTrackbar('H Upper', 'Calibration',
+                               hsv_upper[0], 180, nothing)
+            cv2.createTrackbar('S Upper', 'Calibration',
+                               hsv_upper[1], 255, nothing)
+            cv2.createTrackbar('V Upper', 'Calibration',
+                               hsv_upper[2], 255, nothing)
 
-            hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
-            hsv = self.equalize_histogram(hsv)
-            mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+            while True:
+                ret, self.frame = self.cap.read()
+                if not ret:
+                    print("Error: Unable to read frame from video source")
+                    break
 
-            cv2.imshow(f'Original Frame {color}', self.frame)
-            cv2.imshow(f'Binary Mask for {color}', mask)
+                if resize:
+                    self.frame = self.resize_frame(self.frame, width=resize)
 
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('a'):  # Accept the calibration
-                self.hsv_ranges[color] = (lower_hsv, upper_hsv)
-                break
-            elif key == ord('q'):  # Quit without saving
-                break
+                self.preprocess_frame()
 
-        cv2.destroyAllWindows()
-        # self.cap.release()
+                h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
+                s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
+                v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
+                h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
+                s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
+                v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
 
-    # def calibrate_color(self, color, video_path=None):
-    #     def nothing(x):
-    #         pass
+                lower_hsv = np.array([h_lower, s_lower, v_lower])
+                upper_hsv = np.array([h_upper, s_upper, v_upper])
+                hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+                hsv = self.equalize_histogram(hsv)
+                mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
 
-    #     self.cap = cv2.VideoCapture(video_path)
-    #     # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
-    #     # self.cap.set(cv2.CAP_PROP_FPS, 30)
+                # Elliptical kernel for morphological operations
+                # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+                # mask = cv2.morphologyEx(
+                #    mask, cv2.MORPH_OPEN, kernel)  # Remove noise
+                # mask = cv2.morphologyEx(
+                #    mask, cv2.MORPH_CLOSE, kernel)  # Fill holes
 
-    #     if not self.cap.isOpened():
-    #         print(f"Error: Unable to open video source {video_path}")
-    #         return
+                contours, _ = cv2.findContours(
+                    mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    #     cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
-    #     cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
-    #     cv2.namedWindow(f'Binary mask for {color}', cv2.WINDOW_NORMAL)
+                cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
 
-    #     hsv_lower, hsv_upper = self.hsv_ranges[color]
-    #     cv2.createTrackbar('H Lower', 'Calibration',
-    #                        hsv_lower[0], 180, nothing)
-    #     cv2.createTrackbar('S Lower', 'Calibration',
-    #                        hsv_lower[1], 255, nothing)
-    #     cv2.createTrackbar('V Lower', 'Calibration',
-    #                        hsv_lower[2], 255, nothing)
-    #     cv2.createTrackbar('H Upper', 'Calibration',
-    #                        hsv_upper[0], 180, nothing)
-    #     cv2.createTrackbar('S Upper', 'Calibration',
-    #                        hsv_upper[1], 255, nothing)
-    #     cv2.createTrackbar('V Upper', 'Calibration',
-    #                        hsv_upper[2], 255, nothing)
+                cv2.imshow(f'Contours for {color}', self.frame)
+                cv2.imshow(f'Binary Mask for {color}', mask)
 
-    #     run_flag = True
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord('a'):
+                    self.hsv_ranges[color] = (lower_hsv, upper_hsv)
+                    break
 
-    #     while run_flag:
-    #         ret, self.frame = self.cap.read()
-    #         if not ret:
-    #             print("Error: Unable to read frame from video source")
-    #             break
+                elif key == ord('q'):
+                    break
 
-    #         self.preprocess_frame()
-
-    #         h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
-    #         s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
-    #         v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
-    #         h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
-    #         s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
-    #         v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
-    #         lower_hsv = np.array([h_lower, s_lower, v_lower])
-    #         upper_hsv = np.array([h_upper, s_upper, v_upper])
-    #         hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
-    #         hsv = self.equalize_histogram(hsv)
-    #         mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
-
-    #         # eliptical kernal for morphological operations
-    #         # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    #         # opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    #         # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    #         # closing = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-    #         # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-
-    #         # getContours(mask, frame)
-    #         # contours, _ = cv2.findContours(
-    #         #            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    #         # draw contours on the mask
-    #         # cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
-
-    #         cv2.imshow(f'Original Frame {color}', self.frame)
-    #         cv2.imshow(f'Binary Mask for {color}', mask)
-
-    #         key = cv2.waitKey(1) & 0xFF
-    #         if key == ord('a'):
-    #             self.hsv_ranges[color] = (lower_hsv, upper_hsv)
-    #             break
-    #         elif key == ord('q'):
-    #             break
-    #     cv2.destroyAllWindows()
+            cv2.destroyAllWindows()
 
 
 def camera_process(queue, video_path):
@@ -917,12 +971,11 @@ if __name__ == "__main__":
     # video_path = "/home/madsr2d2/sem4/CDIO_1/CDIO_gruppe_7/cam_module/testMovie.mp4"
     # video_path = "/dev/video8"
     # video_path = "/home/madsr2d2/Downloads/film4.mp4"
-    # video_path = '/dev/video8'
-    video_path = 'testMovie.mp4'
-    camera.calibrate_color('green', video_path)
-    # camera.calibrate_color('blue', video_path)
-    camera.calibrate_color('red', video_path)
-    camera.calibrate_color('orange', video_path)
-    camera.calibrate_color('white', video_path)
+    video_path = '/dev/video9'
+    # video_path = 'testMovie.mp4'
+
+    colors = ['green', 'red', 'orange', 'white']
+    # colors = ['red']
+    # camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, morph=True,
-                              record=False, resize=None)
+                              record=False, resize=False)
