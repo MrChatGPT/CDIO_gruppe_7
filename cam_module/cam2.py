@@ -634,21 +634,6 @@ class Camera2:
 
                 self.draw_detected_features()
 
-            # elif self.waypoint_distance:
-            #    self.morphed_frame = self.frame.copy()
-            #    contours, _ = self.mask_and_find_contours(
-            #        self.frame, color='red')
-            #    sorted_contours = self.sort_contours_by_length(
-            #        contours, min_length=50, reverse=True)
-            #    if len(sorted_contours) > 2:
-            #        cross_contour = sorted_contours[2]
-            #        self.fit_rotated_cross_to_contour(cross_contour)
-            #    self.find_blobs('green', num_points=3)
-            #    self.find_blobs('orange', num_points=1)
-            #    self.find_blobs('blue', num_points=1)
-            #    self.find_robot()
-            #    self.find_white_blobs()
-            #    self.draw_detected_features()
             else:
                 self.morphed_frame = self.frame.copy()
                 contours, _ = self.mask_and_find_contours(
@@ -863,7 +848,6 @@ class Camera2:
             return
 
         # Capture the first frame
-        sleep(0.5)
         ret, self.frame = self.cap.read()
         if not ret:
             print("Error: Unable to read frame from video source")
@@ -927,13 +911,6 @@ class Camera2:
                 hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
                 hsv = self.equalize_histogram(hsv)
                 mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
-
-                # Elliptical kernel for morphological operations
-                # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-                # mask = cv2.morphologyEx(
-                #    mask, cv2.MORPH_OPEN, kernel)  # Remove noise
-                # mask = cv2.morphologyEx(
-                #    mask, cv2.MORPH_CLOSE, kernel)  # Fill holes
 
                 contours, _ = cv2.findContours(
                     mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
