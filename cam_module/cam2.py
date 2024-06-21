@@ -1,12 +1,8 @@
-from calendar import c
-
-# from sklearn import kernel_approximation
 import cv2
 import numpy as np
 import math
 from time import sleep
 from multiprocessing import Queue
-from time import sleep
 import queue
 
 
@@ -734,7 +730,7 @@ class Camera2:
                         tuple(map(int, nearest_waypoint[0])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
 
     def preprocess_frame(self):
-        self.frame = cv2.GaussianBlur(self.frame, (5, 5), 0)
+        self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
 
     def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None):
         self.morph = morph
@@ -824,6 +820,8 @@ class Camera2:
             # catch keyborad interrupt and release the video source
             except KeyboardInterrupt:
                 print("Keyboard interrupt detected.")
+                self.cap.release()
+                cv2.destroyAllWindows()
                 break
 
         self.cap.release()
@@ -852,86 +850,83 @@ class Camera2:
             print("Error: Unable to read frame from video source")
             return
 
-        # Read the first frame to get its size
-        ret, self.frame = self.cap.read()
-        if not ret:
-            print("Error: Unable to read frame from video source")
-            return
         if resize:
             self.frame = self.resize_frame(self.frame, width=resize)
 
         frame_height, frame_width = self.frame.shape[:2]
 
         for color in colors:
+            # Create windows once
+            cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
+            cv2.namedWindow(f'Original Frame {color}', cv2.WINDOW_NORMAL)
+            cv2.namedWindow(f'Binary Mask {color}', cv2.WINDOW_NORMAL)
+
+            # Adjust window sizes to match the frame size
+            cv2.resizeWindow(
+                f'Original Frame {color}', frame_width, frame_height)
+            cv2.resizeWindow(f'Binary Mask {color}', frame_width, frame_height)
+            # Set a reasonable size for the calibration window
+            cv2.resizeWindow('Calibration', 400, 300)
+
+            # Create trackbars once per color
+            hsv_lower, hsv_upper = self.hsv_ranges[color]
+            cv2.createTrackbar('H Lower', 'Calibration',
+                               int(hsv_lower[0]), 180, nothing)
+            cv2.createTrackbar('S Lower', 'Calibration',
+                               int(hsv_lower[1]), 255, nothing)
+            cv2.createTrackbar('V Lower', 'Calibration',
+                               int(hsv_lower[2]), 255, nothing)
+            cv2.createTrackbar('H Upper', 'Calibration',
+                               int(hsv_upper[0]), 180, nothing)
+            cv2.createTrackbar('S Upper', 'Calibration',
+                               int(hsv_upper[1]), 255, nothing)
+            cv2.createTrackbar('V Upper', 'Calibration',
+                               int(hsv_upper[2]), 255, nothing)
+
             while True:
+                ret, self.frame = self.cap.read()
+                if not ret:
+                    print("Error: Unable to read frame from video source")
+                    break
+
+                if resize:
+                    self.frame = self.resize_frame(self.frame, width=resize)
+
                 self.preprocess_frame()
 
-                # Adjust window sizes to match the frame size
-                cv2.resizeWindow(
-                    f'Original Frame {color}', frame_width, frame_height)
-                cv2.resizeWindow(
-                    f'Processed Frame {color}', frame_width, frame_height)
-                cv2.resizeWindow(
-                    f'Binary Mask for {color}', frame_width, frame_height)
-                # Arbitrary size for the calibration window
-                cv2.resizeWindow('Calibration', 200, 200)
+                h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
+                s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
+                v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
+                h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
+                s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
+                v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
 
-                hsv_lower, hsv_upper = self.hsv_ranges[color]
-                cv2.createTrackbar('H Lower', 'Calibration',
-                                   hsv_lower[0], 180, nothing)
-                cv2.createTrackbar('S Lower', 'Calibration',
-                                   hsv_lower[1], 255, nothing)
-                cv2.createTrackbar('V Lower', 'Calibration',
-                                   hsv_lower[2], 255, nothing)
-                cv2.createTrackbar('H Upper', 'Calibration',
-                                   hsv_upper[0], 180, nothing)
-                cv2.createTrackbar('S Upper', 'Calibration',
-                                   hsv_upper[1], 255, nothing)
-                cv2.createTrackbar('V Upper', 'Calibration',
-                                   hsv_upper[2], 255, nothing)
+                lower_hsv = np.array([h_lower, s_lower, v_lower])
+                upper_hsv = np.array([h_upper, s_upper, v_upper])
+                hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+                hsv = self.equalize_histogram(hsv)
+                mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
 
-                while True:
-                    ret, self.frame = self.cap.read()
-                    if not ret:
-                        print("Error: Unable to read frame from video source")
-                        break
+                contours, _ = cv2.findContours(
+                    mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-                    if resize:
-                        self.frame = self.resize_frame(
-                            self.frame, width=resize)
+                cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
 
-                    self.preprocess_frame()
+                cv2.imshow(f'Original Frame {color}', self.frame)
+                cv2.imshow(f'Binary Mask{color}', mask)
 
-                    h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
-                    s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
-                    v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
-                    h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
-                    s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
-                    v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord('a'):
+                    print(f"Calibration for {color} completed.")
+                    self.hsv_ranges[color] = (lower_hsv, upper_hsv)
+                    print(f"HSV ranges for {color}: {self.hsv_ranges[color]}")
+                    break
+                elif key == ord('q'):
 
-                    lower_hsv = np.array([h_lower, s_lower, v_lower])
-                    upper_hsv = np.array([h_upper, s_upper, v_upper])
-                    hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
-                    hsv = self.equalize_histogram(hsv)
-                    mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+                    break
 
-                    contours, _ = cv2.findContours(
-                        mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-                    cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
-
-                    cv2.imshow(f'Contours for {color}', self.frame)
-                    cv2.imshow(f'Binary Mask for {color}', mask)
-
-                    key = cv2.waitKey(1) & 0xFF
-                    if key == ord('a'):
-                        self.hsv_ranges[color] = (lower_hsv, upper_hsv)
-                        break
-
-                    elif key == ord('q'):
-                        break
-
-                cv2.destroyAllWindows()
+            cv2.destroyAllWindows()
+        # self.cap.release()
 
 
 def camera_process(queue, video_path):
@@ -945,16 +940,11 @@ def camera_process(queue, video_path):
                               morph=True, record=False, resize=640)
 
 
+# Example usage:
 if __name__ == "__main__":
     camera = Camera2()
-    # video_path = "/home/madsr2d2/sem4/CDIO_1/CDIO_gruppe_7/cam_module/testMovie.mp4"
-    # video_path = "/dev/video8"
-    # video_path = "/home/madsr2d2/Downloads/film4.mp4"
-    video_path = '/dev/video9'
-    # video_path = 'testMovie.mp4'
-
+    video_path = '/dev/video8'
     colors = ['green', 'red', 'orange', 'white']
-    # colors = ['red']
-    # camera.calibrate_color(colors, video_path, resize=False)
+    camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, morph=True,
                               record=False, resize=False)
