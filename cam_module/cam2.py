@@ -626,6 +626,8 @@ class Camera2:
                             self.find_blobs('blue', num_points=1)
                             self.find_robot()
                             self.find_white_blobs()
+                        else:
+                            print("Failed to find corners.")
 
                 self.draw_detected_features()
 
@@ -920,7 +922,7 @@ class Camera2:
 
                 cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
                 cv2.imshow(f'Original Frame {color}', self.frame)
-                cv2.imshow(f'Binary Mask{color}', mask)
+                cv2.imshow(f'Binary Mask {color}', mask)
 
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord('a'):
