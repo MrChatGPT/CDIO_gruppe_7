@@ -95,6 +95,11 @@ def circle_detection(image):
 
 
 def detect_ball_colors(image, stored_circles):
+    
+
+
+
+
     hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
     ############ Thresholds #####################
     red_lower = np.array([0, 113, 180], np.uint8) #HSV_old  0, 113, 180

@@ -5,6 +5,7 @@ import numpy as np
 from picture.livefeed import CameraHandler
 from picture.transform_arena import find_corners, transform
 from picture.image_detection import circle_detection, detect_ball_colors, find_carv2, match_circles_and_contours
+from picture.autocalibratecolors import *
 from algorithm.algorithm import SortByDistance
 from algorithm.move_to_target import move_to_target
 from algorithm.control import *
@@ -40,6 +41,7 @@ def initialize():
     # Calibrate arena transform
     image = camera_handler._run_video()
     # find_corners(image)
+    select_colors_and_create_mask(image)
     
     return camera_handler
 
