@@ -869,14 +869,13 @@ class Camera2:
             print("Error: Unable to read frame from video source")
             return
 
-            # Read the first frame to get its size
-            ret, self.frame = self.cap.read()
-            if not ret:
-                print("Error: Unable to read frame from video source")
-                return
-
-            if resize:
-                self.frame = self.resize_frame(self.frame, width=resize)
+        # Read the first frame to get its size
+        ret, self.frame = self.cap.read()
+        if not ret:
+            print("Error: Unable to read frame from video source")
+            return
+        if resize:
+            self.frame = self.resize_frame(self.frame, width=resize)
 
         while True:
             self.preprocess_frame()
