@@ -562,7 +562,6 @@ class Camera2:
 
         return contours[current_contour_idx]
 
-    # function to resise the frame keeping the aspect ratio
     def resize_frame(self, frame, width=None, height=None, inter=cv2.INTER_AREA):
         # initialize the dimensions of the frame to be resized and
         # grab the image size
