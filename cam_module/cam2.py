@@ -861,74 +861,78 @@ class Camera2:
         if resize:
             self.frame = self.resize_frame(self.frame, width=resize)
 
-        while True:
-            self.preprocess_frame()
+        frame_height, frame_width = self.frame.shape[:2]
 
-            # Adjust window sizes to match the frame size
-            cv2.resizeWindow(
-                f'Original Frame {color}', frame_width, frame_height)
-            cv2.resizeWindow(
-                f'Processed Frame {color}', frame_width, frame_height)
-            cv2.resizeWindow(
-                f'Binary Mask for {color}', frame_width, frame_height)
-            # Arbitrary size for the calibration window
-            cv2.resizeWindow('Calibration', 200, 200)
-
-            hsv_lower, hsv_upper = self.hsv_ranges[color]
-            cv2.createTrackbar('H Lower', 'Calibration',
-                               hsv_lower[0], 180, nothing)
-            cv2.createTrackbar('S Lower', 'Calibration',
-                               hsv_lower[1], 255, nothing)
-            cv2.createTrackbar('V Lower', 'Calibration',
-                               hsv_lower[2], 255, nothing)
-            cv2.createTrackbar('H Upper', 'Calibration',
-                               hsv_upper[0], 180, nothing)
-            cv2.createTrackbar('S Upper', 'Calibration',
-                               hsv_upper[1], 255, nothing)
-            cv2.createTrackbar('V Upper', 'Calibration',
-                               hsv_upper[2], 255, nothing)
-
+        for color in colors:
             while True:
-                ret, self.frame = self.cap.read()
-                if not ret:
-                    print("Error: Unable to read frame from video source")
-                    break
-
-                if resize:
-                    self.frame = self.resize_frame(self.frame, width=resize)
-
                 self.preprocess_frame()
 
-                h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
-                s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
-                v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
-                h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
-                s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
-                v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
+                # Adjust window sizes to match the frame size
+                cv2.resizeWindow(
+                    f'Original Frame {color}', frame_width, frame_height)
+                cv2.resizeWindow(
+                    f'Processed Frame {color}', frame_width, frame_height)
+                cv2.resizeWindow(
+                    f'Binary Mask for {color}', frame_width, frame_height)
+                # Arbitrary size for the calibration window
+                cv2.resizeWindow('Calibration', 200, 200)
 
-                lower_hsv = np.array([h_lower, s_lower, v_lower])
-                upper_hsv = np.array([h_upper, s_upper, v_upper])
-                hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
-                hsv = self.equalize_histogram(hsv)
-                mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+                hsv_lower, hsv_upper = self.hsv_ranges[color]
+                cv2.createTrackbar('H Lower', 'Calibration',
+                                   hsv_lower[0], 180, nothing)
+                cv2.createTrackbar('S Lower', 'Calibration',
+                                   hsv_lower[1], 255, nothing)
+                cv2.createTrackbar('V Lower', 'Calibration',
+                                   hsv_lower[2], 255, nothing)
+                cv2.createTrackbar('H Upper', 'Calibration',
+                                   hsv_upper[0], 180, nothing)
+                cv2.createTrackbar('S Upper', 'Calibration',
+                                   hsv_upper[1], 255, nothing)
+                cv2.createTrackbar('V Upper', 'Calibration',
+                                   hsv_upper[2], 255, nothing)
 
-                contours, _ = cv2.findContours(
-                    mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                while True:
+                    ret, self.frame = self.cap.read()
+                    if not ret:
+                        print("Error: Unable to read frame from video source")
+                        break
 
-                cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
+                    if resize:
+                        self.frame = self.resize_frame(
+                            self.frame, width=resize)
 
-                cv2.imshow(f'Contours for {color}', self.frame)
-                cv2.imshow(f'Binary Mask for {color}', mask)
+                    self.preprocess_frame()
 
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord('a'):
-                    self.hsv_ranges[color] = (lower_hsv, upper_hsv)
-                    break
+                    h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
+                    s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
+                    v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
+                    h_upper = cv2.getTrackbarPos('H Upper', 'Calibration')
+                    s_upper = cv2.getTrackbarPos('S Upper', 'Calibration')
+                    v_upper = cv2.getTrackbarPos('V Upper', 'Calibration')
 
-                elif key == ord('q'):
-                    break
+                    lower_hsv = np.array([h_lower, s_lower, v_lower])
+                    upper_hsv = np.array([h_upper, s_upper, v_upper])
+                    hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+                    hsv = self.equalize_histogram(hsv)
+                    mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
 
-            cv2.destroyAllWindows()
+                    contours, _ = cv2.findContours(
+                        mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+                    cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
+
+                    cv2.imshow(f'Contours for {color}', self.frame)
+                    cv2.imshow(f'Binary Mask for {color}', mask)
+
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord('a'):
+                        self.hsv_ranges[color] = (lower_hsv, upper_hsv)
+                        break
+
+                    elif key == ord('q'):
+                        break
+
+                cv2.destroyAllWindows()
 
 
 def camera_process(queue, video_path):
