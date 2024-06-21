@@ -32,7 +32,6 @@ class ControlLogic:
         #logic for waypoint:
         waypoint = data.get('vector_to_waypoint_robot_frame')
         distance_to_waypoint = data.get('distance_to_closest_waypoint')
-       
         if waypoint is not None:
             print(f"Moving to waypoint: {waypoint}")
             print(f"Distance to waypoint: {distance_to_waypoint}")
