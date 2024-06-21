@@ -7,6 +7,7 @@ import random
 import imutils
 import argparse
 import json
+from autocalibratecolors import *
 
 class Ball:
     def __init__(self, x, y, obstacle=0):
@@ -95,28 +96,50 @@ def circle_detection(image):
 
 
 def detect_ball_colors(image, stored_circles):
+    # color space 
+    labFrame = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+
+    # Load the LAB ranges from the JSON file
+    lab_ranges = load_lab_ranges('lab_ranges.json')
+
+    # Assuming 'image' is a new image you want to process
+    # Create masks for each color using the LAB ranges
+    orange_lower = np.array(lab_ranges['orange']['lower'])
+    orange_upper = np.array(lab_ranges['orange']['upper'])
+    orange_mask = cv2.inRange(labFrame, orange_lower, orange_upper)
+
+    white_lower = np.array(lab_ranges['white']['lower'])
+    white_upper = np.array(lab_ranges['white']['upper'])
+    white_mask = cv2.inRange(labFrame, white_lower, white_upper)
+
+    green_lower = np.array(lab_ranges['green']['lower'])
+    green_upper = np.array(lab_ranges['green']['upper'])
+    green_mask = cv2.inRange(labFrame, green_lower, green_upper)
+
+    red_lower = np.array(lab_ranges['red']['lower'])
+    red_upper = np.array(lab_ranges['red']['upper'])
+    red_mask = cv2.inRange(labFrame, red_lower, red_upper)
+
+
+
+
+    # hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
+    # ############ Thresholds #####################
+    # red_lower = np.array([0, 113, 180], np.uint8) #HSV_old  0, 113, 180
+    # red_upper = np.array([9, 255, 255], np.uint8) #HSV_old  9, 255, 255
+    # red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
+
+    # orange_lower = np.array([13, 135, 223], np.uint8) #HSV_old 5, 156, 184
+    # orange_upper = np.array([44, 255, 255], np.uint8) #HSV_old 50, 255, 255
+    # orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
+
+    # white_lower = np.array([0, 0, 243], np.uint8) #HSV_old 15, 0, 200
+    # white_upper = np.array([203, 61, 255], np.uint8) #HSV_old 41, 59, 255
+    # white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
     
-
-
-
-
-    hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) 
-    ############ Thresholds #####################
-    red_lower = np.array([0, 113, 180], np.uint8) #HSV_old  0, 113, 180
-    red_upper = np.array([9, 255, 255], np.uint8) #HSV_old  9, 255, 255
-    red_mask = cv2.inRange(hsvFrame, red_lower, red_upper) 
-
-    orange_lower = np.array([13, 135, 223], np.uint8) #HSV_old 5, 156, 184
-    orange_upper = np.array([44, 255, 255], np.uint8) #HSV_old 50, 255, 255
-    orange_mask = cv2.inRange(hsvFrame, orange_lower, orange_upper) 
-
-    white_lower = np.array([0, 0, 243], np.uint8) #HSV_old 15, 0, 200
-    white_upper = np.array([203, 61, 255], np.uint8) #HSV_old 41, 59, 255
-    white_mask = cv2.inRange(hsvFrame, white_lower, white_upper) 
-    
-    green_lower = np.array([44, 56, 141], np.uint8) #HSV_old   72, 130, 187
-    green_upper = np.array([179, 255, 255], np.uint8) #HSV_old   129, 241, 255
-    green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
+    # green_lower = np.array([44, 56, 141], np.uint8) #HSV_old   72, 130, 187
+    # green_upper = np.array([179, 255, 255], np.uint8) #HSV_old   129, 241, 255
+    # green_mask = cv2.inRange(hsvFrame, green_lower, green_upper) 
 
     orange_detected = []
     white_detected = []
