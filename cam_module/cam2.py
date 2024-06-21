@@ -1,4 +1,6 @@
 from calendar import c
+
+from sklearn import kernel_approximation
 import cv2
 import numpy as np
 import math
@@ -14,10 +16,11 @@ class Camera2:
             'red': (np.array([0, 158, 232]), np.array([14, 255, 255])),
             'white': (np.array([0, 0, 251]), np.array([52, 76, 255])),
             'orange': (np.array([13, 186, 184]), np.array([54, 255, 255])),
-            'blue_LED': (np.array([90, 105, 108]), np.array([108, 178, 255])),
-            'LED': (np.array([105, 18, 233]), np.array([165, 255, 255]))
+            'blue': (np.array([90, 105, 108]), np.array([108, 178, 255])),
+            'green': (np.array([105, 18, 233]), np.array([165, 255, 255]))
         }
-        # HSV-Ranges:  {'red': (array([  0, 158, 232]), array([ 14, 255, 255])), 'white': (array([  0,   0, 251]), array([ 52,  76, 255])), 'orange': (array([ 13, 186, 184]), array([ 54, 255, 255])), 'blue_LED': (array([ 90, 105, 108]), array([108, 178, 255])), 'LED': (array([105,  18, 233]), array([165, 255, 255]))}
+        # HSV-Ranges:  {'red': (array([  0, 158, 232]), array([ 14, 255, 255])), 'white': (array([  0,   0, 251]), array([ 52,  76, 255])), 'orange': (array([ 13, 186, 184]), array([ 54, 255, 255])), 'blue': (array([ 90, 105, 108]), array([108, 178, 255])), 'green': (array([105,  18, 233]), array([165, 255, 255]))}
+        self.cap = None
         self.morph = True
         self.orange_blob_detected = False
         self.morphed_frame = None
@@ -31,8 +34,8 @@ class Camera2:
         self.robot_scale_factor = 1.5
         self.orange_blob_centers = []
         self.blocked_orange_blobs = []
-        self.blue_LED_centers = []
-        self.LED_centers = []
+        self.blue_centers = []
+        self.green_center = []
         self.last_cross_angle = 0
         self.M = None
         self.last_valid_points = None
@@ -67,8 +70,8 @@ class Camera2:
             'egg_size': self.egg_size,
             'orange_blob_centers': self.orange_blob_centers,
             'blocked_orange_blobs': self.blocked_orange_blobs,
-            'blue_LED_centers': self.blue_LED_centers,
-            'LED_centers': self.LED_centers,
+            'blue_centers': self.blue_centers,
+            'green_center': self.green_center,
             'angle_to_closest_ball': self.angle_to_closest_ball,
             'distance_to_closest_ball': self.distance_to_closest_ball,
             'angle_to_closest_waypoint': self.angle_to_closest_waypoint,
@@ -89,10 +92,10 @@ class Camera2:
 
         kernel1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         kernel2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        if close:
-            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel1)
         if open:
             mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel1)
+        if close:
+            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel1)
         if erode:
             mask = cv2.erode(mask, kernel2, iterations=1)
 
@@ -169,10 +172,10 @@ class Camera2:
         box = cv2.boxPoints(rect)
         box = np.array(box, dtype=np.float32)
         center = np.mean(box, axis=0)
-        scaled_box = center + 2 * (box - center)
-        scaled_box = np.array(scaled_box, dtype=np.int0)
-        self.cross_lines = [(tuple(scaled_box[0]), tuple(
-            scaled_box[2])), (tuple(scaled_box[1]), tuple(scaled_box[3]))]
+        scagreen_box = center + 2 * (box - center)
+        scagreen_box = np.array(scagreen_box, dtype=np.int0)
+        self.cross_lines = [(tuple(scagreen_box[0]), tuple(
+            scagreen_box[2])), (tuple(scagreen_box[1]), tuple(scagreen_box[3]))]
 
     def sort_contours_by_length(self, contours, min_length=10, reverse=True):
         sorted_contours = sorted(
@@ -223,13 +226,13 @@ class Camera2:
         self.white_ball_centers = self.find_centers_in_contour_list(
             sorted_contours[1:11] if len(sorted_contours) > 1 else [])
 
-        # Remove balls close to the LED centers
-        if self.LED_centers:
-            LED_center = np.mean(np.array(self.LED_centers), axis=0)
-            LED_radius = np.mean(
-                [np.linalg.norm(np.array(center) - LED_center) for center in self.LED_centers])
+        # Remove balls close to the green centers
+        if self.green_center:
+            green_center = np.mean(np.array(self.green_center), axis=0)
+            green_radius = np.mean(
+                [np.linalg.norm(np.array(center) - green_center) for center in self.green_center])
             self.white_ball_centers = [center for center in self.white_ball_centers if np.linalg.norm(
-                np.array(center) - LED_center) > self.robot_scale_factor * LED_radius]
+                np.array(center) - green_center) > self.robot_scale_factor * green_radius]
 
         # Sort white balls by their distance to the robot center
         if self.robot_center is not None:
@@ -440,11 +443,13 @@ class Camera2:
     def find_blobs(self, color, num_points):
         target_frame = self.morphed_frame if self.morph else self.frame
         contours, _ = self.mask_and_find_contours(
-            target_frame, color=color, close=True)
+            target_frame, color=color, close=True, open=True, erode=False)
         sorted_contours = self.sort_contours_by_length(
             contours, min_length=10, reverse=True)
+
         if not sorted_contours:
             return False
+            # set the centers to Non
         centers = self.find_centers_in_contour_list(
             sorted_contours[:num_points])
         if color == 'orange':
@@ -455,24 +460,25 @@ class Camera2:
                 self.orange_blob_centers, self.blocked_orange_blobs = self.filter_blocked_balls(
                     self.orange_blob_centers)
 
-        elif color == 'blue_LED':
-            self.blue_LED_centers = centers
-        elif color == 'LED':
-            self.LED_centers = centers
+        elif color == 'blue':
+            self.blue_centers = centers
+        elif color == 'green':
+            self.green_center = centers
         return bool(centers)
 
     def find_robot(self):
-        if self.LED_centers:
-            self.robot_center = np.mean(self.LED_centers, axis=0)
+        if self.green_center and self.blue_centers:
+            self.robot_center = np.mean(self.green_center, axis=0)
 
-        if len(self.LED_centers) >= 4 and self.blue_LED_centers:
-            led_centers_array = np.array(self.LED_centers)
-            blue_led_center = np.array(self.blue_LED_centers[0])
+        if len(self.green_center) >= 4 and self.blue_centers:
+            green_center_array = np.array(self.green_center)
+            blue_center = np.array(self.blue_centers[0])
 
             sorted_indices = np.argsort(np.linalg.norm(
-                led_centers_array - blue_led_center, axis=1))
-            sorted_led_centers = led_centers_array[sorted_indices]
-            b1, b2, f1, f2 = sorted_led_centers[0], sorted_led_centers[1], sorted_led_centers[2], sorted_led_centers[3]
+                green_center_array - blue_center, axis=1))
+            sorted_green_center = green_center_array[sorted_indices]
+            b1, b2, f1, f2 = sorted_green_center[0], sorted_green_center[
+                1], sorted_green_center[2], sorted_green_center[3]
 
             back_center = (b1 + b2) / 2
             front_center = (f1 + f2) / 2
@@ -482,8 +488,8 @@ class Camera2:
             self.robot_direction = direction / np.linalg.norm(direction)
 
             # Debug statements
-            # print(f"LED centers: {self.LED_centers}")
-            # print(f"Sorted LED centers: {sorted_led_centers}")
+            # print(f"green centers: {self.green_center}")
+            # print(f"Sorted green centers: {sorted_green_center}")
             # print(f"Back center: {back_center}")
             # print(f"Front center: {front_center}")
             # print(f"Direction (unnormalized): {direction}")
@@ -493,10 +499,10 @@ class Camera2:
 
     def process_frame(self):
         try:
-            # self.preprocess_frame()
+            self.preprocess_frame()
             if self.morph:
                 contours, _ = self.mask_and_find_contours(
-                    self.frame, color='red', close=True, open=False, erode=False)
+                    self.frame, color='red', close=True, open=True, erode=False)
                 sorted_contours = self.sort_contours_by_length(
                     contours, min_length=50, reverse=True)
                 if len(sorted_contours) > 2:
@@ -514,13 +520,13 @@ class Camera2:
                             self.fit_rotated_cross_to_contour(
                                 transformed_contour)
 
-                        self.find_blobs('LED', num_points=4)
+                        self.find_blobs('green', num_points=4)
                         self.find_blobs('orange', num_points=1)
-                        self.find_blobs('blue_LED', num_points=1)
+                        self.find_blobs('blue', num_points=1)
                         self.find_robot()
                         self.find_white_blobs()
-
                         self.draw_detected_features()
+
             elif self.waypoint_distance:
                 self.morphed_frame = self.frame.copy()
                 contours, _ = self.mask_and_find_contours(
@@ -530,9 +536,9 @@ class Camera2:
                 if len(sorted_contours) > 2:
                     cross_contour = sorted_contours[2]
                     self.fit_rotated_cross_to_contour(cross_contour)
-                self.find_blobs('LED', num_points=4)
+                self.find_blobs('green', num_points=4)
                 self.find_blobs('orange', num_points=1)
-                self.find_blobs('blue_LED', num_points=1)
+                self.find_blobs('blue', num_points=1)
                 self.find_robot()
                 self.find_white_blobs()
                 self.draw_detected_features()
@@ -545,11 +551,11 @@ class Camera2:
                 if len(sorted_contours) > 2:
                     cross_contour = sorted_contours[2]
                     self.fit_rotated_cross_to_contour(cross_contour)
-                self.find_blobs('LED', num_points=4)
-                #self.find_blobs('orange', num_points=1)
-                self.find_blobs('blue_LED', num_points=1)
+                self.find_blobs('green', num_points=4)
+                # self.find_blobs('orange', num_points=1)
+                self.find_blobs('blue', num_points=1)
                 self.find_robot()
-                #self.find_white_blobs()
+                # self.find_white_blobs()
                 self.draw_detected_features()
         except Exception as e:
             print(f"Error processing frame: {e}")
@@ -575,9 +581,9 @@ class Camera2:
                     cv2.line(self.morphed_frame, tuple(
                         map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
 
-        # Draw blue LED centers
-        if self.blue_LED_centers:
-            for center in self.blue_LED_centers:
+        # Draw blue green centers
+        if self.blue_centers:
+            for center in self.blue_centers:
                 cv2.circle(self.morphed_frame, tuple(
                     map(int, center)), 8, (255, 0, 0), -1)
 
@@ -608,8 +614,8 @@ class Camera2:
             cv2.circle(self.morphed_frame, tuple(
                 map(int, self.orange_blob_centers[0])), 20, (0, 140, 255), 3)
 
-        if self.LED_centers:
-            for center in self.LED_centers:
+        if self.green_center:
+            for center in self.green_center:
                 cv2.circle(self.morphed_frame, tuple(
                     map(int, center)), 8, (255, 255, 255), -1)
 
@@ -653,48 +659,49 @@ class Camera2:
 
     def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None):
         self.morph = morph
-        cap = cv2.VideoCapture(video_source, cv2.CAP_V4L2)
-        if not cap.isOpened():
-            print(f"Error: Unable to open video source {video_source}")
-            return
+
+        if self.cap is None:
+            self.cap = cv2.VideoCapture(video_source)
+            if not self.cap.isOpened():
+                print(f"Error: Unable to open video source {video_source}")
+                return
+            self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
+            self.cap.set(cv2.CAP_PROP_FPS, 30)
 
         first_valid_points_obtained = False
         out = None  # Initialize video writer as None
 
         while True:
-            # sleep(0.5)
-            ret, self.frame = cap.read()
+            ret, self.frame = self.cap.read()
             if not ret:
                 print("Error: Unable to read frame from video source")
                 break
-            # if resize:
-            #    self.frame = self.resize_with_aspect_ratio(
-            #        self.frame, width=resize)
 
             if self.morph and not first_valid_points_obtained:
                 for _ in range(10):
-                    ret, self.frame = cap.read()
-
-                # if resize:
-                #    self.frame = self.resize_with_aspect_ratio(
-                #        self.frame, width=resize)
+                    ret, self.frame = self.cap.read()
+                    if not ret:
+                        print("Error: Unable to read frame from video source")
+                        break
 
                 self.process_frame()
-                print("First set of valid points obtained.")
-                first_valid_points_obtained = True
-                for pt in self.last_valid_points:
-                    pt = tuple(map(int, pt))
-                    cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
-                cv2.imshow('Initial Frame', self.frame)
-                key = cv2.waitKey(0) & 0xFF
-                if key == ord('r'):
-                    first_valid_points_obtained = False
-                    continue
-                elif key == ord('a'):
-                    cv2.destroyWindow('Initial Frame')
-                    continue
-                elif key == ord('q'):
-                    break
+
+                # check if last_valid_points is not None
+                if self.last_valid_points is not None:
+                    for pt in self.last_valid_points:
+                        pt = tuple(map(int, pt))
+                        cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
+                    cv2.imshow('Initial Frame', self.frame)
+                    key = cv2.waitKey(0) & 0xFF
+                    if key == ord('r'):
+                        first_valid_points_obtained = False
+                        continue
+                    elif key == ord('a'):
+                        cv2.destroyWindow('Initial Frame')
+                        first_valid_points_obtained = True
+                        continue
+                    elif key == ord('q'):
+                        break
             else:
                 self.process_frame()
                 cv2.imshow('Processed Frame', self.morphed_frame)
@@ -730,7 +737,7 @@ class Camera2:
                 except:
                     pass
 
-        cap.release()
+        self.cap.release()
         if out:
             out.release()
         cv2.destroyAllWindows()
@@ -739,29 +746,12 @@ class Camera2:
         def nothing(x):
             pass
 
-        cap = cv2.VideoCapture(video_path, cv2.CAP_V4L2)
+        self.cap = cv2.VideoCapture(video_path)
+        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
+        self.cap.set(cv2.CAP_PROP_FPS, 30)
 
-        # Set the codec to MJPEG for high quality
-        # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
-
-        # Set the resolution to 1920x1080
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-        # Set the frame rate to 30 FPS
-        cap.set(cv2.CAP_PROP_FPS, 30)
-
-        if not cap.isOpened():
+        if not self.cap.isOpened():
             print(f"Error: Unable to open video source {video_path}")
-            return
-
-        for _ in range(10):
-            ret, self.frame = cap.read()
-        # self.frame = self.resize_with_aspect_ratio(self.frame, width=640)
-        self.preprocess_frame()
-        if not ret:
-            print("Error: Unable to read frame from video source")
             return
 
         cv2.namedWindow('Calibration', cv2.WINDOW_NORMAL)
@@ -783,6 +773,12 @@ class Camera2:
                            hsv_upper[2], 255, nothing)
 
         while True:
+            ret, self.frame = self.cap.read()
+            if not ret:
+                print("Error: Unable to read frame from video source")
+                break
+            self.preprocess_frame()
+
             h_lower = cv2.getTrackbarPos('H Lower', 'Calibration')
             s_lower = cv2.getTrackbarPos('S Lower', 'Calibration')
             v_lower = cv2.getTrackbarPos('V Lower', 'Calibration')
@@ -794,6 +790,21 @@ class Camera2:
             hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
             hsv = self.equalize_histogram(hsv)
             mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+
+            # eliptical kernal for morphological operations
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+            # opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            # closing = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+
+            # getContours(mask, frame)
+            contours, _ = cv2.findContours(
+                mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+            # draw contours on the mask
+            cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
+
             cv2.imshow(f'Original Frame {color}', self.frame)
             cv2.imshow(f'Binary Mask for {color}', mask)
 
@@ -803,8 +814,6 @@ class Camera2:
                 break
             elif key == ord('q'):
                 break
-
-        cap.release()
         cv2.destroyAllWindows()
 
 
@@ -816,12 +825,13 @@ def camera_process(queue, video_path):
 
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = "/dev/video8"
+    video_path = "/home/madsr2d2/sem4/CDIO_1/CDIO_gruppe_7/cam_module/testMovie.mp4"
+    # video_path = "/dev/video8"
     # video_path = "/home/madsr2d2/Downloads/film4.mp4"
     # video_path = '/dev/video8'
-    # camera.calibrate_color('LED', video_path)
-    camera.calibrate_color('blue_LED', video_path)
-    # camera.calibrate_color('red', video_path)
+    # camera.calibrate_color('green', video_path)
+    # camera.calibrate_color('blue', video_path)
+    camera.calibrate_color('red', video_path)
     # camera.calibrate_color('orange', video_path)
     # camera.calibrate_color('white', video_path)
     camera.start_video_stream(video_path, morph=True,
