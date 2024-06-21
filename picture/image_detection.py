@@ -154,7 +154,7 @@ def detect_ball_colors(image, stored_circles):
                 center = (int(rect[0][0]), int(rect[0][1]))
                 size = (int(rect[1][0] // 2) + 10, int(rect[1][1] // 2) + 10)
                 angle = rect[2] + 45
-                while angle >= 90:
+                while angle >= 45:
                     angle = angle - 90
                 
                 # Create a rotation matrix

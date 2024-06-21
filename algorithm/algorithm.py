@@ -85,7 +85,6 @@ def write_obstacle_val(ball, cross):
         tuple(cross.arms[1].start): 10,  # Left point 
         tuple(cross.arms[1].end): 12   # Right point
     }
-
     # Check proximity to track corners
     for point, value in TrackCorners.items():
         if Distance((ball.x, ball.y), point) < 100:  # Arbitrary distance to be considered "close"
@@ -200,7 +199,7 @@ def get_closest_quadrants(first_quadrant):
 
 def calc_obstacle_waypoints(ball, car, cross):
     cross_length = 100
-    waypoint_distance = 350 # Distance from ball location to put waypoint
+    waypoint_distance = 200 # Distance from ball location to put waypoint
     x,y = 1229, 900
 
     if ball.obstacle == 0:
@@ -306,8 +305,6 @@ def calc_obstacle_waypoints(ball, car, cross):
     if len(ball.waypoints) == 0:
         waypoint = Waypoint(ball.x, ball.y)
         while is_crossed_by_line(car, waypoint, cross):
-            print("Hello", ball)
-            time.sleep(3)
             add_additional_waypoint(ball, car, cross, (waypoint_distance+100))
             waypoint = ball.waypoints[-1]
     else:
@@ -356,17 +353,30 @@ def Distance(p1, p2):
 def Distance_objects(car, ball):
     return np.sqrt((car.x - ball.x)**2 + (car.y - ball.y)**2)
 
+
+def messi():
+    print("ads")
+    ball = Ball(1220, 450, 8)
+
+
+
 # Function to sort the positions of the balls based on their distance from the Robot 
 # This function is based on the key function lambda, where the ist will be sorted in descending order
 
 def SortByDistance(car, white_balls, orange_balls, cross):
     SortedList = sorted(white_balls, key=lambda ball: Distance_objects(car, ball))
-    SortedList.append(orange_balls)
-    print(len(SortedList))
-   
+    SortedList.append(orange_balls[0])
+    #DEBUG
+    # SortedList = SortedList[2:]
+    # print(len(SortedList))
+
     # Create a ball object for the target position (first in the sorted list)
     ball = SortedList[0]
-    
+
+    if len(SortedList) == 0:
+        print("No more balls")
+        messi()
+
     # Set an obstacle number
     write_obstacle_val(ball, cross)
     # Calculate waypoints (even if obstacle == 0, if the last ball is on the opposite side of the cross)
