@@ -174,7 +174,7 @@ class Camera2:
         box = np.array(box, dtype=np.float32)
         center = np.mean(box, axis=0)
         scagreen_box = center + 2 * (box - center)
-        scagreen_box = np.array(scagreen_box, dtype=np.int0)
+        scagreen_box = np.array(scagreen_box, dtype=np.intp)
         self.cross_lines = [(tuple(scagreen_box[0]), tuple(
             scagreen_box[2])), (tuple(scagreen_box[1]), tuple(scagreen_box[3]))]
 
@@ -733,9 +733,11 @@ class Camera2:
         self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
 
     def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None):
+        print("Starting video stream...")
         self.morph = morph
 
         if self.cap is None:
+            print(f"Opening video source {video_source}")
             self.cap = cv2.VideoCapture(video_source, cv2.CAP_V4L2)
             if not self.cap.isOpened():
                 print(f"Error: Unable to open video source {video_source}")
@@ -758,13 +760,16 @@ class Camera2:
                     self.frame = self.resize_frame(self.frame, width=resize)
 
                 if self.morph and not first_valid_points_obtained:
-                    # Capture the first frame
+                    print("Obtaining initial points for morphing...")
+
                     ret, self.frame = self.cap.read()
                     if not ret:
                         print("Error: Unable to read frame from video source")
                         break
 
+                    print('processing initial frame')
                     self.process_frame()
+                    print('processed initial frame')
 
                     # check if last_valid_points is not None
                     if self.last_valid_points is not None:
@@ -822,6 +827,9 @@ class Camera2:
                 print("Keyboard interrupt detected.")
                 self.cap.release()
                 cv2.destroyAllWindows()
+                break
+            except Exception as e:
+                print(f"Error in start_video_stream while loop: {e}")
                 break
 
         self.cap.release()
@@ -911,7 +919,6 @@ class Camera2:
                     mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
                 cv2.drawContours(self.frame, contours, -1, (0, 255, 0), 3)
-
                 cv2.imshow(f'Original Frame {color}', self.frame)
                 cv2.imshow(f'Binary Mask{color}', mask)
 
@@ -926,6 +933,7 @@ class Camera2:
                     break
 
             cv2.destroyAllWindows()
+        print('exiting calibration')
         # self.cap.release()
 
 
@@ -943,7 +951,7 @@ def camera_process(queue, video_path):
 # Example usage:
 if __name__ == "__main__":
     camera = Camera2()
-    video_path = '/dev/video8'
+    video_path = '/dev/video9'
     colors = ['green', 'red', 'orange', 'white']
     camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, morph=True,
