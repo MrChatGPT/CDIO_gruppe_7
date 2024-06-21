@@ -32,19 +32,32 @@ class ControlLogic:
         #logic for waypoint:
         waypoint = data.get('vector_to_waypoint_robot_frame')
         distance_to_waypoint = data.get('distance_to_closest_waypoint')
+        angle_errw = data.get('angle_to_closest_waypoint')
+        
         if waypoint is not None:
             print(f"Moving to waypoint: {waypoint}")
             print(f"Distance to waypoint: {distance_to_waypoint}")
 
-            # Use the PID controller to get the speed
-            speed = self.pid(-distance_to_waypoint)
-            print(f"Speed: {speed}")
+            # # Use the PID controller to get the speed
+            # speed = self.pid(-distance_to_waypoint)
+            # print(f"Speed: {speed}")
 
-            # Scale the normalized vector to the speed
-            y = waypoint[0] * speed
-            x = waypoint[1] * speed
-            rotation = 0
-            print(f"Control data: x={x}, y={y}, rotation={rotation}")
+            # # Scale the normalized vector to the speed
+            # y = waypoint[0] * speed
+            # x = waypoint[1] * speed
+            # rotation = 0
+            # print(f"Control data: x={x}, y={y}, rotation={rotation}")
+            
+            if angle_errw > 5:
+                self.controller.publish_control_data(0,0,0.11)
+                return
+            elif angle_errw < -5:
+                self.controller.publish_control_data(0,0,-0.11)
+                return
+            if abs(angle_errw) < 5:
+                self.controller.publish_control_data(0,0.12,0)
+                return
+            
             return
 
         #         self.controller.publish_control_data(x, y, rotation)
