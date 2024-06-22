@@ -7,55 +7,80 @@ import queue
 
 
 class Camera2:
-    def __init__(self):
+    def __init__(self, control_flags):
         self.hsv_ranges = {
-            'red': (np.array([0, 128, 117]), np.array([180, 255, 255])),
+            'red': (np.array([0, 96, 117]), np.array([180, 255, 255])),
             'white': (np.array([0, 0, 251]), np.array([180, 38, 255])),
-            'orange': (np.array([13, 143, 255]), np.array([54, 255, 255])),
+            'orange': (np.array([13, 61, 255]), np.array([54, 255, 255])),
             'blue': (np.array([90, 105, 108]), np.array([108, 178, 255])),
             'green': (np.array([45, 66, 198]), np.array([150, 255, 255]))
         }
-        # HSV-Ranges:  {'red': (array([  0, 158, 232]), array([ 14, 255, 255])), 'white': (array([  0,   0, 251]), array([ 52,  76, 255])), 'orange': (array([ 13, 186, 184]), array([ 54, 255, 255])), 'blue': (array([ 90, 105, 108]), array([108, 178, 255])), 'green': (array([105,  18, 233]), array([165, 255, 255]))}
+
+        # Camera properties and frame data
         self.cap = None
-        self.morph = True
-        self.orange_blob_detected = False
         self.morphed_frame = None
         self.frame = None
-        self.cross_lines = None
+
+        # White ball properties
         self.white_ball_centers = []
-        self.blocked_ball_centers = []
+        self.blocked_white_centers = []
+        self.angle_to_closest_white_ball = None
+        self.distance_to_closest_white_ball = None
+        self.angle_to_closest_white_waypoint = None
+        self.distance_to_closest_white_waypoint = None
+        self.waypoint_for_closest_white_ball = None
+        self.vector_to_white_ball_robot_frame = []
+        self.vector_to_white_waypoint_robot_frame = []
+
+        # Egg properties
         self.egg_center = None
         self.egg_size = 0
+        self.egg_area = 0
         self.egg_scale_factor = 1.5
-        self.robot_scale_factor = 1.5
-        self.orange_blob_centers = []
+
+        # Orange blob properties
         self.orange_blob_area = 0
-        self.blocked_orange_blobs = []
-        self.blue_centers = []
+        self.orange_blob_detected = False
+
+        self.orange_blob_centers = []
+        self.blocked_orange_centers = []
+        self.angle_to_closest_orange_ball = None
+        self.distance_to_closest_orange_ball = None
+        self.angle_to_closest_orange_waypoint = None
+        self.distance_to_closest_orange_waypoint = None
+        self.waypoint_for_closest_orange_ball = None
+        self.vector_to_orange_ball_robot_frame = []
+        self.vector_to_orange_waypoint_robot_frame = []
+
+        # Robot properties
+        self.robot_scale_factor = 1.5
         self.green_centers = []
+        self.robot_center = None
+        self.robot_radius = None
+        self.robot_direction = None
+        self.robot_critical_length = 50  # cm
+        self.robot_center_correction = [0, 0]
+        self.robot_center_angle_correction = 0  # degrees
+
+        # cross properties
         self.last_cross_angle = 0
+        self.cross_lines = None
+
+        # Arena properties
+        self.morph = True
         self.M = None
         self.last_valid_points = None
         self.morph_points = None
-        self.robot_center = None
-        self.robot_direction = None
-        self.angle_to_closest_ball = None
-        self.distance_to_closest_ball = None
-        self.angle_to_closest_waypoint = None
-        self.distance_to_closest_waypoint = None
         self.arena_dimensions = (166.8, 122)  # (width, height) in cm
-        self.waypoint_for_closest_white_ball = None
-        self.waypoint_for_closest_orange_ball = None
         self.waypoint_distance = 40  # distance from ball center to waypoint in cm
-        self.vector_to_ball_robot_frame = []
-        self.vector_to_waypoint_robot_frame = []
-        self.orange_ball_size = 0
-        self.robot_critical_length = 50  # cm
-        # x,y values for the center of the robot
-        self.robot_center_correction = [0, 0]
-        self.robot_center_angle_correction = 0  # degrees
-        self.corner_tolerance = 20  # percentage
-        self.update_ball_centers = True
+        self.corner_tolerance = 20  # percentage deviation tolerance for morph points
+
+        # Control flags
+        self.control_flags = control_flags if control_flags is not None else {
+            'update_orange_balls': True,
+            'update_white_balls': True,
+            'update_robot': True,
+            'update_arena': False}
 
     def get_data(self):
         """
@@ -63,23 +88,32 @@ class Camera2:
         This method can be customized to return any required class attributes.
         """
         return {
-            'vector_to_ball_robot_frame': self.vector_to_ball_robot_frame,
-            'vector_to_waypoint_robot_frame': self.vector_to_waypoint_robot_frame,
-            'orange_blob_detected': self.orange_blob_detected,
-            'robot_center': self.robot_center,
+            # White ball data
             'white_ball_centers': self.white_ball_centers,
-            'blocked_ball_centers': self.blocked_ball_centers,
-            'egg_center': self.egg_center,
-            'egg_size': self.egg_size,
-            'orange_blob_centers': self.orange_blob_centers,
-            'blocked_orange_blobs': self.blocked_orange_blobs,
-            'blue_centers': self.blue_centers,
-            'green_centers': self.green_centers,
-            'angle_to_closest_ball': self.angle_to_closest_ball,
-            'distance_to_closest_ball': self.distance_to_closest_ball,
-            'angle_to_closest_waypoint': self.angle_to_closest_waypoint,
-            'distance_to_closest_waypoint': self.distance_to_closest_waypoint,
+            'blocked_white_centers': self.blocked_white_centers,
+            'angle_to_closest_white_ball': self.angle_to_closest_white_ball,
+            'distance_to_closest_white_ball': self.distance_to_closest_white_ball,
+            'angle_to_closest_white_waypoint': self.angle_to_closest_white_waypoint,
+            'distance_to_closest_white_waypoint': self.distance_to_closest_white_waypoint,
             'waypoint_for_closest_white_ball': self.waypoint_for_closest_white_ball,
+            'vector_to_white_ball_robot_frame': self.vector_to_white_ball_robot_frame,
+            'vector_to_white_waypoint_robot_frame': self.vector_to_white_waypoint_robot_frame,
+
+            # Orange ball data
+            'orange_blob_detected': self.orange_blob_detected,
+            'orange_blob_centers': self.orange_blob_centers,
+            'blocked_orange_centers': self.blocked_orange_centers,
+            'angle_to_closest_orange_ball': self.angle_to_closest_orange_ball,
+            'distance_to_closest_orange_ball': self.distance_to_closest_orange_ball,
+            'angle_to_closest_orange_waypoint': self.angle_to_closest_orange_waypoint,
+            'distance_to_closest_orange_waypoint': self.distance_to_closest_orange_waypoint,
+            'waypoint_for_closest_orange_ball': self.waypoint_for_closest_orange_ball,
+            'vector_to_orange_ball_robot_frame': self.vector_to_orange_ball_robot_frame,
+            'vector_to_orange_waypoint_robot_frame': self.vector_to_orange_waypoint_robot_frame,
+
+            # Robot data
+            'robot_critical_length': self.robot_critical_length
+
         }
 
     def equalize_histogram(self, hsv_frame):
@@ -197,9 +231,6 @@ class Camera2:
         # Filter contours based on the minimum bounding box area
         return [contour for contour in sorted_contours if cv2.boundingRect(contour)[2] * cv2.boundingRect(contour)[3] >= min_area]
 
-# Example usage:
-# sorted_contours = self.sort_contours_by_bounding_box_area(contours, min_area=10, reverse=True)
-
     def find_centers_in_contour_list(self, contours):
         centers = []
         for contour in contours:
@@ -215,7 +246,7 @@ class Camera2:
 
             # Find contours in the target frame
             contours, _ = self.mask_and_find_contours(
-                target_frame, color='white', erode=True, open=False, close=True)
+                target_frame, color='white', erode=False, open=False, close=False)
 
             # Sort contours by length
             sorted_contours = self.sort_contours_by_bounding_box_area(
@@ -230,18 +261,10 @@ class Camera2:
             egg_contour = sorted_contours[0]
             self.egg_center = self.find_centers_in_contour_list([egg_contour])[
                 0]
-            self.egg_size = max(cv2.boundingRect(egg_contour)[2:4])
 
-            # Get white ball contours and their centers
-            contours, _ = self.mask_and_find_contours(
-                target_frame, color='white', erode=True, open=True)
-
-            sorted_contours = self.sort_contours_by_bounding_box_area(
-                contours, min_area=10, reverse=True)
-            if not sorted_contours:
-                print("No contours found.")
-                self.reset_ball_centers()
-                return False
+            # find egg area from min area rect
+            self.egg_area = cv2.minAreaRect(
+                egg_contour)[1][0] * cv2.minAreaRect(egg_contour)[1][1]
 
             self.white_ball_centers = self.find_centers_in_contour_list(
                 sorted_contours[1:11] if len(sorted_contours) > 1 else [])
@@ -265,24 +288,24 @@ class Camera2:
                 self.white_ball_centers = [center for center in self.white_ball_centers if np.linalg.norm(
                     np.array(center) - self.egg_center) > exclusion_radius]
 
-            # Initialize blocked_ball_centers list
-            self.blocked_ball_centers = []
+            # Initialize blocked_white_centers list
+            self.blocked_white_centers = []
 
             # Filter out blocked balls based on crossing lines
             if self.robot_center is not None and self.cross_lines:
-                self.white_ball_centers, self.blocked_ball_centers = self.filter_blocked_balls(
+                self.white_ball_centers, self.blocked_white_centers = self.filter_blocked_balls(
                     self.white_ball_centers)
 
             # Add unblocked orange balls to the front of the white_ball_centers list
-            if self.orange_blob_centers:
-                self.white_ball_centers = self.orange_blob_centers + self.white_ball_centers
+            # if self.orange_blob_centers:
+            #    self.white_ball_centers = self.orange_blob_centers + self.white_ball_centers
 
             # Process white balls to find a non-blocked waypoint
-            self.find_waypoint_for_closest_white_ball()
+            # self.find_waypoint_for_closest_white_ball()
 
             # Calculate the vectors to the closest ball and waypoint
-            self.calculate_vectors_to_targets(morph_frame_width=max(
-                self.morphed_frame.shape[0], self.morphed_frame.shape[1]))
+            # self.calculate_vectors_to_targets(morph_frame_width=max(
+            #     self.morphed_frame.shape[0], self.morphed_frame.shape[1]))
 
             return True
         except Exception as e:
@@ -291,10 +314,11 @@ class Camera2:
 
     def reset_ball_centers(self):
         self.white_ball_centers = []
-        self.blocked_ball_centers = []
+        self.blocked_white_centers = []
         self.egg_center = None
 
     def find_waypoint_for_closest_white_ball(self):
+        print('Finding waypoint for white ball')
         r = self.waypoint_distance * \
             max(self.morphed_frame.shape[0],
                 self.morphed_frame.shape[1]) / self.arena_dimensions[0]
@@ -307,32 +331,77 @@ class Camera2:
                 break
             else:
                 blocked_center = self.white_ball_centers.pop(0)
-                self.blocked_ball_centers.append(blocked_center)
+                self.blocked_white_centers.append(blocked_center)
         if not self.white_ball_centers:
             self.waypoint_for_closest_white_ball = None
 
+    def find_waypoint_for_closest_orange_ball(self):
+        r = self.waypoint_distance * \
+            max(self.morphed_frame.shape[0],
+                self.morphed_frame.shape[1]) / self.arena_dimensions[0]
+        print('Finding waypoint for orange ball')
+        while self.orange_blob_centers:
+            self.waypoint_for_closest_orange_ball = self.calculate_waypoint(
+                self.orange_blob_centers[0], r)
+            temp_orange_centers, temp_blocked_centers = self.filter_blocked_balls(
+                [self.orange_blob_centers[0]])
+            if not temp_blocked_centers:
+                break
+            else:
+                blocked_center = self.orange_blob_centers.pop(0)
+                self.blocked_orange_centers.append(blocked_center)
+        if not self.orange_blob_centers:
+            self.waypoint_for_closest_orange_ball = None
+
     def calculate_vectors_to_targets(self, morph_frame_width):
+
+        # Calculate the angle and distance to the closest white ball
         if self.robot_center is not None and self.white_ball_centers:
             nearest_ball_center = self.white_ball_centers[0]
-            self.angle_to_closest_ball = self.calculate_angle_to_ball(
+            self.angle_to_closest_white_ball = self.calculate_angle_to_ball(
                 self.robot_center, nearest_ball_center, self.robot_direction)
-            self.distance_to_closest_ball = np.linalg.norm(np.array(
+            self.distance_to_closest_white_ball = np.linalg.norm(np.array(
                 nearest_ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
-            self.vector_to_ball_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+            self.vector_to_white_ball_robot_frame = self.calculate_vector_to_target_in_robot_frame(
                 nearest_ball_center)
-            self.vector_to_ball_robot_frame = self.normalize_vector(
-                self.vector_to_ball_robot_frame)
+            self.vector_to_white_ball_robot_frame = self.normalize_vector(
+                self.vector_to_white_ball_robot_frame)
 
+        # Calculate the angle and distance to the closest orange ball
+        if self.robot_center is not None and self.orange_blob_centers:
+            nearest_orange_ball_center = self.orange_blob_centers[0]
+            self.angle_to_closest_orange_ball = self.calculate_angle_to_ball(
+                self.robot_center, nearest_orange_ball_center, self.robot_direction)
+            self.distance_to_closest_orange_ball = np.linalg.norm(np.array(
+                nearest_orange_ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+            self.vector_to_orange_ball_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+                nearest_orange_ball_center)
+            self.vector_to_orange_ball_robot_frame = self.normalize_vector(
+                self.vector_to_orange_ball_robot_frame)
+
+        # Calculate the angle and distance to the closest waypoint
         if self.robot_center is not None and self.waypoint_for_closest_white_ball:
             nearest_waypoint = self.waypoint_for_closest_white_ball[0]
-            self.angle_to_closest_waypoint = self.calculate_angle_to_ball(
+            self.angle_to_closest_white_waypoint = self.calculate_angle_to_ball(
                 self.robot_center, nearest_waypoint[0], self.robot_direction)
-            self.distance_to_closest_waypoint = np.linalg.norm(np.array(
+            self.distance_to_closest_white_waypoint = np.linalg.norm(np.array(
                 nearest_waypoint[0]) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
-            self.vector_to_waypoint_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+            self.vector_to_white_waypoint_robot_frame = self.calculate_vector_to_target_in_robot_frame(
                 nearest_waypoint[0])
-            self.vector_to_waypoint_robot_frame = self.normalize_vector(
-                self.vector_to_waypoint_robot_frame)
+            self.vector_to_white_waypoint_robot_frame = self.normalize_vector(
+                self.vector_to_white_waypoint_robot_frame)
+
+        # do the same for waypoint to orange ball
+        if self.robot_center is not None and self.waypoint_for_closest_orange_ball:
+            nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+            self.angle_to_closest_orange_waypoint = self.calculate_angle_to_ball(
+                self.robot_center, nearest_waypoint[0], self.robot_direction)
+            self.distance_to_closest_orange_waypoint = np.linalg.norm(np.array(
+                nearest_waypoint[0]) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+            self.vector_to_orange_waypoint_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+                nearest_waypoint[0])
+            self.vector_to_orange_waypoint_robot_frame = self.normalize_vector(
+                self.vector_to_orange_waypoint_robot_frame)
 
     def calculate_vector_to_target_in_robot_frame(self, target):
         vector_to_target_global = np.array(target) - self.robot_center
@@ -346,8 +415,8 @@ class Camera2:
 
     def filter_blocked_balls(self, ball_centers):
         robot_center = np.array(self.robot_center)
-        unblocked_ball_centers = []
-        blocked_ball_centers = []
+        unblocked_white_centers = []
+        blocked_white_centers = []
 
         for center in ball_centers:
             center = np.array(center)
@@ -356,13 +425,13 @@ class Camera2:
                 line_start = np.array(line[0])
                 line_end = np.array(line[1])
                 if self.intersect_lines(robot_center, center, line_start, line_end):
-                    blocked_ball_centers.append(tuple(center))
+                    blocked_white_centers.append(tuple(center))
                     blocked = True
                     break
             if not blocked:
-                unblocked_ball_centers.append(tuple(center))
+                unblocked_white_centers.append(tuple(center))
 
-        return unblocked_ball_centers, blocked_ball_centers
+        return unblocked_white_centers, blocked_white_centers
 
     def intersect_lines(self, p1, p2, q1, q2):
         def orientation(p, q, r):
@@ -396,6 +465,7 @@ class Camera2:
         return np.degrees(angle)
 
     def calculate_waypoint(self, ball_center, r):
+        print(f"Calculating waypoint for ball at {ball_center}")
         if not ball_center or self.robot_center is None:
             return []
 
@@ -421,7 +491,7 @@ class Camera2:
             x, y = point
             return min(x, width - x, y, height - y)
 
-        def generate_candidate_waypoints(ball_center, radius, num_points=100):
+        def generate_candidate_waypoints(ball_center, radius, num_points=200):
             cx, cy = ball_center
             candidates = []
             for i in range(num_points):
@@ -461,47 +531,57 @@ class Camera2:
             best_waypoint = (int(best_waypoint[0]), int(best_waypoint[1]))
             waypoints.append((best_waypoint, ball_center))
 
+        print(f"Waypoint for ball at {ball_center}: {waypoints}")
         return waypoints
 
     def find_blobs(self, color, num_points):
         target_frame = self.morphed_frame if self.morph else self.frame
         contours, _ = self.mask_and_find_contours(
             target_frame, color=color, close=False, open=False, erode=False)
+
         sorted_contours = self.sort_contours_by_bounding_box_area(
-            contours, min_area=10, reverse=True)
+            contours, min_area=20, reverse=True)
 
         if not sorted_contours:
+            if color == 'orange':
+                self.orange_blob_detected = False
+                self.orange_blob_centers = []
+                self.blocked_orange_centers = []
+            elif color == 'green':
+                self.green_centers = []
             return False
-            # set the centers to Non
+
+        # Find the centers of the top num_points contours
         centers = self.find_centers_in_contour_list(
             sorted_contours[:num_points])
+
         if color == 'orange':
             self.orange_blob_detected = True
             self.orange_blob_centers = centers
             # Check if orange blob is blocked
             if self.robot_center is not None and self.cross_lines:
-                self.orange_blob_centers, self.blocked_orange_blobs = self.filter_blocked_balls(
+                self.orange_blob_centers, self.blocked_orange_centers = self.filter_blocked_balls(
                     self.orange_blob_centers)
 
             # get orange blob area from bounding rect
             if len(sorted_contours) > 0:
                 bounding_rect = cv2.boundingRect(sorted_contours[0])
                 self.orange_blob_area = bounding_rect[2] * bounding_rect[3]
+            else:
+                self.orange_blob_detected = False
 
-        elif color == 'blue':
-            self.blue_centers = centers
         elif color == 'green':
+            # Find the robot center and radious from the green centers
+            self.robot_center = np.mean(np.array(centers), axis=0)
+            self.robot_radius = np.mean(
+                [np.linalg.norm(np.array(center) - self.robot_center) for center in centers])
             self.green_centers = centers
+            self.find_robot_direction()
+
         return bool(centers)
 
-    def find_robot(self):
-        if self.green_centers:
-            self.robot_center = np.mean(np.array(self.green_centers), axis=0)
-
-            # Correct the robot center
-            self.robot_center = self.robot_center + self.robot_center_correction
-
-        if len(self.green_centers) >= 3:
+    def find_robot_direction(self):
+        if len(self.green_centers) == 3:
             green_centers_array = np.array(self.green_centers)
             back_center = green_centers_array[0]
             front_point_1 = green_centers_array[1]
@@ -509,9 +589,8 @@ class Camera2:
 
             front_center = (front_point_1 + front_point_2) / 2
 
-            # sort green cenmters af after length
-
             direction = front_center - back_center
+
             # Normalize the direction vector
             self.robot_direction = direction / np.linalg.norm(direction)
 
@@ -519,66 +598,8 @@ class Camera2:
             self.robot_direction = np.dot(
                 np.array([[np.cos(self.robot_center_angle_correction), -np.sin(self.robot_center_angle_correction)], [np.sin(self.robot_center_angle_correction), np.cos(self.robot_center_angle_correction)]]), self.robot_direction)
 
-            # Debug statements
-            # print(f"green centers: {self.green_centers}")
-            # print(f"Sorted green centers: {sorted_green_centers}")
-            # print(f"Back center: {back_center}")
-            # print(f"Front center: {front_center}")
-            # print(f"Direction (unnormalized): {direction}")
-            # print(f"Robot direction (normalized): {self.robot_direction}")
         else:
             self.robot_direction = None
-
-    def find_longest_child_contour(self, contours, hierarchy, depth=1):
-        """
-        Find the longest child contour starting from the specified depth.
-
-        :param contours: List of contours found by cv2.findContours.
-        :param hierarchy: Hierarchy returned by cv2.findContours.
-        :param depth: Depth level to start the search. Default is 1.
-        :return: The longest child contour starting from the specified depth.
-        """
-        if not contours or hierarchy is None:
-            return None
-
-        if len(hierarchy.shape) != 3 or hierarchy.shape[2] != 4:
-            print("Error: Invalid hierarchy shape.")
-            return None
-
-        hierarchy = hierarchy[0]  # Simplify the hierarchy reference
-
-        # Find the top contour (parent contour with no parent)
-        top_contour_idx = next(
-            (i for i, h in enumerate(hierarchy) if h[3] == -1), None)
-
-        if top_contour_idx is None:
-            return None
-
-        def find_longest_child(contour_idx):
-            max_length = 0
-            longest_child_contour = None
-            child_idx = hierarchy[contour_idx][2]
-
-            while child_idx != -1:
-                current_length = cv2.arcLength(contours[child_idx], True)
-                if current_length > max_length:
-                    max_length = current_length
-                    longest_child_contour = child_idx
-                child_idx = hierarchy[child_idx][0]
-
-            return longest_child_contour
-
-        current_contour_idx = top_contour_idx
-
-        for _ in range(depth):
-            if current_contour_idx is None:
-                return None
-            current_contour_idx = find_longest_child(current_contour_idx)
-
-        if current_contour_idx is None:
-            return None
-
-        return contours[current_contour_idx]
 
     def resize_frame(self, frame, width=None, height=None, inter=cv2.INTER_AREA):
         # initialize the dimensions of the frame to be resized and
@@ -615,23 +636,28 @@ class Camera2:
         try:
             self.preprocess_frame()
             if self.morph:
-                contours, hierarchy = self.mask_and_find_contours(
-                    self.frame, color='red', close=False, open=False, erode=False)
+                # if self.update_arena is True, the arena corners and cross are updated
 
-                sorted_contours = self.sort_contours_by_arch_length(
-                    contours, min_length=100, reverse=True)
+                # if self.update_arena:
+                if self.control_flags['update_arena']:
+                    print("Updating arena corners and cross.")
+                    contours, hierarchy = self.mask_and_find_contours(
+                        self.frame, color='red', close=False, open=False, erode=False)
 
-                if len(sorted_contours) > 2:
+                    sorted_contours = self.sort_contours_by_arch_length(
+                        contours, min_length=100, reverse=True)
 
-                    arena_contour, cross_contour = sorted_contours[1], sorted_contours[2]
+                    if len(sorted_contours) > 2:
 
-                    corners = self.find_sharpest_corners(arena_contour)
+                        arena_contour, cross_contour = sorted_contours[1], sorted_contours[2]
 
-                    if corners is not None and len(corners) == 4:
-                        corners = np.array([corner.ravel()
-                                            for corner in corners], dtype="float32")
+                        corners = self.find_sharpest_corners(arena_contour)
 
-                        if self.four_point_transform(self.frame, corners):
+                        if corners is not None and len(corners) == 4:
+                            corners = np.array([corner.ravel()
+                                                for corner in corners], dtype="float32")
+
+                            self.four_point_transform(self.frame, corners)
 
                             if cross_contour is not None:
                                 transformed_contour = cv2.perspectiveTransform(
@@ -639,14 +665,29 @@ class Camera2:
                                 self.fit_rotated_cross_to_contour(
                                     transformed_contour)
 
-                        else:
-                            print("Failed to find corners.")
+                    else:
+                        print("Failed to find corners.")
 
-                    self.find_blobs('green', num_points=3)
-                    self.find_blobs('orange', num_points=1)
-                    self.find_robot()
-                    if self.update_ball_centers:
+                else:
+                    self.four_point_transform(
+                        self.frame, self.last_valid_points)
+
+                if self.morphed_frame is not None:
+
+                    if self.control_flags['update_robot']:
+                        self.find_blobs('green', num_points=3)
+
+                    if self.control_flags['update_orange_balls']:
+                        self.find_blobs('orange', num_points=1)
+                        self.find_waypoint_for_closest_orange_ball()
+
+                    if self.control_flags['update_white_balls']:
                         self.find_white_blobs()
+                        self.find_waypoint_for_closest_white_ball()
+
+                    if self.control_flags['update_robot']:
+                        self.calculate_vectors_to_targets(
+                            morph_frame_width=max(self.morphed_frame.shape[0], self.morphed_frame.shape[1]))
 
             self.draw_detected_features()
         except Exception as e:
@@ -660,29 +701,30 @@ class Camera2:
 
             if self.waypoint_for_closest_white_ball:
                 nearest_waypoint = self.waypoint_for_closest_white_ball[0]
+
                 waypoint_coord = tuple(map(int, nearest_waypoint[0]))
-                # ball_center = tuple(map(int, nearest_waypoint[1]))
+                ball_center = tuple(map(int, self.white_ball_centers[0]))
 
                 cv2.circle(self.morphed_frame, waypoint_coord,
                            5, (0, 255, 255), -1)
 
-                # cv2.line(self.morphed_frame, waypoint_coord,
-                #          ball_center, (0, 255, 255), 2)
+                cv2.line(self.morphed_frame, waypoint_coord,
+                         ball_center, (0, 255, 255), 2)
 
                 # if self.robot_center is not None:
-                #     cv2.line(self.morphed_frame, tuple(
-                #         map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
+                #    cv2.line(self.morphed_frame, tuple(
+                #        map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
 
-        # if self.blocked_ball_centers:
-        #    for center in self.blocked_ball_centers:
+        # if self.blocked_white_centers:
+        #    for center in self.blocked_white_centers:
         #        cv2.circle(self.morphed_frame, tuple(
         #            map(int, center)), 5, (0, 0, 0), -1)
-        # if self.blocked_orange_blobs:
-        #    for center in self.blocked_orange_blobs:
+        # if self.blocked_orange_centers:
+        #    for center in self.blocked_orange_centers:
         #        cv2.circle(self.morphed_frame, tuple(
         #            map(int, center)), 5, (0, 0, 0), -1)
         #    cv2.circle(self.morphed_frame, tuple(
-        #        map(int, self.blocked_orange_blobs[0])), 20, (0, 140, 255), 3)
+        #        map(int, self.blocked_orange_centers[0])), 20, (0, 140, 255), 3)
 #
         # if self.egg_center is not None:
         #    cv2.circle(self.morphed_frame, tuple(
@@ -693,13 +735,29 @@ class Camera2:
         #        cv2.line(self.morphed_frame, tuple(map(int, line[0])), tuple(
         #            map(int, line[1])), (0, 0, 255), 5)
 
-        # if self.orange_blob_centers:
-        #    for center in self.orange_blob_centers:
-        #        cv2.circle(self.morphed_frame, tuple(
-        #            map(int, center)), 5, (0, 255, 0), -1)
-        #    cv2.circle(self.morphed_frame, tuple(
-        #        map(int, self.orange_blob_centers[0])), 20, (0, 140, 255), 3)
-#
+        if self.orange_blob_centers:
+            # for center in self.orange_blob_centers:
+            #     cv2.circle(self.morphed_frame, tuple(
+            #         map(int, center)), 5, (0, 255, 0), -1)
+            cv2.circle(self.morphed_frame, tuple(
+                map(int, self.orange_blob_centers[0])), 5, (0, 255, 0), -1)
+
+            if self.waypoint_for_closest_orange_ball:
+                nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+
+                waypoint_coord = tuple(map(int, nearest_waypoint[0]))
+                ball_center = tuple(map(int, self.orange_blob_centers[0]))
+
+                cv2.circle(self.morphed_frame, waypoint_coord,
+                           5, (0, 255, 255), -1)
+
+                cv2.line(self.morphed_frame, waypoint_coord,
+                         ball_center, (0, 255, 255), 2)
+
+                if self.robot_center is not None:
+                    cv2.line(self.morphed_frame, tuple(
+                        map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
+
         # if self.green_centers:
         #    for center in self.green_centers:
         #        cv2.circle(self.morphed_frame, tuple(
@@ -710,29 +768,29 @@ class Camera2:
             cv2.circle(self.morphed_frame, center, 5, (255, 0, 0), -1)
             # if self.robot_direction is not None:
 #
-            #    # scale the robot direction vector by the critical length converted to pixels
-            #    scale_factor = self.robot_critical_length * \
-            #        max(self.morphed_frame.shape[0],
-            #            self.morphed_frame.shape[1]) / self.arena_dimensions[0]
-#
-            #    end_points = (center, tuple(
-            #        map(int, self.robot_center + scale_factor * self.robot_direction)))
-            #    cv2.arrowedLine(self.morphed_frame,
-            #                    end_points[0], end_points[1], (255, 0, 0), 2)
+            # scale the robot direction vector by the critical length converted to pixels
+            scale_factor = self.robot_critical_length * \
+                max(self.morphed_frame.shape[0],
+                    self.morphed_frame.shape[1]) / self.arena_dimensions[0]
+
+            end_points = (center, tuple(
+                map(int, self.robot_center + scale_factor * self.robot_direction)))
+            cv2.arrowedLine(self.morphed_frame,
+                            end_points[0], end_points[1], (255, 0, 0), 2)
 
         if self.last_valid_points is not None:
             for pt in self.last_valid_points:
                 pt = tuple(map(int, pt))
                 cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
 
-        # if self.robot_center is not None:
-        #    cv2.putText(self.morphed_frame, f"{self.angle_to_closest_waypoint:.1f} deg",
-        #                tuple(map(int, self.robot_center)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
-#
-        # if self.waypoint_for_closest_white_ball:
-        #    nearest_waypoint = self.waypoint_for_closest_white_ball[0]
-        #    cv2.putText(self.morphed_frame, f"{self.distance_to_closest_waypoint:.1f} cm",
-        #                tuple(map(int, nearest_waypoint[0])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+        if self.robot_center is not None:
+            cv2.putText(self.morphed_frame, f"{self.angle_to_closest_orange_ball:.1f} deg",
+                        tuple(map(int, self.robot_center)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+        if self.waypoint_for_closest_orange_ball:
+            nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+            cv2.putText(self.morphed_frame, f"{self.distance_to_closest_orange_waypoint:.1f} cm",
+                        tuple(map(int, nearest_waypoint[0])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
     def preprocess_frame(self):
         self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
@@ -748,11 +806,12 @@ class Camera2:
                 print(f"Error: Unable to open video source {video_source}")
                 return
             self.cap.set(cv2.CAP_PROP_FPS, 40)
-            # sleep to alow camera to adjust to lighting conditions
-            sleep(5)
+            sleep(5)  # Allow camera to adjust to lighting conditions
 
         first_valid_points_obtained = False
         out = None  # Initialize video writer as None
+
+        temp_flags = self.control_flags.copy()
 
         while True:
             try:
@@ -772,11 +831,23 @@ class Camera2:
                         print("Error: Unable to read frame from video source")
                         break
 
-                    print('processing initial frame')
-                    self.process_frame()
-                    print('processed initial frame')
+                    # Set all flags to True
 
-                    # check if last_valid_points is not None
+                    print('Attempting to set all flags to true')
+                    self.control_flags.update(
+                        {key: True for key in self.control_flags})
+                    print('All flags set to true')
+
+                    print('Processing initial frame')
+
+                    self.process_frame()
+
+                    print('Processed initial frame')
+                    # print initial ball centers
+                    print('White ball centers:', self.white_ball_centers)
+                    print('Orange ball centers:', self.orange_blob_centers)
+
+                    # Check if last_valid_points is not None
                     if self.last_valid_points is not None:
                         for pt in self.last_valid_points:
                             pt = tuple(map(int, pt))
@@ -789,6 +860,7 @@ class Camera2:
                         elif key == ord('a'):
                             cv2.destroyWindow('Initial Frame')
                             first_valid_points_obtained = True
+                            self.control_flags.update(temp_flags)
                             continue
                         elif key == ord('q'):
                             break
@@ -814,7 +886,7 @@ class Camera2:
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
 
-                    # pause the video stream if 'p' is pressed
+                    # Pause the video stream if 'p' is pressed
                     if cv2.waitKey(1) & 0xFF == ord('p'):
                         sleep(1)
                         cv2.waitKey(-1)
@@ -824,10 +896,9 @@ class Camera2:
                     data = self.get_data()
                     try:
                         queue.put_nowait(data)
-                    except:
-                        pass
+                    except Exception as e:
+                        print(f"Error putting data in queue: {e}")
 
-            # catch keyborad interrupt and release the video source
             except KeyboardInterrupt:
                 print("Keyboard interrupt detected.")
                 self.cap.release()
@@ -942,8 +1013,8 @@ class Camera2:
         # self.cap.release()
 
 
-def camera_process(queue, video_path):
-    camera = Camera2()
+def camera_process(queue, video_path, control_flags):
+    camera = Camera2(control_flags)
     colors = ['green', 'red', 'orange', 'white']
     camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, queue=queue,
@@ -952,7 +1023,14 @@ def camera_process(queue, video_path):
 
 # Example usage:
 if __name__ == "__main__":
-    camera = Camera2()
+    control_flags = {
+        'update_orange_balls': False,
+        'update_white_balls': False,
+        'update_robot': True,
+        'update_arena': False
+    }
+
+    camera = Camera2(control_flags=control_flags)
     video_path = '/dev/video9'
     colors = ['green', 'red', 'orange', 'white']
     camera.calibrate_color(colors, video_path, resize=False)
