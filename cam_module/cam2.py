@@ -597,9 +597,18 @@ class Camera2:
             # Normalize the direction vector
             self.robot_direction = direction / np.linalg.norm(direction)
 
+            # Convert angle correction from degrees to radians
+            angle_correction_radians = np.radians(self.robot_angle_coor)
+
             # Correct the robot direction
             self.robot_direction = np.dot(
-                np.array([[np.cos(self.robot_angle_coor), -np.sin(self.robot_angle_coor)], [np.sin(self.robot_angle_coor), np.cos(self.robot_angle_coor)]]), self.robot_direction)
+                np.array([[np.cos(angle_correction_radians), -np.sin(angle_correction_radians)],
+                          [np.sin(angle_correction_radians), np.cos(angle_correction_radians)]]),
+                self.robot_direction
+            )
+
+            # self.robot_direction = np.dot(
+            #     np.array([[np.cos(self.robot_angle_coor), -np.sin(self.robot_angle_coor)], [np.sin(self.robot_angle_coor), np.cos(self.robot_angle_coor)]]), self.robot_direction)
 
         else:
             self.robot_direction = None
