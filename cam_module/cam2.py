@@ -59,8 +59,8 @@ class Camera2:
         self.robot_radius = None
         self.robot_direction = None
         self.robot_critical_length = 50  # cm
-        self.robot_center_correction = [0, 0]
-        self.robot_center_angle_correction = 0  # degrees
+        self.robot_center_coor = [0, 0]
+        self.robot_angle_coor = 0  # degrees
 
         # cross properties
         self.last_cross_angle = 0
@@ -573,6 +573,9 @@ class Camera2:
         elif color == 'green':
             # Find the robot center and radious from the green centers
             self.robot_center = np.mean(np.array(centers), axis=0)
+            # add the robot center correction
+            self.robot_center = self.robot_center + \
+                np.array(self.robot_center_coor)
             self.robot_radius = np.mean(
                 [np.linalg.norm(np.array(center) - self.robot_center) for center in centers])
             self.green_centers = centers
@@ -596,7 +599,7 @@ class Camera2:
 
             # Correct the robot direction
             self.robot_direction = np.dot(
-                np.array([[np.cos(self.robot_center_angle_correction), -np.sin(self.robot_center_angle_correction)], [np.sin(self.robot_center_angle_correction), np.cos(self.robot_center_angle_correction)]]), self.robot_direction)
+                np.array([[np.cos(self.robot_angle_coor), -np.sin(self.robot_angle_coor)], [np.sin(self.robot_angle_coor), np.cos(self.robot_angle_coor)]]), self.robot_direction)
 
         else:
             self.robot_direction = None

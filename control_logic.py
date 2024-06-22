@@ -18,8 +18,6 @@ class ControlLogic:
 
     def run(self):
         while True:
-            # time this loop
-
             try:
                 data = self.queue.get_nowait()
                 if data:
