@@ -1,23 +1,28 @@
 from multiprocessing import Process, Queue
-from cam_module.cam2 import camera_process
+from queue import Empty
+from turtle import st
+from simple_pid import PID
 import time
-from queue import Empty  # Import Empty exception from the standard library queue module
-from simple_pid import PID  # Import PID from simple-pid
+from cam_module.cam2 import camera_process  # Adjust the import as needed
 from controller_module.controller import Controller
-from time import sleep
+import math
 
 
 class ControlLogic:
-    def __init__(self, queue, controller, pid):
+    def __init__(self, queue, controller, translation_pid, rotation_pid):
         self.queue = queue
         self.controller = controller
-        self.pid = pid
+        self.pid_translation = translation_pid
+        self.pid_rotation = rotation_pid
+        self.on_waypoint = False
 
     def run(self):
         while True:
+            # time this loop
+
             try:
                 data = self.queue.get_nowait()
-                if data is not None:
+                if data:
                     self.process_data(data)
                 else:
                     self.stop_robot()
@@ -26,72 +31,94 @@ class ControlLogic:
             except Exception as e:
                 print(f"Error occurred: {e}")
                 break
-            time.sleep(0.1)
 
     def process_data(self, data):
-        # logic for waypoint:
-        waypoint = data.get('vector_to_waypoint_robot_frame')
-        distance_to_waypoint = data.get('distance_to_closest_waypoint')
-        angle_errw = data.get('angle_to_closest_waypoint')
+        orange_waypoint = data.get('vector_to_orange_waypoint_robot_frame')
+        # print(f"vector to range waypoint: {orange_waypoint}")
+        # print(orange_waypoint)
+        distance_to_orange_waypoint = data.get(
+            'distance_to_closest_orange_waypoint')
+        # print(distance_to_orange_waypoint)
+        angle_err = data.get('angle_to_closest_orange_ball')
+        print(f"Angel error is {angle_err}")
 
-        if waypoint is not None and distance_to_waypoint > 5:
-            print(f"Moving to waypoint: {waypoint}")
-            print(f"Distance to waypoint: {distance_to_waypoint}")
+        if orange_waypoint is not None:
+            # do pid stuff
 
-            # Use the PID controller to get the speed
-            speed = self.pid(-distance_to_waypoint)
-            print(f"Speed: {speed}")
+            # Calculate the direction angle using the normalized orange_waypoint vector
+            direction_angle = math.degrees(math.atan2(
+                orange_waypoint[1], orange_waypoint[0]))
 
-            # Scale the normalized vector to the speed
-            y = waypoint[0] * speed
-            x = waypoint[1] * speed
-            rotation = 0
-            print(f"Control data: x={x}, y={y}, rotation={rotation}")
-            self.controller.publish_control_data(x, y, rotation)
+            # Determine if the robot is moving straight or diagonally
+            if 45 <= abs(direction_angle) <= 135:
+                speed_scale = 1  # Scale factor for diagonal movements
+            else:
+                speed_scale = 0.5  # Scale factor for straight movements
+
+            # Calculate the speed using the distance to the orange_waypoint
+            speed = self.pid_translation(
+                -distance_to_orange_waypoint) * speed_scale
+            y = orange_waypoint[0] * speed
+            x = orange_waypoint[1] * speed
+
+            # Calculate the rotation using the angle error
+            rotation = self.pid_rotation(angle_err)
+
+            if (distance_to_orange_waypoint > 1):
+                rotation = 0
+                print(f"x: {x}, y: {y}, rotation: {-rotation}")
+                self.controller.publish_control_data(x, y, -rotation)
+
+            elif abs(angle_err) > 1:
+                x = y = 0
+                self.controller.publish_control_data(x, y, -rotation)
+
+            else:
+                self.stop_robot()
+                print("Reached orange_waypoint")
+                self.on_waypoint = True
         else:
-            print("No waypoint")
-            self.stop_robot()
+            print("No orange_waypoint")
+            # self.stop_robot()
 
     def stop_robot(self):
-        # Stop the robot if no waypoint
-        self.controller.publish_control_data(0, 0, 0, 0, 0)
+        self.controller.publish_control_data(0, 0, 0)
 
 
 if __name__ == "__main__":
-    queue = Queue(maxsize=10)  # Set a reasonable max size for the queue
-    video_path = "/home/madsr2d2/sem4/CDIO/CDIO_gruppe_7/camera2/film_2.mp4"
+    queue = Queue(maxsize=10)
     video_path = "/dev/video9"
-    # Initialize the Controller directly, which includes the MQTT client initialization
+
     broker_url = '192.168.1.101'
     broker_port = 1883
     topic = "robot/control"
     controller = Controller(broker_url, broker_port, topic)
 
-    # Initialize the PID controller
+    translation_pid = PID(Kp=0.03, Ki=0.00, Kd=0, setpoint=0)
+    rotation_pid = PID(Kp=0.01, Ki=0.025, Kd=0.00, setpoint=0)
 
-    translation_pid = PID(Kp=0.001, Ki=0.0, Kd=0.0000, setpoint=0)
-    rotation_pid = PID(Kp=0.001, Ki=0.0, Kd=0.00, setpoint=0)
+    translation_pid.output_limits = (0.25, 1)
+    rotation_pid.output_limits = (-0.3, 0.3)
 
-    # Limit the PID output to the range of 0 to 1
-    translation_pid.output_limits = (0.15, 0.3)
-    rotation_pid.output_limits = (-0.2, 0.2)
+    control_flags = {
+        'update_orange_balls': False,
+        'update_white_balls': False,
+        'update_robot': True,
+        'update_arena': False
+    }
 
-    # Create an instance of the ControlLogic class
-    control_logic = ControlLogic(queue, controller, translation_pid)
+    control_logic = ControlLogic(
+        queue, controller, translation_pid, rotation_pid)
 
-    # Start the camera process
-    camera_proc = Process(target=camera_process, args=(queue, video_path))
+    camera_proc = Process(target=camera_process, args=(
+        queue, video_path, control_flags))
     camera_proc.start()
 
-    # Run the control logic
     try:
         control_logic.run()
     except KeyboardInterrupt:
         camera_proc.terminate()
         camera_proc.join()
-        exit(0)
     finally:
-        # Ensure the camera process is terminated when the control logic is done
         camera_proc.terminate()
         camera_proc.join()
-        exit(0)
