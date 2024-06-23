@@ -106,14 +106,6 @@ class ControlLogic:
 
                     self.on_waypoint = True
 
-            elif abs(angle_err_to_ball) > self.angle_tolerance:
-                rotation = -self.pid_rotation(angle_err_to_ball)
-
-                # set x and y to 0
-                x = y = 0
-
-                self.controller.publish_control_data(x, y, rotation)
-
             elif distance_to_ball - robot_critical_length > self.distance_tolerance:
                 # scale pid constants down for the last part of the movement by 0.5
                 self.pid_translation.Kp = self.pid_translation.Kp * self.pid_scaling_factor
@@ -144,6 +136,13 @@ class ControlLogic:
                 rotation = 0
                 self.controller.publish_control_data(x, y, rotation)
 
+            elif abs(angle_err_to_ball) > self.angle_tolerance:
+                rotation = -self.pid_rotation(angle_err_to_ball)
+
+                # set x and y to 0
+                x = y = 0
+
+                self.controller.publish_control_data(x, y, rotation)
             else:
                 # reset pid constants
                 self.pid_translation.Kp = self.pid_translation.Kp / self.pid_scaling_factor
@@ -161,7 +160,7 @@ class ControlLogic:
 
                 print('Uddating arena, robot and balls')
                 print('control flags:', self.control_flags)
-                time.sleep(2)
+                time.sleep(5)
                 self.on_waypoint = False
 
         except Exception as e:
@@ -186,7 +185,7 @@ if __name__ == "__main__":
     topic = "robot/control"
     controller = Controller(broker_url, broker_port, topic)
 
-    translation_pid = PID(Kp=0.05, Ki=0.0000, Kd=0.001, setpoint=0)
+    translation_pid = PID(Kp=0.05, Ki=0.000, Kd=0.001, setpoint=0)
     rotation_pid = PID(Kp=0.001, Ki=0.005, Kd=0.005, setpoint=0)
 
     translation_pid.output_limits = (0.25, 1)

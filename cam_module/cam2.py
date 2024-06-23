@@ -141,7 +141,47 @@ class Camera2:
             mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         return contours, hierarchy
 
-    def find_sharpest_corners(self, contour, num_corners=4, epsilon_factor=0.02):
+    def find_sharpest_corners(self, contour, num_corners=4):
+        try:
+            # Create a blank mask with the same size as the frame
+            mask = np.zeros_like(self.frame, dtype=np.uint8)
+
+            # Draw the contour on the mask
+            cv2.drawContours(mask, [contour], -1,
+                             (255, 255, 255), thickness=cv2.FILLED)
+
+            # Convert the mask to a single channel (grayscale)
+            if len(mask.shape) > 2:
+                mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+
+            # Use cv2.goodFeaturesToTrack to find the sharpest corners
+            corners = cv2.goodFeaturesToTrack(
+                mask,
+                maxCorners=num_corners,
+                qualityLevel=0.01,
+                minDistance=10
+            )
+
+            if corners is not None:
+                # Refine corner points to sub-pixel accuracy
+                refined_corners = cv2.cornerSubPix(
+                    mask,
+                    corners,
+                    (5, 5),
+                    (-1, -1),
+                    criteria=(cv2.TERM_CRITERIA_EPS +
+                              cv2.TERM_CRITERIA_MAX_ITER, 30, 0.01)
+                )
+
+                return refined_corners.reshape(-1, 2).astype(int)
+            else:
+                print("No corners found")
+                return None
+        except Exception as e:
+            print(f"Error finding corners: {e}")
+            return None
+
+    def find_sharpest_corners_2(self, contour, num_corners=4, epsilon_factor=0.02):
         try:
             epsilon = epsilon_factor * cv2.arcLength(contour, True)
             approx_corners = cv2.approxPolyDP(contour, epsilon, True)
@@ -314,17 +354,6 @@ class Camera2:
             if self.robot_center is not None and self.cross_lines:
                 self.white_ball_centers, self.blocked_white_centers = self.filter_blocked_balls(
                     self.white_ball_centers)
-
-            # Add unblocked orange balls to the front of the white_ball_centers list
-            # if self.orange_blob_centers:
-            #    self.white_ball_centers = self.orange_blob_centers + self.white_ball_centers
-
-            # Process white balls to find a non-blocked waypoint
-            # self.find_waypoint_for_closest_white_ball()
-
-            # Calculate the vectors to the closest ball and waypoint
-            # self.calculate_vectors_to_targets(morph_frame_width=max(
-            #     self.morphed_frame.shape[0], self.morphed_frame.shape[1]))
 
             return True
         except Exception as e:
@@ -682,13 +711,13 @@ class Camera2:
                         self.frame, color='red', close=False, open=False, erode=False)
 
                     sorted_contours = self.sort_contours_by_arch_length(
-                        contours, min_length=100, reverse=True)
+                        contours, min_length=50, reverse=True)
 
                     if len(sorted_contours) > 2:
 
                         arena_contour, cross_contour = sorted_contours[1], sorted_contours[2]
 
-                        corners = self.find_sharpest_corners(arena_contour)
+                        corners = self.find_sharpest_corners_2(arena_contour)
 
                         if corners is not None and len(corners) == 4:
                             corners = np.array([corner.ravel()
@@ -716,15 +745,12 @@ class Camera2:
                             print("Finding blue centers.")
                             self.find_blobs('blue', num_points=4)
                             print(f'Blue centers: {self.blue_centers}')
-                        except Exception as e:
-                            print(f"Error finding blue blobs: {e}")
 
-                        try:
                             print("Finding green centers.")
                             self.find_blobs('green', num_points=1)
                             print(f'Green centers: {self.green_centers}')
                         except Exception as e:
-                            print(f"Error finding green blobs: {e}")
+                            print(f"Failed to find robot: {e}")
 
                     if self.control_flags['update_orange_balls']:
                         try:
@@ -960,6 +986,12 @@ class Camera2:
                             self.calibrate_robot()
                             continue
                         elif key == ord('q'):
+                            break
+                    else:
+                        print('last_valid_points is None')
+                        cv2.imshow('Initial Frame', self.frame)
+                        key = cv2.waitKey(0) & 0xFF
+                        if key == ord('q'):
                             break
 
                 # Calibrate robot
