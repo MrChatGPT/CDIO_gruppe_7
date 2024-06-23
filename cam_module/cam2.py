@@ -59,8 +59,12 @@ class Camera2:
         self.robot_radius = None
         self.robot_direction = None
         self.robot_critical_length = 50  # cm
-        self.robot_center_coor = [0, 0]
+        self.robot_center_coor = [0, 0]  # pixels
         self.robot_angle_coor = 0  # degrees
+
+        self.robot_center_calibrated = False
+        self.robot_angle_calibrated = False
+        self.robot_critical_length_calibrated = False
 
         # cross properties
         self.last_cross_angle = 0
@@ -573,9 +577,12 @@ class Camera2:
         elif color == 'green':
             # Find the robot center and radious from the green centers
             self.robot_center = np.mean(np.array(centers), axis=0)
-            # add the robot center correction
+
+            # add the robot center correction and convert to int
             self.robot_center = self.robot_center + \
                 np.array(self.robot_center_coor)
+            self.robot_center = tuple(map(int, self.robot_center))
+
             self.robot_radius = np.mean(
                 [np.linalg.norm(np.array(center) - self.robot_center) for center in centers])
             self.green_centers = centers
@@ -687,124 +694,157 @@ class Camera2:
                 if self.morphed_frame is not None:
 
                     if self.control_flags['update_robot']:
-                        self.find_blobs('green', num_points=3)
+                        try:
+                            self.find_blobs('green', num_points=3)
+                        except Exception as e:
+                            print(f"Error finding robot: {e}")
 
                     if self.control_flags['update_orange_balls']:
-                        self.find_blobs('orange', num_points=1)
-                        self.find_waypoint_for_closest_orange_ball()
+                        try:
+                            self.find_blobs('orange', num_points=1)
+                            self.find_waypoint_for_closest_orange_ball()
+                        except Exception as e:
+                            print(f"Error finding orange blobs: {e}")
 
                     if self.control_flags['update_white_balls']:
-                        self.find_white_blobs()
-                        self.find_waypoint_for_closest_white_ball()
+                        try:
+                            self.find_white_blobs()
+                            self.find_waypoint_for_closest_white_ball()
+                        except Exception as e:
+                            print(f"Error finding white blobs: {e}")
 
                     if self.control_flags['update_robot']:
-                        self.calculate_vectors_to_targets(
-                            morph_frame_width=max(self.morphed_frame.shape[0], self.morphed_frame.shape[1]))
+                        try:
+                            self.calculate_vectors_to_targets(
+                                morph_frame_width=max(self.morphed_frame.shape[0], self.morphed_frame.shape[1]))
+                        except Exception as e:
+                            print(f"Error calculating vectors: {e}")
 
             self.draw_detected_features()
         except Exception as e:
             print(f"Error processing frame: {e}")
 
     def draw_detected_features(self):
-        if self.white_ball_centers:
-            for center in self.white_ball_centers:
-                cv2.circle(self.morphed_frame, tuple(
-                    map(int, center)), 5, (0, 255, 0), -1)
 
-            if self.waypoint_for_closest_white_ball:
+        # Draw white ball centers
+        try:
+            if self.white_ball_centers is not None:
+                for center in self.white_ball_centers:
+                    cv2.circle(self.morphed_frame, center, 5, (0, 255, 0), -1)
+
+                if self.waypoint_for_closest_white_ball:
+                    nearest_waypoint = self.waypoint_for_closest_white_ball[0]
+
+                    waypoint_coord = nearest_waypoint[0]
+                    ball_center = nearest_waypoint[1]
+
+                    cv2.circle(self.morphed_frame, waypoint_coord,
+                               5, (0, 255, 255), -1)
+
+                    cv2.line(self.morphed_frame, waypoint_coord,
+                             ball_center, (0, 255, 255), 2)
+
+                    if self.robot_center is not None:
+                        cv2.line(self.morphed_frame, self.robot_center,
+                                 waypoint_coord, (0, 255, 255), 2)
+        except Exception as e:
+            print(f"Error drawing white blobs: {e}")
+
+        try:  # Draw blocked centers
+            if self.blocked_white_centers:
+                for center in self.blocked_white_centers:
+                    cv2.circle(self.morphed_frame, center, 5, (0, 0, 0), -1)
+
+            if self.blocked_orange_centers:
+                for center in self.blocked_orange_centers:
+                    cv2.circle(self.morphed_frame, center, 5, (0, 0, 0), -1)
+        except Exception as e:
+            print(f"Error drawing blocked centers: {e}")
+
+        try:  # Draw egg center
+            if self.egg_center is not None:
+                cv2.circle(self.morphed_frame,
+                           self.egg_center, 5, (0, 0, 255), -1)
+        except Exception as e:
+            print(f"Error drawing egg center: {e}")
+
+        try:  # Draw cross lines
+            if self.cross_lines:
+                for line in self.cross_lines:
+                    cv2.line(self.morphed_frame,
+                             line[0], line[1], (0, 0, 255), 5)
+
+        except Exception as e:
+            print(f"Error drawing cross lines: {e}")
+
+        try:  # Draw orange ball centers
+            if self.orange_blob_centers is not None:
+                for center in self.orange_blob_centers:
+                    cv2.circle(self.morphed_frame, center, 5, (0, 255, 0), -1)
+
+                if self.waypoint_for_closest_orange_ball:
+                    nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+
+                    waypoint_coord = nearest_waypoint[0]
+                    ball_center = nearest_waypoint[1]
+
+                    cv2.circle(self.morphed_frame, waypoint_coord,
+                               5, (0, 255, 255), -1)
+
+                    cv2.line(self.morphed_frame, waypoint_coord,
+                             ball_center, (0, 255, 255), 2)
+
+                    if self.robot_center is not None:
+                        cv2.line(self.morphed_frame, self.robot_center,
+                                 waypoint_coord, (0, 255, 255), 2)
+        except Exception as e:
+            print(f"Error drawing orange blobs: {e}")
+
+        try:  # Draw robot center and direction
+            if self.robot_center is not None:
+                center = self.robot_center
+                cv2.circle(self.morphed_frame, center, 5, (255, 0, 0), -1)
+
+            if self.robot_direction is not None:
+
+                # scale the robot direction vector by the critical length converted to pixels
+                scale_factor = self.robot_critical_length * \
+                    max(self.morphed_frame.shape[0],
+                        self.morphed_frame.shape[1]) / self.arena_dimensions[0]
+
+                end_points = (center, tuple(
+                    map(int, self.robot_center + scale_factor * self.robot_direction)))
+
+                cv2.arrowedLine(self.morphed_frame,
+                                end_points[0], end_points[1], (255, 0, 0), 2)
+
+        except Exception as e:
+            print(f"Error drawing robot: {e}")
+
+        try:  # Draw last valid cornor points
+            if self.last_valid_points is not None:
+                for pt in self.last_valid_points:
+                    pt = tuple(map(int, pt))
+                    cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
+        except Exception as e:
+            print(f"Error drawing last valid points: {e}")
+
+        try:  # Draw text
+
+            # Draw the angle to the closest white ball
+            if self.robot_center is not None:
+                cv2.putText(self.morphed_frame, f"{self.angle_to_closest_white_ball:.1f} deg",
+                            self.robot_center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+            # Draw the distance to the closest white ball
+            if self.waypoint_for_closest_white_ball is not None:
                 nearest_waypoint = self.waypoint_for_closest_white_ball[0]
-
-                waypoint_coord = tuple(map(int, nearest_waypoint[0]))
-                ball_center = tuple(map(int, self.white_ball_centers[0]))
-
-                cv2.circle(self.morphed_frame, waypoint_coord,
-                           5, (0, 255, 255), -1)
-
-                cv2.line(self.morphed_frame, waypoint_coord,
-                         ball_center, (0, 255, 255), 2)
-
-                # if self.robot_center is not None:
-                #    cv2.line(self.morphed_frame, tuple(
-                #        map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
-
-        # if self.blocked_white_centers:
-        #    for center in self.blocked_white_centers:
-        #        cv2.circle(self.morphed_frame, tuple(
-        #            map(int, center)), 5, (0, 0, 0), -1)
-        # if self.blocked_orange_centers:
-        #    for center in self.blocked_orange_centers:
-        #        cv2.circle(self.morphed_frame, tuple(
-        #            map(int, center)), 5, (0, 0, 0), -1)
-        #    cv2.circle(self.morphed_frame, tuple(
-        #        map(int, self.blocked_orange_centers[0])), 20, (0, 140, 255), 3)
-#
-        # if self.egg_center is not None:
-        #    cv2.circle(self.morphed_frame, tuple(
-        #        map(int, self.egg_center)), 5, (0, 0, 255), -1)
-#
-        # if self.cross_lines:
-        #    for line in self.cross_lines:
-        #        cv2.line(self.morphed_frame, tuple(map(int, line[0])), tuple(
-        #            map(int, line[1])), (0, 0, 255), 5)
-
-        if self.orange_blob_centers:
-            # for center in self.orange_blob_centers:
-            #     cv2.circle(self.morphed_frame, tuple(
-            #         map(int, center)), 5, (0, 255, 0), -1)
-            cv2.circle(self.morphed_frame, tuple(
-                map(int, self.orange_blob_centers[0])), 5, (0, 255, 0), -1)
-
-            if self.waypoint_for_closest_orange_ball:
-                nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
-
-                waypoint_coord = tuple(map(int, nearest_waypoint[0]))
-                ball_center = tuple(map(int, self.orange_blob_centers[0]))
-
-                cv2.circle(self.morphed_frame, waypoint_coord,
-                           5, (0, 255, 255), -1)
-
-                cv2.line(self.morphed_frame, waypoint_coord,
-                         ball_center, (0, 255, 255), 2)
-
-                if self.robot_center is not None:
-                    cv2.line(self.morphed_frame, tuple(
-                        map(int, self.robot_center)), waypoint_coord, (0, 255, 255), 2)
-
-        # if self.green_centers:
-        #    for center in self.green_centers:
-        #        cv2.circle(self.morphed_frame, tuple(
-        #            map(int, center)), 8, (255, 255, 255), -1)
-
-        if self.robot_center is not None:
-            center = tuple(map(int, self.robot_center))
-            cv2.circle(self.morphed_frame, center, 5, (255, 0, 0), -1)
-            # if self.robot_direction is not None:
-#
-            # scale the robot direction vector by the critical length converted to pixels
-            scale_factor = self.robot_critical_length * \
-                max(self.morphed_frame.shape[0],
-                    self.morphed_frame.shape[1]) / self.arena_dimensions[0]
-
-            end_points = (center, tuple(
-                map(int, self.robot_center + scale_factor * self.robot_direction)))
-            cv2.arrowedLine(self.morphed_frame,
-                            end_points[0], end_points[1], (255, 0, 0), 2)
-
-        if self.last_valid_points is not None:
-            for pt in self.last_valid_points:
-                pt = tuple(map(int, pt))
-                cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
-
-        if self.robot_center is not None:
-            cv2.putText(self.morphed_frame, f"{self.angle_to_closest_orange_ball:.1f} deg",
-                        tuple(map(int, self.robot_center)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
-        if self.waypoint_for_closest_orange_ball:
-            nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
-            cv2.putText(self.morphed_frame, f"{self.distance_to_closest_orange_waypoint:.1f} cm",
-                        tuple(map(int, nearest_waypoint[0])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-
+                cv2.putText(self.morphed_frame, f"{self.distance_to_closest_white_waypoint:.1f} cm",
+                            nearest_waypoint[0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        except Exception as e:
+            print(f"Error drawing text: {e}")
     def preprocess_frame(self):
+        return
         self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
 
     def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None):
@@ -844,20 +884,29 @@ class Camera2:
                         break
 
                     # Set all flags to True
-
                     print('Attempting to set all flags to true')
                     self.control_flags.update(
                         {key: True for key in self.control_flags})
                     print('All flags set to true')
-
                     print('Processing initial frame')
 
                     self.process_frame()
 
                     print('Processed initial frame')
-                    # print initial ball centers
+
+                    # print ball and robot initial ball centers
                     print('White ball centers:', self.white_ball_centers)
+                    print('White ball waypoints:',
+                          self.waypoint_for_closest_white_ball)
+                    print('Blocked white ball centers:',
+                          self.blocked_white_centers)
                     print('Orange ball centers:', self.orange_blob_centers)
+                    print('Orange ball waypoints:',
+                          self.waypoint_for_closest_orange_ball)
+                    print('Blocked orange ball centers:',
+                          self.blocked_orange_centers)
+                    print('Robot center:', self.robot_center)
+                    print('Last valid points:', self.last_valid_points)
 
                     # Check if last_valid_points is not None
                     if self.last_valid_points is not None:
@@ -873,9 +922,19 @@ class Camera2:
                             cv2.destroyWindow('Initial Frame')
                             first_valid_points_obtained = True
                             self.control_flags.update(temp_flags)
+                            self.calibrate_robot()
                             continue
                         elif key == ord('q'):
                             break
+
+                # Calibrate robot
+                if not (self.robot_center_calibrated and self.robot_angle_calibrated and self.robot_critical_length_calibrated):
+                    self.calibrate_robot()
+                    self.robot_center_calibrated = True
+                    self.robot_angle_calibrated = True
+                    self.robot_critical_length_calibrated = True
+                    self.control_flags.update(temp_flags)
+
                 else:
                     self.process_frame()
                     cv2.imshow('Processed Frame', self.morphed_frame)
@@ -903,13 +962,13 @@ class Camera2:
                         sleep(1)
                         cv2.waitKey(-1)
 
-                # Send data to the queue
-                if queue is not None and self.morphed_frame is not None:
-                    data = self.get_data()
-                    try:
-                        queue.put_nowait(data)
-                    except Exception as e:
-                        print(f"Error putting data in queue: {e}")
+                    # Send data to the queue
+                    if queue is not None and self.morphed_frame is not None:
+                        data = self.get_data()
+                        try:
+                            queue.put_nowait(data)
+                        except Exception as e:
+                            print(f"Error putting data in queue: {e}")
 
             except KeyboardInterrupt:
                 print("Keyboard interrupt detected.")
@@ -924,6 +983,84 @@ class Camera2:
         if out:
             out.release()
         cv2.destroyAllWindows()
+
+    def calibrate_robot(self):
+
+        while not (self.robot_center_calibrated and self.robot_angle_calibrated and self.robot_critical_length_calibrated):
+            self.process_frame()
+            cv2.imshow('Robot calibration', self.morphed_frame)
+
+            if not self.robot_center_calibrated:
+                print(
+                    f'Calibrating robot center. Current center: {self.robot_center}')
+                print(f'Robot center correction: {self.robot_center_coor}')
+                # wait for arrow key press
+                key = cv2.waitKey(0) & 0xFF
+
+                # if up arrow key is pressed
+                if key == 82:
+                    self.robot_center_coor[1] += 1
+                # if down arrow key is pressed
+                elif key == 84:
+                    self.robot_center_coor[1] -= 1
+                # if left arrow key is pressed
+                elif key == 81:
+                    self.robot_center_coor[0] -= 1
+                # if right arrow key is pressed
+                elif key == 83:
+                    self.robot_center_coor[0] += 1
+
+                # accept the calibration on 'a' key press
+                if key == ord('a'):
+                    print('Robot center calibrated')
+                    self.robot_center_calibrated = True
+                    continue
+
+                if key == ord('q'):
+                    break
+
+            elif not self.robot_angle_calibrated:
+                print(
+                    f"Calibrating robot angle. Current correction: {self.robot_angle_coor}")
+
+                # wait for arrow key press
+                key = cv2.waitKey(0) & 0xFF
+
+                # if right arrow key is pressed
+                if key == 83:
+                    self.robot_angle_coor += 0.5
+
+                # if left arrow key is pressed
+                elif key == 81:
+                    self.robot_angle_coor -= 0.5
+
+                # accept the calibration on 'a' key press
+                if key == ord('a'):
+                    print('Robot angle calibrated')
+                    self.robot_angle_calibrated = True
+                    continue
+
+            elif not self.robot_critical_length_calibrated:
+                print(
+                    f"Calibrating robot critical length. Current length: {self.robot_critical_length}")
+
+                # wait for arrow key press
+                key = cv2.waitKey(0) & 0xFF
+
+                # if up arrow key is pressed
+                if key == 82:
+                    self.robot_critical_length += 1
+                # if down arrow key is pressed
+                elif key == 84:
+                    self.robot_critical_length -= 1
+
+                # accept the calibration on 'a' key press
+                if key == ord('a'):
+                    print('Robot critical length calibrated')
+                    self.robot_critical_length_calibrated = True
+                    continue
+
+        cv2.destroyWindow('Robot calibration')
 
     def calibrate_color(self, colors, video_path=None, resize=None):
         def nothing(x):
