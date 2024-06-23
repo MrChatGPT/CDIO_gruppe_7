@@ -9,11 +9,11 @@ import queue
 class Camera2:
     def __init__(self, control_flags):
         self.hsv_ranges = {
-            'red': (np.array([0, 96, 117]), np.array([180, 255, 255])),
-            'white': (np.array([0, 0, 251]), np.array([180, 38, 255])),
+            'red': (np.array([0, 78, 77]), np.array([9, 255, 255])),
+            'white': (np.array([0, 0, 255]), np.array([180, 81, 255])),
             'orange': (np.array([13, 61, 255]), np.array([54, 255, 255])),
-            'blue': (np.array([90, 105, 108]), np.array([108, 178, 255])),
-            'green': (np.array([45, 66, 198]), np.array([150, 255, 255]))
+            'blue': (np.array([90, 50, 0]), np.array([122, 255, 255])),
+            'green': (np.array([54, 25, 238]), np.array([85, 255, 255]))
         }
 
         # Camera properties and frame data
@@ -53,12 +53,13 @@ class Camera2:
         self.vector_to_orange_waypoint_robot_frame = []
 
         # Robot properties
-        self.robot_scale_factor = 1.5
+        self.robot_radius_scale_factor = 1.5
         self.green_centers = []
+        self.blue_centers = []
         self.robot_center = None
         self.robot_radius = None
         self.robot_direction = None
-        self.robot_critical_length = 50  # cm
+        self.robot_critical_length = 25  # cm
         self.robot_center_coor = [0, 0]  # pixels
         self.robot_angle_coor = 0  # degrees
 
@@ -80,11 +81,7 @@ class Camera2:
         self.corner_tolerance = 20  # percentage deviation tolerance for morph points
 
         # Control flags
-        self.control_flags = control_flags if control_flags is not None else {
-            'update_orange_balls': True,
-            'update_white_balls': True,
-            'update_robot': True,
-            'update_arena': False}
+        self.control_flags = control_flags
 
     def get_data(self):
         """
@@ -148,11 +145,32 @@ class Camera2:
         try:
             epsilon = epsilon_factor * cv2.arcLength(contour, True)
             approx_corners = cv2.approxPolyDP(contour, epsilon, True)
+
             while len(approx_corners) > num_corners:
                 epsilon_factor += 0.01
                 epsilon = epsilon_factor * cv2.arcLength(contour, True)
                 approx_corners = cv2.approxPolyDP(contour, epsilon, True)
-            return approx_corners.reshape(-1, 2).astype(int) if len(approx_corners) == num_corners else None
+
+            if len(approx_corners) == num_corners:
+                approx_corners = approx_corners.reshape(
+                    -1, 2).astype(np.float32)
+
+                # Convert the frame to grayscale
+                gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+
+                # Refine corner points to sub-pixel accuracy
+                refined_corners = cv2.cornerSubPix(
+                    gray,
+                    approx_corners,
+                    (5, 5),
+                    (-1, -1),
+                    criteria=(cv2.TERM_CRITERIA_EPS +
+                              cv2.TERM_CRITERIA_MAX_ITER, 30, 0.01)
+                )
+
+                return refined_corners.astype(int)
+            else:
+                return None
         except Exception as e:
             print(f"Error finding corners: {e}")
             return None
@@ -254,7 +272,7 @@ class Camera2:
 
             # Sort contours by length
             sorted_contours = self.sort_contours_by_bounding_box_area(
-                contours, min_area=0.8*self.orange_blob_area, reverse=True)
+                contours, min_area=0.3*self.orange_blob_area, reverse=True)
 
             if not sorted_contours:
                 print("No contours found.")
@@ -273,13 +291,10 @@ class Camera2:
             self.white_ball_centers = self.find_centers_in_contour_list(
                 sorted_contours[1:11] if len(sorted_contours) > 1 else [])
 
-            # Remove balls close to the green centers
-            if self.green_centers:
-                green_centers = np.mean(np.array(self.green_centers), axis=0)
-                green_radius = np.mean(
-                    [np.linalg.norm(np.array(center) - green_centers) for center in self.green_centers])
+            # Remove balls within robot radius of robot center
+            if self.robot_center is not None and self.robot_radius is not None:
                 self.white_ball_centers = [center for center in self.white_ball_centers if np.linalg.norm(
-                    np.array(center) - green_centers) > self.robot_scale_factor * green_radius]
+                    np.array(center) - self.robot_center) > self.robot_radius_scale_factor * self.robot_radius]
 
             # Sort white balls by their distance to the robot center
             if self.robot_center is not None:
@@ -544,15 +559,9 @@ class Camera2:
             target_frame, color=color, close=False, open=False, erode=False)
 
         sorted_contours = self.sort_contours_by_bounding_box_area(
-            contours, min_area=20, reverse=True)
+            contours, min_area=5, reverse=True)
 
         if not sorted_contours:
-            if color == 'orange':
-                self.orange_blob_detected = False
-                self.orange_blob_centers = []
-                self.blocked_orange_centers = []
-            elif color == 'green':
-                self.green_centers = []
             return False
 
         # Find the centers of the top num_points contours
@@ -574,7 +583,7 @@ class Camera2:
             else:
                 self.orange_blob_detected = False
 
-        elif color == 'green':
+        elif color == 'blue':
             # Find the robot center and radious from the green centers
             self.robot_center = np.mean(np.array(centers), axis=0)
 
@@ -585,39 +594,48 @@ class Camera2:
 
             self.robot_radius = np.mean(
                 [np.linalg.norm(np.array(center) - self.robot_center) for center in centers])
+            self.blue_centers = centers
+
+        elif color == 'green':
             self.green_centers = centers
             self.find_robot_direction()
 
         return bool(centers)
 
     def find_robot_direction(self):
-        if len(self.green_centers) == 3:
-            green_centers_array = np.array(self.green_centers)
-            back_center = green_centers_array[0]
-            front_point_1 = green_centers_array[1]
-            front_point_2 = green_centers_array[2]
+        try:
+            print("Finding robot direction.")
+            if len(self.blue_centers) == 4:
+                blue_centers_array = np.array(self.blue_centers)
 
-            front_center = (front_point_1 + front_point_2) / 2
+                # sort the blue centers by distance to green center
+                blue_centers_array = sorted(blue_centers_array, key=lambda center: np.linalg.norm(
+                    np.array(center) - self.green_centers[0]))
 
-            direction = front_center - back_center
+                front_point1, front_point2 = blue_centers_array[0], blue_centers_array[1]
+                back_point1, back_point2 = blue_centers_array[2], blue_centers_array[3]
 
-            # Normalize the direction vector
-            self.robot_direction = direction / np.linalg.norm(direction)
+                front_center = (front_point1 + front_point2) / 2
+                back_center = (back_point1 + back_point2) / 2
 
-            # Convert angle correction from degrees to radians
-            angle_correction_radians = np.radians(self.robot_angle_coor)
+                direction = front_center - back_center
 
-            # Correct the robot direction
-            self.robot_direction = np.dot(
-                np.array([[np.cos(angle_correction_radians), -np.sin(angle_correction_radians)],
-                          [np.sin(angle_correction_radians), np.cos(angle_correction_radians)]]),
-                self.robot_direction
-            )
+                print(f"Direction: {direction}")
 
-            # self.robot_direction = np.dot(
-            #     np.array([[np.cos(self.robot_angle_coor), -np.sin(self.robot_angle_coor)], [np.sin(self.robot_angle_coor), np.cos(self.robot_angle_coor)]]), self.robot_direction)
+                # Normalize the direction vector
+                self.robot_direction = direction / np.linalg.norm(direction)
 
-        else:
+                # Convert angle correction from degrees to radians
+                angle_correction_radians = np.radians(self.robot_angle_coor)
+
+                # Correct the robot direction
+                self.robot_direction = np.dot(
+                    np.array([[np.cos(angle_correction_radians), -np.sin(angle_correction_radians)],
+                              [np.sin(angle_correction_radians), np.cos(angle_correction_radians)]]),
+                    self.robot_direction
+                )
+        except Exception as e:
+            print(f"Error finding robot direction: {e}")
             self.robot_direction = None
 
     def resize_frame(self, frame, width=None, height=None, inter=cv2.INTER_AREA):
@@ -695,9 +713,18 @@ class Camera2:
 
                     if self.control_flags['update_robot']:
                         try:
-                            self.find_blobs('green', num_points=3)
+                            print("Finding blue centers.")
+                            self.find_blobs('blue', num_points=4)
+                            print(f'Blue centers: {self.blue_centers}')
                         except Exception as e:
-                            print(f"Error finding robot: {e}")
+                            print(f"Error finding blue blobs: {e}")
+
+                        try:
+                            print("Finding green centers.")
+                            self.find_blobs('green', num_points=1)
+                            print(f'Green centers: {self.green_centers}')
+                        except Exception as e:
+                            print(f"Error finding green blobs: {e}")
 
                     if self.control_flags['update_orange_balls']:
                         try:
@@ -829,20 +856,21 @@ class Camera2:
         except Exception as e:
             print(f"Error drawing last valid points: {e}")
 
-        try:  # Draw text
+        # try:  # Draw text
 
-            # Draw the angle to the closest white ball
-            if self.robot_center is not None:
-                cv2.putText(self.morphed_frame, f"{self.angle_to_closest_white_ball:.1f} deg",
-                            self.robot_center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        #     # Draw the angle to the closest white ball
+        #     if self.robot_center is not None:
+        #         cv2.putText(self.morphed_frame, f"{self.angle_to_closest_white_ball:.1f} deg",
+        #                     self.robot_center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-            # Draw the distance to the closest white ball
-            if self.waypoint_for_closest_white_ball is not None:
-                nearest_waypoint = self.waypoint_for_closest_white_ball[0]
-                cv2.putText(self.morphed_frame, f"{self.distance_to_closest_white_waypoint:.1f} cm",
-                            nearest_waypoint[0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-        except Exception as e:
-            print(f"Error drawing text: {e}")
+        #     # Draw the distance to the closest white ball
+        #     if self.waypoint_for_closest_white_ball is not None:
+        #         nearest_waypoint = self.waypoint_for_closest_white_ball[0]
+        #         cv2.putText(self.morphed_frame, f"{self.distance_to_closest_white_waypoint:.1f} cm",
+        #                     nearest_waypoint[0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        # except Exception as e:
+        #     print(f"Error drawing text: {e}")
+
     def preprocess_frame(self):
         return
         self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
@@ -866,6 +894,7 @@ class Camera2:
         temp_flags = self.control_flags.copy()
 
         while True:
+            print('Entering first while loop try block')
             try:
                 ret, self.frame = self.cap.read()
                 if not ret:
@@ -884,9 +913,10 @@ class Camera2:
                         break
 
                     # Set all flags to True
+                    print('Initial control flags:', self.control_flags)
                     print('Attempting to set all flags to true')
-                    self.control_flags.update(
-                        {key: True for key in self.control_flags})
+                    for key in self.control_flags.keys():
+                        self.control_flags[key] = True
                     print('All flags set to true')
                     print('Processing initial frame')
 
@@ -909,7 +939,9 @@ class Camera2:
                     print('Last valid points:', self.last_valid_points)
 
                     # Check if last_valid_points is not None
+                    print('Attempting to check if last_valid_points is not None')
                     if self.last_valid_points is not None:
+                        print('last_valid_points is not None')
                         for pt in self.last_valid_points:
                             pt = tuple(map(int, pt))
                             cv2.circle(self.frame, pt, 5, (0, 0, 0), -1)
@@ -920,8 +952,11 @@ class Camera2:
                             continue
                         elif key == ord('a'):
                             cv2.destroyWindow('Initial Frame')
-                            first_valid_points_obtained = True
-                            self.control_flags.update(temp_flags)
+                            first_valid_points_obtained = True\
+                                # reset all flags to false except for update_robot
+                            for key in self.control_flags.keys():
+                                self.control_flags[key] = False
+                            self.control_flags['update_robot'] = True
                             self.calibrate_robot()
                             continue
                         elif key == ord('q'):
@@ -933,7 +968,9 @@ class Camera2:
                     self.robot_center_calibrated = True
                     self.robot_angle_calibrated = True
                     self.robot_critical_length_calibrated = True
-                    self.control_flags.update(temp_flags)
+                    # reset the control falgs to the original values
+                    for key in self.control_flags.keys():
+                        self.control_flags[key] = temp_flags[key]
 
                 else:
                     self.process_frame()
@@ -985,7 +1022,6 @@ class Camera2:
         cv2.destroyAllWindows()
 
     def calibrate_robot(self):
-
         while not (self.robot_center_calibrated and self.robot_angle_calibrated and self.robot_critical_length_calibrated):
             self.process_frame()
             cv2.imshow('Robot calibration', self.morphed_frame)
@@ -1077,7 +1113,8 @@ class Camera2:
             print(f"Error: Unable to open video source {video_path}")
             return
 
-        # Capture the first frame
+        # Sleep to allow camera to adjust to lighting conditions
+        sleep(3)
         ret, self.frame = self.cap.read()
         if not ret:
             print("Error: Unable to read frame from video source")
@@ -1117,6 +1154,7 @@ class Camera2:
                                int(hsv_upper[2]), 255, nothing)
 
             while True:
+                # sleep to allow the camera to adjust to lighting conditions
                 ret, self.frame = self.cap.read()
                 if not ret:
                     print("Error: Unable to read frame from video source")
@@ -1163,11 +1201,13 @@ class Camera2:
 
 
 def camera_process(queue, video_path, control_flags):
+    print("Starting camera process...")
+    print("Control flags:", control_flags)
     camera = Camera2(control_flags)
-    colors = ['green', 'red', 'orange', 'white']
+    colors = ['blue', 'green', 'red', 'orange', 'white']
     camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, queue=queue,
-                              morph=True, record=False, resize=640)
+                              morph=True, record=False, resize=False)
 
 
 # Example usage:
@@ -1181,7 +1221,7 @@ if __name__ == "__main__":
 
     camera = Camera2(control_flags=control_flags)
     video_path = '/dev/video9'
-    colors = ['green', 'red', 'orange', 'white']
+    colors = ['blue', 'green', 'red', 'orange', 'white']
     camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, morph=True,
                               record=False, resize=False)
