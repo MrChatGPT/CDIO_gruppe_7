@@ -268,10 +268,12 @@ class ControlLogic:
             vector_waypoint = vectortwo_waypoint
             distance_to_waypoint = distancetwo_to_waypoint
             angle_err_to_waypoint = angletwo_err_to_waypoint
+
+        
         print("\nGoing towards goal:\n")
         print(f"Distance to waypoint: {distance_to_waypoint}")
         print(f"Angle error to waypoint: {angle_err_to_waypoint}")
-        print('vector to waypoint:', vector_waypoint)
+        print(f'vector to waypoint: {vector_waypoint}')
         goal_toleration = self.distance_tolerance-15
 
         # print(data)
