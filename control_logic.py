@@ -224,7 +224,6 @@ class ControlLogic:
                 # set control flags to true
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
-               
                 time.sleep(0.1)
                 self.arena_check = False
 
