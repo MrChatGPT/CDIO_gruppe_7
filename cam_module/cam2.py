@@ -9,9 +9,9 @@ import queue
 class Camera2:
     def __init__(self, control_flags):
         self.hsv_ranges = {
-            'red': (np.array([0, 42, 62]), np.array([18, 255, 255])),
-            'white': (np.array([0, 0, 251]), np.array([180, 87, 255])),
-            'orange': (np.array([7, 167, 255]), np.array([35, 255, 255])),
+            'red': (np.array([0, 90, 62]), np.array([18, 255, 255])),
+            'white': (np.array([0, 0, 253]), np.array([180, 59, 255])),
+            'orange': (np.array([7, 132, 255]), np.array([35, 255, 255])),
             'blue': (np.array([90, 50, 0]), np.array([122, 255, 255])),
             'green': (np.array([34, 67, 171]), np.array([80, 255, 255]))
         }
@@ -1310,7 +1310,8 @@ class Camera2:
 
         if self.cap is None:
             print(f"Opening video source {video_source}")
-            self.cap = cv2.VideoCapture(video_source, cv2.CAP_V4L2)  # , cv2.CAP_V4L2
+            self.cap = cv2.VideoCapture(
+                video_source, cv2.CAP_V4L2)  # , cv2.CAP_V4L2
             if not self.cap.isOpened():
                 print(f"Error: Unable to open video source {video_source}")
                 return
@@ -1538,7 +1539,8 @@ class Camera2:
             pass
 
         try:
-            self.cap = cv2.VideoCapture(video_path, cv2.CAP_V4L2)  # , cv2.CAP_V4L2
+            self.cap = cv2.VideoCapture(
+                video_path, cv2.CAP_V4L2)  # , cv2.CAP_V4L2
             self.cap.set(cv2.CAP_PROP_FPS, 40)
         except Exception as e:
             print(f"Error: Unable to open video source {video_path}")
