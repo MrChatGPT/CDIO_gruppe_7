@@ -1017,7 +1017,6 @@ class Camera2:
                 )
         except Exception as e:
             print(f"Error finding robot direction: {e}")
-            self.robot_direction = None
 
     def resize_frame(self, frame, width=None, height=None, inter=cv2.INTER_AREA):
         # initialize the dimensions of the frame to be resized and
