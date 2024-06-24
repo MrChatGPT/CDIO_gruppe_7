@@ -15,8 +15,8 @@ class Camera2:
             'white': (np.array([0, 0, 253]), np.array([180, 59, 255])),
             'orange': (np.array([0, 75, 244]), np.array([6, 255, 255])),
             # 'blue': (np.array([90, 50, 0]), np.array([122, 255, 255]))
-            'blue': (np.array([10, 39, 255]), np.array([29, 255, 255])),
-            'green': (np.array([45, 0, 0]), np.array([87, 255, 255]))
+            'blue': (np.array([39, 60, 0]), np.array([87, 255, 255])),
+            'green': (np.array([0, 79, 233]), np.array([40, 255, 255]))
         }
 
         # Camera properties and frame data
@@ -375,7 +375,7 @@ class Camera2:
 
             # Sort contours by length
             sorted_contours = self.sort_contours_by_area(
-                contours, min_area=0.3*self.orange_blob_area, reverse=True)
+                contours, min_area=5, reverse=True)
 
             if not sorted_contours:
                 print("No contours found.")
@@ -394,6 +394,7 @@ class Camera2:
             self.white_ball_centers = self.find_centers_in_contour_list(
                 sorted_contours[1:11] if len(sorted_contours) > 1 else [])
 
+            print(f"White ball centers: {self.white_ball_centers}")
             # append orange center to white ball centers
             if self.orange_blob_centers:
                 self.white_ball_centers.append(self.orange_blob_centers[0])
