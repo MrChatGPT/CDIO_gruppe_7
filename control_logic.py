@@ -272,7 +272,7 @@ class ControlLogic:
 if __name__ == "__main__":
     queue = Queue(maxsize=10)
     manager = Manager()
-    video_path = "/dev/video9"
+    video_path = "/dev/video8"
 
     broker_url = '192.168.1.101'
     broker_port = 1883

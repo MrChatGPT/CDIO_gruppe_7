@@ -79,6 +79,8 @@ class Camera2:
         self.arena_dimensions = (166.8, 122)  # (width, height) in cm
         self.waypoint_distance = 40  # distance from ball center to waypoint in cm
         self.corner_tolerance = 20  # percentage deviation tolerance for morph points
+        self.arena_waypoints = []
+        self.arena_data = []
 
         # Control flags
         self.control_flags = control_flags
@@ -113,9 +115,40 @@ class Camera2:
             'vector_to_orange_waypoint_robot_frame': self.vector_to_orange_waypoint_robot_frame,
 
             # Robot data
-            'robot_critical_length': self.robot_critical_length
+            'robot_critical_length': self.robot_critical_length,
+
+            # Arena data
+            'arena_waypoints': self.arena_waypoints,
 
         }
+
+    def find_arena_waypoints(self):
+        frame = self.morphed_frame
+        height, width = frame.shape[:2]
+
+        # Define the goals and arena points
+        goal_1 = (height / 2, 0)
+        goal_2 = (height / 2, width)
+        arena_points = [
+            (0, 0), (0, width / 2), (0, width),
+            (height, 0), (height, width / 2), (height, width)
+        ]
+
+        # Combine goals and arena points
+        combined_points = [goal_1] + arena_points + [goal_2]
+
+        # map combined points to lsit of int tuples
+        combined_points = [tuple(map(int, point)) for point in combined_points]
+
+        # Calculate the radius for waypoints
+        r = self.waypoint_distance
+
+        self.arena_waypoints = []
+        for point in combined_points:
+            waypoint = self.calculate_waypoint(point, r)
+            if waypoint:
+                # Store only the waypoint, not the original point
+                self.arena_waypoints.append(waypoint[0])
 
     def equalize_histogram(self, hsv_frame):
         h, s, v = cv2.split(hsv_frame)
@@ -411,54 +444,189 @@ class Camera2:
             self.waypoint_for_closest_orange_ball = None
 
     def calculate_vectors_to_targets(self, morph_frame_width):
+        def calculate_and_store_vectors(ball_center, vector_attr, angle_attr, distance_attr):
+            angle = self.calculate_angle_to_ball(
+                self.robot_center, ball_center, self.robot_direction)
+            distance = np.linalg.norm(np.array(
+                ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+            vector = self.calculate_vector_to_target_in_robot_frame(
+                ball_center)
+            vector = self.normalize_vector(vector)
+            setattr(self, vector_attr, vector)
+            setattr(self, angle_attr, angle)
+            setattr(self, distance_attr, distance)
+            return distance, angle
 
-        # Calculate the angle and distance to the closest white ball
-        if self.robot_center is not None and self.white_ball_centers:
-            nearest_ball_center = self.white_ball_centers[0]
-            self.angle_to_closest_white_ball = self.calculate_angle_to_ball(
-                self.robot_center, nearest_ball_center, self.robot_direction)
-            self.distance_to_closest_white_ball = np.linalg.norm(np.array(
-                nearest_ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
-            self.vector_to_white_ball_robot_frame = self.calculate_vector_to_target_in_robot_frame(
-                nearest_ball_center)
-            self.vector_to_white_ball_robot_frame = self.normalize_vector(
-                self.vector_to_white_ball_robot_frame)
+        if self.robot_center is not None:
+            if self.white_ball_centers:
+                nearest_ball_center = self.white_ball_centers[0]
+                calculate_and_store_vectors(
+                    nearest_ball_center,
+                    'vector_to_white_ball_robot_frame',
+                    'angle_to_closest_white_ball',
+                    'distance_to_closest_white_ball'
+                )
 
-        # Calculate the angle and distance to the closest orange ball
-        if self.robot_center is not None and self.orange_blob_centers:
-            nearest_orange_ball_center = self.orange_blob_centers[0]
-            self.angle_to_closest_orange_ball = self.calculate_angle_to_ball(
-                self.robot_center, nearest_orange_ball_center, self.robot_direction)
-            self.distance_to_closest_orange_ball = np.linalg.norm(np.array(
-                nearest_orange_ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
-            self.vector_to_orange_ball_robot_frame = self.calculate_vector_to_target_in_robot_frame(
-                nearest_orange_ball_center)
-            self.vector_to_orange_ball_robot_frame = self.normalize_vector(
-                self.vector_to_orange_ball_robot_frame)
+            if self.orange_blob_centers:
+                nearest_orange_ball_center = self.orange_blob_centers[0]
+                calculate_and_store_vectors(
+                    nearest_orange_ball_center,
+                    'vector_to_orange_ball_robot_frame',
+                    'angle_to_closest_orange_ball',
+                    'distance_to_closest_orange_ball'
+                )
 
-        # Calculate the angle and distance to the closest waypoint
-        if self.robot_center is not None and self.waypoint_for_closest_white_ball:
-            nearest_waypoint = self.waypoint_for_closest_white_ball[0]
-            self.angle_to_closest_white_waypoint = self.calculate_angle_to_ball(
-                self.robot_center, nearest_waypoint[0], self.robot_direction)
-            self.distance_to_closest_white_waypoint = np.linalg.norm(np.array(
-                nearest_waypoint[0]) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
-            self.vector_to_white_waypoint_robot_frame = self.calculate_vector_to_target_in_robot_frame(
-                nearest_waypoint[0])
-            self.vector_to_white_waypoint_robot_frame = self.normalize_vector(
-                self.vector_to_white_waypoint_robot_frame)
+            if self.waypoint_for_closest_white_ball:
+                nearest_waypoint = self.waypoint_for_closest_white_ball[0]
+                calculate_and_store_vectors(
+                    nearest_waypoint[0],
+                    'vector_to_white_waypoint_robot_frame',
+                    'angle_to_closest_white_waypoint',
+                    'distance_to_closest_white_waypoint'
+                )
 
-        # do the same for waypoint to orange ball
-        if self.robot_center is not None and self.waypoint_for_closest_orange_ball:
-            nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
-            self.angle_to_closest_orange_waypoint = self.calculate_angle_to_ball(
-                self.robot_center, nearest_waypoint[0], self.robot_direction)
-            self.distance_to_closest_orange_waypoint = np.linalg.norm(np.array(
-                nearest_waypoint[0]) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
-            self.vector_to_orange_waypoint_robot_frame = self.calculate_vector_to_target_in_robot_frame(
-                nearest_waypoint[0])
-            self.vector_to_orange_waypoint_robot_frame = self.normalize_vector(
-                self.vector_to_orange_waypoint_robot_frame)
+            if self.waypoint_for_closest_orange_ball:
+                nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+                calculate_and_store_vectors(
+                    nearest_waypoint[0],
+                    'vector_to_orange_waypoint_robot_frame',
+                    'angle_to_closest_orange_waypoint',
+                    'distance_to_closest_orange_waypoint'
+                )
+
+            # Calculate and store vectors for all arena waypoints
+            if self.arena_waypoints is not None:
+                temp_list = []
+                for waypoint in self.arena_waypoints:
+                    element = []
+                    vector = self.calculate_vector_to_target_in_robot_frame(
+                        waypoint[0])
+                    vector = self.normalize_vector(vector)
+                    element.append(vector)
+                    distance = np.linalg.norm(np.array(
+                        waypoint[0]) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+                    element.append(distance)
+                    angle = self.calculate_angle_to_ball(
+                        self.robot_center, waypoint[1], self.robot_direction)
+                    element.append(angle)
+                    temp_list.append(element)
+
+                self.arena_data = temp_list
+            else:
+                print('No arena waypoints found')
+
+    # def calculate_vectors_to_targets(self, morph_frame_width):
+    #     def calculate_and_store_vectors(ball_center, vector_attr, angle_attr, distance_attr):
+    #         angle = self.calculate_angle_to_ball(
+    #             self.robot_center, ball_center, self.robot_direction)
+    #         distance = np.linalg.norm(np.array(
+    #             ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+    #         vector = self.calculate_vector_to_target_in_robot_frame(
+    #             ball_center)
+    #         vector = self.normalize_vector(vector)
+    #         setattr(self, vector_attr, vector)
+    #         setattr(self, angle_attr, angle)
+    #         setattr(self, distance_attr, distance)
+
+    #     if self.robot_center is not None:
+    #         if self.white_ball_centers:
+    #             nearest_ball_center = self.white_ball_centers[0]
+    #             calculate_and_store_vectors(
+    #                 nearest_ball_center,
+    #                 'vector_to_white_ball_robot_frame',
+    #                 'angle_to_closest_white_ball',
+    #                 'distance_to_closest_white_ball'
+    #             )
+
+    #         if self.orange_blob_centers:
+    #             nearest_orange_ball_center = self.orange_blob_centers[0]
+    #             calculate_and_store_vectors(
+    #                 nearest_orange_ball_center,
+    #                 'vector_to_orange_ball_robot_frame',
+    #                 'angle_to_closest_orange_ball',
+    #                 'distance_to_closest_orange_ball'
+    #             )
+
+    #         if self.waypoint_for_closest_white_ball:
+    #             nearest_waypoint = self.waypoint_for_closest_white_ball[0]
+    #             calculate_and_store_vectors(
+    #                 nearest_waypoint[0],
+    #                 'vector_to_white_waypoint_robot_frame',
+    #                 'angle_to_closest_white_waypoint',
+    #                 'distance_to_closest_white_waypoint'
+    #             )
+
+    #         if self.waypoint_for_closest_orange_ball:
+    #             nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+    #             calculate_and_store_vectors(
+    #                 nearest_waypoint[0],
+    #                 'vector_to_orange_waypoint_robot_frame',
+    #                 'angle_to_closest_orange_waypoint',
+    #                 'distance_to_closest_orange_waypoint'
+    #             )
+
+    #         # Calculate and store vectors for all arena waypoints
+    #         if self.arena_waypoints:
+    #             self.arena_waypoint_vectors = []
+    #             self.arena_waypoint_distances = []
+    #             for waypoint, _ in self.arena_waypoints:
+    #                 vector = self.calculate_vector_to_target_in_robot_frame(
+    #                     waypoint)
+    #                 vector = self.normalize_vector(vector)
+    #                 distance = np.linalg.norm(np.array(
+    #                     waypoint) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+    #                 self.arena_waypoint_vectors.append(vector)
+    #                 self.arena_waypoint_distances.append(distance)
+
+    # def calculate_vectors_to_targets(self, morph_frame_width):
+
+    #     # Calculate the angle and distance to the closest white ball
+    #     if self.robot_center is not None and self.white_ball_centers:
+    #         nearest_ball_center = self.white_ball_centers[0]
+    #         self.angle_to_closest_white_ball = self.calculate_angle_to_ball(
+    #             self.robot_center, nearest_ball_center, self.robot_direction)
+    #         self.distance_to_closest_white_ball = np.linalg.norm(np.array(
+    #             nearest_ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+    #         self.vector_to_white_ball_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+    #             nearest_ball_center)
+    #         self.vector_to_white_ball_robot_frame = self.normalize_vector(
+    #             self.vector_to_white_ball_robot_frame)
+
+    #     # Calculate the angle and distance to the closest orange ball
+    #     if self.robot_center is not None and self.orange_blob_centers:
+    #         nearest_orange_ball_center = self.orange_blob_centers[0]
+    #         self.angle_to_closest_orange_ball = self.calculate_angle_to_ball(
+    #             self.robot_center, nearest_orange_ball_center, self.robot_direction)
+    #         self.distance_to_closest_orange_ball = np.linalg.norm(np.array(
+    #             nearest_orange_ball_center) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+    #         self.vector_to_orange_ball_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+    #             nearest_orange_ball_center)
+    #         self.vector_to_orange_ball_robot_frame = self.normalize_vector(
+    #             self.vector_to_orange_ball_robot_frame)
+
+    #     # Calculate the angle and distance to the closest waypoint
+    #     if self.robot_center is not None and self.waypoint_for_closest_white_ball:
+    #         nearest_waypoint = self.waypoint_for_closest_white_ball[0]
+    #         self.angle_to_closest_white_waypoint = self.calculate_angle_to_ball(
+    #             self.robot_center, nearest_waypoint[0], self.robot_direction)
+    #         self.distance_to_closest_white_waypoint = np.linalg.norm(np.array(
+    #             nearest_waypoint[0]) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+    #         self.vector_to_white_waypoint_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+    #             nearest_waypoint[0])
+    #         self.vector_to_white_waypoint_robot_frame = self.normalize_vector(
+    #             self.vector_to_white_waypoint_robot_frame)
+
+    #     # do the same for waypoint to orange ball
+    #     if self.robot_center is not None and self.waypoint_for_closest_orange_ball:
+    #         nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+    #         self.angle_to_closest_orange_waypoint = self.calculate_angle_to_ball(
+    #             self.robot_center, nearest_waypoint[0], self.robot_direction)
+    #         self.distance_to_closest_orange_waypoint = np.linalg.norm(np.array(
+    #             nearest_waypoint[0]) - self.robot_center) * self.arena_dimensions[0] / morph_frame_width
+    #         self.vector_to_orange_waypoint_robot_frame = self.calculate_vector_to_target_in_robot_frame(
+    #             nearest_waypoint[0])
+    #         self.vector_to_orange_waypoint_robot_frame = self.normalize_vector(
+    #             self.vector_to_orange_waypoint_robot_frame)
 
     def calculate_vector_to_target_in_robot_frame(self, target):
         vector_to_target_global = np.array(target) - self.robot_center
@@ -523,7 +691,7 @@ class Camera2:
 
     def calculate_waypoint(self, ball_center, r):
         print(f"Calculating waypoint for ball at {ball_center}")
-        if not ball_center or self.robot_center is None:
+        if not ball_center:
             return []
 
         waypoints = []
@@ -548,15 +716,20 @@ class Camera2:
             x, y = point
             return min(x, width - x, y, height - y)
 
-        def generate_candidate_waypoints(ball_center, radius, num_points=200):
+        def generate_candidate_waypoints(ball_center, radius, num_points=400):
             cx, cy = ball_center
             candidates = []
             for i in range(num_points):
                 angle = 2 * math.pi / num_points * i
                 candidate = (cx + radius * math.cos(angle),
                              cy + radius * math.sin(angle))
-                if 0 <= candidate[0] < img_width and 0 <= candidate[1] < img_height:
-                    candidates.append(candidate)
+                candidate = (int(candidate[0]), int(candidate[1]))
+                # Ensure candidates are within the frame boundaries, adjust if they are at the edge
+                candidate = (
+                    min(max(candidate[0], 0), img_width - 1),
+                    min(max(candidate[1], 0), img_height - 1)
+                )
+                candidates.append(candidate)
             return candidates
 
         img_height, img_width = self.morphed_frame.shape[:2]
@@ -585,11 +758,80 @@ class Camera2:
                 best_waypoint = candidate
 
         if best_waypoint:
-            best_waypoint = (int(best_waypoint[0]), int(best_waypoint[1]))
             waypoints.append((best_waypoint, ball_center))
 
         print(f"Waypoint for ball at {ball_center}: {waypoints}")
         return waypoints
+
+    # def calculate_waypoint(self, ball_center, r):
+    #     print(f"Calculating waypoint for ball at {ball_center}")
+    #     if not ball_center:
+    #         return []
+
+    #     waypoints = []
+
+    #     def distance_to_line_segment(point, line):
+    #         px, py = point
+    #         (x1, y1), (x2, y2) = line
+    #         v1 = np.array([px - x1, py - y1])
+    #         v2 = np.array([x2 - x1, y2 - y1])
+    #         projection = np.dot(v1, v2) / np.dot(v2, v2)
+
+    #         if projection < 0:
+    #             closest_point = np.array([x1, y1])
+    #         elif projection > 1:
+    #             closest_point = np.array([x2, y2])
+    #         else:
+    #             closest_point = np.array([x1, y1]) + projection * v2
+
+    #         return np.linalg.norm(np.array([px, py]) - closest_point)
+
+    #     def distance_to_boundaries(point, width, height):
+    #         x, y = point
+    #         return min(x, width - x, y, height - y)
+
+    #     def generate_candidate_waypoints(ball_center, radius, num_points=400):
+    #         cx, cy = ball_center
+    #         candidates = []
+    #         for i in range(num_points):
+    #             angle = 2 * math.pi / num_points * i
+    #             candidate = (cx + radius * math.cos(angle),
+    #                          cy + radius * math.sin(angle))
+    #             if 0 <= candidate[0] < img_width and 0 <= candidate[1] < img_height:
+    #                 candidates.append(candidate)
+    #         return candidates
+
+    #     img_height, img_width = self.morphed_frame.shape[:2]
+
+    #     candidates = generate_candidate_waypoints(ball_center, r)
+    #     if not candidates:
+    #         print(f"No valid waypoints for ball at {ball_center}")
+    #         return waypoints
+
+    #     max_min_distance = 0
+    #     best_waypoint = None
+
+    #     for candidate in candidates:
+    #         min_distance = float('inf')
+
+    #         for line in self.cross_lines:
+    #             distance = distance_to_line_segment(candidate, line)
+    #             min_distance = min(min_distance, distance)
+
+    #         boundary_distance = distance_to_boundaries(
+    #             candidate, img_width, img_height)
+    #         min_distance = min(min_distance, boundary_distance)
+
+    #         if min_distance > max_min_distance:
+    #             max_min_distance = min_distance
+    #             best_waypoint = candidate
+
+    #     if best_waypoint:
+    #         best_waypoint = (int(best_waypoint[0]), int(best_waypoint[1]))
+    #         waypoints.append((best_waypoint, ball_center))
+
+    #     print(f"Waypoint for ball at {ball_center}: {waypoints}")
+    #     return waypoints
 
     def find_blobs(self, color, num_points):
         target_frame = self.morphed_frame if self.morph else self.frame
@@ -740,6 +982,13 @@ class Camera2:
                                 self.fit_rotated_cross_to_contour(
                                     transformed_contour)
 
+                            # calculate arena waypoints
+                            # print("Calculating arena waypoints.")
+                            self.find_arena_waypoints()
+                            # draw area waypoints on the self.morphed_frame
+
+                            # print(f"Arena waypoints: {self.arena_waypoints}")
+
                     else:
                         print("Failed to find corners.")
 
@@ -777,8 +1026,11 @@ class Camera2:
 
                     if self.control_flags['update_robot']:
                         try:
+                            print("Calculating vectors to targets.")
                             self.calculate_vectors_to_targets(
                                 morph_frame_width=max(self.morphed_frame.shape[0], self.morphed_frame.shape[1]))
+                            # print arena waypoints
+                            print(f"Arena data: {self.arena_data}")
                         except Exception as e:
                             print(f"Error calculating vectors: {e}")
 
