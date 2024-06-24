@@ -184,10 +184,10 @@ class ControlLogic:
     def score_ball(self, data):
         print("Moving to waypoint in front of goal")
         
-        waypoints = data.get(f'arena_waypoints')
+        waypoints = data.get(f'arena_data')
         vectorone_waypoint = waypoints[0][0]
         vectortwo_waypoint = waypoints[4][0]
-        
+
         distanceone_to_waypoint = waypoints[0][1]
         distancetwo_to_waypoint = waypoints[4][1]
 
