@@ -240,7 +240,7 @@ class ControlLogic:
             
 
     def stop_robot(self):
-        self.controller.publish_control_data(0, 0, 0)
+        self.controller.publish_control_data(0, 0, 0, 0, 0)
 
     def ball_in(self):
         self.controller.publish_control_data(0, 0, 0, 1, 0)
@@ -275,7 +275,7 @@ class ControlLogic:
         # print(f"Angle error to waypoint: {angle_err_to_waypoint}")
         # print(f'vector to waypoint: {vector_waypoint}')
 
-        goal_toleration = self.distance_tolerance-15
+        goal_toleration = self.distance_tolerance
 
         # print(data)
         
@@ -316,7 +316,7 @@ class ControlLogic:
                 print("rotation: ", rotation)
                 # set x and y to 0
                 x = y = 0
-                exit()
+                # exit()
                 self.controller.publish_control_data(x, y, rotation)
             else:
                 print("Spitting out the balls")
