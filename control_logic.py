@@ -303,7 +303,7 @@ class ControlLogic:
                         -distance_to_waypoint) * speed_scale
                     y = vector_waypoint[0] * speed
                     x = vector_waypoint[1] * speed
-
+                    print(f"\nx = {x}\ny = {y}\nspeed = {speed}\nspeed_scale = {speed_scale}")
                     # set rotation to 0
                     rotation = 0
                     self.controller.publish_control_data(x, y, rotation)
