@@ -53,7 +53,7 @@ class Camera2:
         self.vector_to_orange_waypoint_robot_frame = []
 
         # Robot properties
-        self.robot_radius_scale_factor = 1.5
+        self.robot_radius_scale_factor = 4
         self.green_centers = []
         self.blue_centers = []
         self.robot_center = None
@@ -292,6 +292,15 @@ class Camera2:
 
         # Filter contours based on the minimum bounding box area
         return [contour for contour in sorted_contours if cv2.boundingRect(contour)[2] * cv2.boundingRect(contour)[3] >= min_area]
+
+    def sort_contours_by_min_area_rect(self, contours, min_area=10, reverse=True):
+        # Sort contours based on the area of the minimum area bounding rectangle
+        sorted_contours = sorted(
+            contours, key=lambda c: cv2.minAreaRect(c)[1][0] * cv2.minAreaRect(c)[1][1], reverse=reverse
+        )
+
+        # Filter contours based on the minimum area of the bounding rectangle
+        return [contour for contour in sorted_contours if cv2.minAreaRect(contour)[1][0] * cv2.minAreaRect(contour)[1][1] >= min_area]
 
     def find_centers_in_contour_list(self, contours):
         centers = []
@@ -710,8 +719,8 @@ class Camera2:
                     contours, hierarchy = self.mask_and_find_contours(
                         self.frame, color='red', close=False, open=False, erode=False)
 
-                    sorted_contours = self.sort_contours_by_arch_length(
-                        contours, min_length=50, reverse=True)
+                    sorted_contours = self.sort_contours_by_min_area_rect(
+                        contours, min_area=50, reverse=True)
 
                     if len(sorted_contours) > 2:
 
@@ -1252,7 +1261,7 @@ if __name__ == "__main__":
     }
 
     camera = Camera2(control_flags=control_flags)
-    video_path = '/dev/video9'
+    video_path = '/dev/video8'
     colors = ['blue', 'green', 'red', 'orange', 'white']
     camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, morph=True,
