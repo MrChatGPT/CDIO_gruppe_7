@@ -47,11 +47,11 @@ class ControlLogic:
     def collect_ball(self, data, color):
         # Get the initial waypoint data
         vector_waypoint = data.get(f'vector_to_{color}_waypoint_robot_frame')
-        distance_to_waypoint = data.get(f'distance_to_closest_{color}_waypoint')
+        distance_to_waypoint = data.get(
+            f'distance_to_closest_{color}_waypoint')
         angle_err_to_waypoint = data.get(f'angle_to_closest_{color}_waypoint')
         waypoints = data.get('arena_data')
 
-       
         # get ball data
         vector_ball = data.get(f'vector_to_{color}_ball_robot_frame')
         distance_to_ball = data.get(f'distance_to_closest_{color}_ball')
@@ -67,34 +67,36 @@ class ControlLogic:
         print(f"Angle error to {color}_ball: {angle_err_to_ball}")
         print('control flags:', self.control_flags)
 
-         # If the initial waypoint data is invalid, find the closest valid waypoint
+        # If the initial waypoint data is invalid, find the closest valid waypoint
         if (len(vector_waypoint) == 0):
             print("no balls reachable\n waypoint info = ", vector_waypoint)
             self.arena_check = True
             closest_waypoint = None
             min_distance = float('inf')
-            
+
             for waypoint in waypoints:
                 vector, distance, angle = waypoint
-                
+
                 if distance < min_distance:
                     min_distance = distance
                     closest_waypoint = waypoint
-            
+
             if closest_waypoint:
                 vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = closest_waypoint
 
             # Check if the current waypoint matches any waypoint, and find the next closest one
-            current_waypoint = (vector_waypoint, distance_to_waypoint, angle_err_to_waypoint)
-            waypoints_sorted_by_distance = sorted(waypoints, key=lambda wp: wp[1])
-            
+            current_waypoint = (
+                vector_waypoint, distance_to_waypoint, angle_err_to_waypoint)
+            waypoints_sorted_by_distance = sorted(
+                waypoints, key=lambda wp: wp[1])
+
             for wp in waypoints_sorted_by_distance:
                 if wp != current_waypoint:
                     vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = wp
                     break
 
         # print(data)
-        if(not self.arena_check):
+        if (not self.arena_check):
             try:
                 if not self.on_waypoint:
                     # reset control flags to false except for update_robot
@@ -191,7 +193,7 @@ class ControlLogic:
 
                     print('Uddating arena, robot and balls')
                     print('control flags:', self.control_flags)
-                    time.sleep(5)
+                    time.sleep(3)
                     self.on_waypoint = False
 
             except Exception as e:
@@ -201,8 +203,8 @@ class ControlLogic:
         else:
             try:
                 for key in self.control_flags.keys():
-                        if key != 'update_robot':
-                            self.control_flags[key] = False
+                    if key != 'update_robot':
+                        self.control_flags[key] = False
 
                 if distance_to_waypoint > self.distance_tolerance:
 
@@ -237,8 +239,6 @@ class ControlLogic:
                 print('Stopping robot')
                 self.stop_robot()
 
-            
-
     def stop_robot(self):
         self.controller.publish_control_data(0, 0, 0)
 
@@ -269,7 +269,6 @@ class ControlLogic:
             distance_to_waypoint = distancetwo_to_waypoint
             angle_err_to_waypoint = angletwo_err_to_waypoint
 
-        
         # print("\nGoing towards goal:\n")
         # print(f"Distance to waypoint: {distance_to_waypoint}")
         # print(f"Angle error to waypoint: {angle_err_to_waypoint}")
@@ -278,7 +277,7 @@ class ControlLogic:
         goal_toleration = self.distance_tolerance
 
         # print(data)
-        
+
         try:
             if not self.on_goal:
                 # reset control flags to false except for update_robot
@@ -303,7 +302,8 @@ class ControlLogic:
                         -distance_to_waypoint) * speed_scale
                     y = vector_waypoint[0] * speed
                     x = vector_waypoint[1] * speed
-                    print(f"\nx = {x}\ny = {y}\nspeed = {speed}\nspeed_scale = {speed_scale}")
+                    print(
+                        f"\nx = {x}\ny = {y}\nspeed = {speed}\nspeed_scale = {speed_scale}")
                     # set rotation to 0
                     rotation = 0
                     self.controller.publish_control_data(x, y, rotation)
@@ -316,7 +316,6 @@ class ControlLogic:
                 print("rotation: ", rotation)
                 # set x and y to 0
                 x = y = 0
-                # exit()
                 self.controller.publish_control_data(x, y, rotation)
             else:
                 print("Spitting out the balls")
@@ -324,7 +323,7 @@ class ControlLogic:
                 self.ball_out()
                 time.sleep(8)
                 self.stop_robot()
-                
+                time.sleep(3)
 
         except Exception as e:
             print(f"Error occurred in score_ball method: {e}")
@@ -336,7 +335,7 @@ if __name__ == "__main__":
     queue = Queue(maxsize=10)
     manager = Manager()
     video_path = "/dev/video8"
-    #video_path = 0
+    # video_path = 0
 
     broker_url = '192.168.1.101'
     broker_port = 1883
