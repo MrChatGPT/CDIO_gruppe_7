@@ -1,3 +1,5 @@
+import copy
+from re import T
 import cv2
 import numpy as np
 import math
@@ -11,10 +13,10 @@ class Camera2:
         self.hsv_ranges = {
             'red': (np.array([0, 120, 112]), np.array([180, 255, 255])),
             'white': (np.array([0, 0, 253]), np.array([180, 59, 255])),
-            'orange': (np.array([14, 112, 255]), np.array([19, 255, 255])),
+            'orange': (np.array([0, 75, 244]), np.array([6, 255, 255])),
             # 'blue': (np.array([90, 50, 0]), np.array([122, 255, 255]))
-            'blue': (np.array([22, 102, 238]), np.array([38, 204, 255])),
-            'green': (np.array([34, 67, 171]), np.array([80, 255, 255]))
+            'blue': (np.array([10, 39, 255]), np.array([29, 255, 255])),
+            'green': (np.array([45, 0, 0]), np.array([87, 255, 255]))
         }
 
         # Camera properties and frame data
@@ -83,6 +85,7 @@ class Camera2:
         self.corner_tolerance = 20  # percentage deviation tolerance for morph points
         self.arena_waypoints = []
         self.arena_data = []
+        self.manual_corners = True
 
         # Control flags
         self.control_flags = control_flags
@@ -932,7 +935,7 @@ class Camera2:
             target_frame, color=color, close=False, open=False, erode=False)
 
         sorted_contours = self.sort_contours_by_area(
-            contours, min_area=10, reverse=True)
+            contours, min_area=1, reverse=True)
 
         if not sorted_contours:
             return False
@@ -1052,40 +1055,52 @@ class Camera2:
                 # if self.update_arena:
                 if self.control_flags['update_arena']:
                     print("Updating arena corners and cross.")
-                    contours, hierarchy = self.mask_and_find_contours(
-                        self.frame, color='red', close=False, open=False, erode=False)
 
-                    sorted_contours = self.sort_contours_by_area(
-                        contours, min_area=50, reverse=True)
+                    if not self.manual_corners:
+                        contours, hierarchy = self.mask_and_find_contours(
+                            self.frame, color='red', close=False, open=False, erode=False)
 
-                    if len(sorted_contours) > 2:
+                        sorted_contours = self.sort_contours_by_area(
+                            contours, min_area=10, reverse=True)
 
-                        arena_contour, cross_contour = sorted_contours[1], sorted_contours[2]
+                        if len(sorted_contours) > 2:
 
-                        corners = self.find_sharpest_corners_2(arena_contour)
+                            arena_contour, cross_contour = sorted_contours[1], sorted_contours[2]
 
-                        if corners is not None and len(corners) == 4:
-                            corners = np.array([corner.ravel()
-                                                for corner in corners], dtype="float32")
+                            corners = self.find_sharpest_corners_2(
+                                arena_contour)
 
-                            self.four_point_transform(self.frame, corners)
+                            if corners is not None and len(corners) == 4:
+                                corners = np.array([corner.ravel()
+                                                    for corner in corners], dtype="float32")
 
-                            if cross_contour is not None:
-                                transformed_contour = cv2.perspectiveTransform(
-                                    cross_contour.reshape(-1, 1, 2).astype(np.float32), self.M).astype(int)
-                                self.fit_rotated_cross_to_contour(
-                                    transformed_contour)
+                                self.four_point_transform(self.frame, corners)
 
-                            # calculate arena waypoints
-                            # print("Calculating arena waypoints.")
-                            if self.morphed_frame is not None:
-                                self.find_arena_waypoints()
-                            # draw area waypoints on the self.morphed_frame
+                                if cross_contour is not None:
+                                    transformed_contour = cv2.perspectiveTransform(
+                                        cross_contour.reshape(-1, 1, 2).astype(np.float32), self.M).astype(int)
+                                    self.fit_rotated_cross_to_contour(
+                                        transformed_contour)
 
-                            # print(f"Arena waypoints: {self.arena_waypoints}")
+                                # calculate arena waypoints
+                                # print("Calculating arena waypoints.")
+                                if self.morphed_frame is not None:
+                                    self.find_arena_waypoints()
+
+                                # print(f"Arena waypoints: {self.arena_waypoints}")
+
+                            else:
+                                print("Failed to find corners.")
 
                     else:
-                        print("Failed to find corners.")
+                        self.four_point_transform(
+                            self.frame, self.last_valid_points)
+                        contours, hierarchy = self.mask_and_find_contours(
+                            self.frame, color='red', close=False, open=False, erode=False)
+                        sorted_contours = self.sort_contours_by_area(
+                            contours, min_area=50, reverse=True)
+                        cross_contour = sorted_contours[0]
+                        self.fit_rotated_cross_to_contour(cross_contour)
 
                 else:
                     self.four_point_transform(
@@ -1208,12 +1223,12 @@ class Camera2:
                     cv2.circle(self.morphed_frame, waypoint_coord,
                                5, (0, 255, 255), -1)
 
-                    cv2.line(self.morphed_frame, waypoint_coord,
-                             ball_center, (0, 255, 255), 2)
+                    # cv2.line(self.morphed_frame, waypoint_coord,
+                    #          ball_center, (0, 255, 255), 2)
 
-                    if self.robot_center is not None:
-                        cv2.line(self.morphed_frame, self.robot_center,
-                                 waypoint_coord, (0, 255, 255), 2)
+                    # if self.robot_center is not None:
+                    #     cv2.line(self.morphed_frame, self.robot_center,
+                    #              waypoint_coord, (0, 255, 255), 2)
         except Exception as e:
             print(f"Error drawing orange blobs: {e}")
 
@@ -1316,14 +1331,14 @@ class Camera2:
         # return
         self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
 
-    def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None):
+    def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None, manual_corners=False):
         print("Starting video stream...")
         self.morph = morph
+        self.manual_corners = manual_corners
 
         if self.cap is None:
             print(f"Opening video source {video_source}")
-            self.cap = cv2.VideoCapture(
-                video_source, cv2.CAP_V4L2)  # , cv2.CAP_V4L2
+            self.cap = cv2.VideoCapture(video_source, cv2.CAP_V4L2)
             if not self.cap.isOpened():
                 print(f"Error: Unable to open video source {video_source}")
                 return
@@ -1346,6 +1361,19 @@ class Camera2:
                 if resize:
                     self.frame = self.resize_frame(self.frame, width=resize)
 
+                if manual_corners and not first_valid_points_obtained:
+                    print("Manual corner selection enabled.")
+                    self.last_valid_points = self.find_corners_manual()
+                    self.four_point_transform(
+                        self.frame, self.last_valid_points)
+                    first_valid_points_obtained = True
+                    for key in self.control_flags.keys():
+                        self.control_flags[key] = False
+                    self.control_flags['update_robot'] = True
+                    self.process_frame()
+                    self.calibrate_robot()
+                    continue
+
                 if self.morph and not first_valid_points_obtained:
                     print("Obtaining initial points for morphing...")
 
@@ -1366,20 +1394,6 @@ class Camera2:
 
                     print('Processed initial frame')
 
-                    # print ball and robot initial ball centers
-                    print('White ball centers:', self.white_ball_centers)
-                    print('White ball waypoints:',
-                          self.waypoint_for_closest_white_ball)
-                    print('Blocked white ball centers:',
-                          self.blocked_white_centers)
-                    print('Orange ball centers:', self.orange_blob_centers)
-                    print('Orange ball waypoints:',
-                          self.waypoint_for_closest_orange_ball)
-                    print('Blocked orange ball centers:',
-                          self.blocked_orange_centers)
-                    print('Robot center:', self.robot_center)
-                    print('Last valid points:', self.last_valid_points)
-
                     # Check if last_valid_points is not None
                     print('Attempting to check if last_valid_points is not None')
                     if self.last_valid_points is not None:
@@ -1394,8 +1408,8 @@ class Camera2:
                             continue
                         elif key == ord('a'):
                             cv2.destroyWindow('Initial Frame')
-                            first_valid_points_obtained = True\
-                                # reset all flags to false except for update_robot
+                            first_valid_points_obtained = True
+                            # reset all flags to false except for update_robot
                             for key in self.control_flags.keys():
                                 self.control_flags[key] = False
                             self.control_flags['update_robot'] = True
@@ -1416,7 +1430,7 @@ class Camera2:
                     self.robot_center_calibrated = True
                     self.robot_angle_calibrated = True
                     self.robot_critical_length_calibrated = True
-                    # reset the control falgs to the original values
+                    # reset the control flags to the original values
                     for key in self.control_flags.keys():
                         self.control_flags[key] = temp_flags[key]
 
@@ -1590,13 +1604,13 @@ class Camera2:
             # Create trackbars once per color
             hsv_lower, hsv_upper = self.hsv_ranges[color]
             cv2.createTrackbar('H Lower', 'Calibration',
-                               int(hsv_lower[0]), 360, nothing)
+                               int(hsv_lower[0]), 180, nothing)
             cv2.createTrackbar('S Lower', 'Calibration',
                                int(hsv_lower[1]), 255, nothing)
             cv2.createTrackbar('V Lower', 'Calibration',
                                int(hsv_lower[2]), 255, nothing)
             cv2.createTrackbar('H Upper', 'Calibration',
-                               int(hsv_upper[0]), 360, nothing)
+                               int(hsv_upper[0]), 180, nothing)
             cv2.createTrackbar('S Upper', 'Calibration',
                                int(hsv_upper[1]), 255, nothing)
             cv2.createTrackbar('V Upper', 'Calibration',
@@ -1648,6 +1662,56 @@ class Camera2:
         print('exiting calibration')
         # self.cap.release()
 
+    def find_corners_manual(self):
+        def draw_corners(image, corners):
+            for i, corner in enumerate(corners):
+                cv2.circle(image, tuple(corner), 5, (0, 255, 0), -1)
+                cv2.putText(image, str(i), tuple(corner),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+
+        frame_height, frame_width = self.frame.shape[:2]
+
+        # Initial guess: corners close to the frame corners
+        corners = [
+            (20, 20),  # Top-left
+            (frame_width - 20, 20),  # Top-right
+            (frame_width - 20, frame_height - 20),  # Bottom-right
+            (20, frame_height - 20)  # Bottom-left
+        ]
+
+        selected_corner = 0
+
+        while True:
+            frame_copy = self.frame.copy()
+            draw_corners(frame_copy, corners)
+            cv2.imshow("Select Corners", frame_copy)
+
+            key = cv2.waitKey(0) & 0xFF
+            if key == ord('q'):
+                break
+            elif key == ord('a'):  # Move selected corner left
+                corners[selected_corner] = (
+                    corners[selected_corner][0] - 1, corners[selected_corner][1])
+            elif key == ord('d'):  # Move selected corner right
+                corners[selected_corner] = (
+                    corners[selected_corner][0] + 1, corners[selected_corner][1])
+            elif key == ord('w'):  # Move selected corner up
+                corners[selected_corner] = (
+                    corners[selected_corner][0], corners[selected_corner][1] - 1)
+            elif key == ord('s'):  # Move selected corner down
+                corners[selected_corner] = (
+                    corners[selected_corner][0], corners[selected_corner][1] + 1)
+            elif key == ord('n'):  # Select next corner
+                selected_corner = (selected_corner + 1) % 4
+
+        cv2.destroyWindow("Select Corners")
+
+        # Order points: top-left, top-right, bottom-right, bottom-left
+        corners = np.array(corners, dtype="float32")
+        rect = self.order_points(corners)
+        self.last_valid_points = rect
+        return self.last_valid_points
+
 
 def camera_process(queue, video_path, control_flags):
     print("Starting camera process...")
@@ -1673,4 +1737,4 @@ if __name__ == "__main__":
     colors = ['blue', 'green', 'red', 'orange', 'white']
     camera.calibrate_color(colors, video_path, resize=False)
     camera.start_video_stream(video_path, morph=True,
-                              record=False, resize=False)
+                              record=False, resize=False, manual_corners=False)

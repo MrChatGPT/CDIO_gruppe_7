@@ -336,7 +336,7 @@ if __name__ == "__main__":
     controller = Controller(broker_url, broker_port, topic)
 
     translation_pid = PID(Kp=0.03, Ki=0.000, Kd=0.001, setpoint=0)
-    rotation_pid = PID(Kp=0.01, Ki=0.02, Kd=0.01, setpoint=0)
+    rotation_pid = PID(Kp=0.01, Ki=0.015, Kd=0.01, setpoint=0)
 
     translation_pid.output_limits = (0.25, 1)
     rotation_pid.output_limits = (-0.3, 0.3)
