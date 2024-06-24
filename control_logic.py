@@ -164,14 +164,12 @@ class ControlLogic:
                 self.ball_in()
                 self.stop_robot()
 
-               
                 # set control flags to true
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
 
                 print('Uddating arena, robot and balls')
                 print('control flags:', self.control_flags)
-                time.sleep(3)
                 self.on_waypoint = False
                 if (self.ball_count % 4 == 0): # or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
                     self.to_goal = True
