@@ -190,7 +190,10 @@ class ControlLogic:
 
 
         try:
-            #find closest waypoint:
+            #find closest waypoint, mangler ydre if....:
+            for key in self.control_flags.keys():
+                    if key != 'update_robot':
+                        self.control_flags[key] = False
             if(distance_to_waypoint < 6 or None):
                 print("We're choosing an arena waypoint...")
                 for i, waypoint in enumerate(waypoints):
@@ -230,7 +233,7 @@ class ControlLogic:
                 # set control flags to true
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
-
+                
                 time.sleep(0.1)
                 self.arena_check = False
 
@@ -311,6 +314,8 @@ class ControlLogic:
             else:
                 print("Spitting out the balls")
                 self.to_goal = False
+                for key in self.control_flags.keys():
+                    self.control_flags[key] = True
                 self.ball_out()
                 self.stop_robot()
                 time.sleep(3)
