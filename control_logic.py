@@ -36,7 +36,7 @@ class ControlLogic:
                 if data:
                     if not self.to_goal:
                         self.collect_ball(data, color='white')
-                    # if not self.to_goal and self.arena_check:
+                    # if self.arena_check:
                     #     self.to_arena_waypoint(data)
                     else:
                         self.score_ball(data)
@@ -183,21 +183,22 @@ class ControlLogic:
 
     def to_arena_waypoint(self, data):
         waypoints = data.get('arena_data')
-        if not waypoints:
-            print("No waypoints available.")
-            return
 
         min_distance = float('inf')
+        
+        vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = self.closest_waypoint
+
 
         try:
-            # I assume this is meant to indicate if it's the first time running this method.
-            if self.arena_first_way:
+            #find closest waypoint:
+            if(distance_to_waypoint < 6 or None):
+                print("We're choosing an arena waypoint...")
                 for i, waypoint in enumerate(waypoints):
                     vector, distance, angle = waypoint
 
-                    if distance < min_distance:
-                        min_distance = distance
-                        self.closest_waypoint = waypoint
+                if distance < min_distance:
+                    min_distance = distance
+                    self.closest_waypoint = waypoint
 
                 if len(self.closest_waypoint) > 0 and self.closest_waypoint[1] < 5:
                     # Check if there is a next waypoint to move to
@@ -210,10 +211,9 @@ class ControlLogic:
                             self.closest_waypoint) - 1
                         if previous_index >= 0:
                             self.closest_waypoint = waypoints[previous_index]
-                vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = self.closest_waypoint
-                self.arena_first_way = False
-
+            
             if distance_to_waypoint > self.distance_tolerance:
+                print("we're translating to closest arena_waypoint...")
                 direction_angle = math.degrees(math.atan2(
                     vector_waypoint[1], vector_waypoint[0]))
                 speed_scale = 1 if 45 <= abs(direction_angle) <= 135 else 0.5
