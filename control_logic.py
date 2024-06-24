@@ -26,6 +26,8 @@ class ControlLogic:
         self.to_goal = False
         self.arena_check = False
         self.on_goal = False
+        self.arena_first_way = False
+        self.closest_waypoint = None
 
     def run(self):
         while True:
@@ -34,6 +36,8 @@ class ControlLogic:
                 if data:
                     if not self.to_goal:
                         self.collect_ball(data, color='white')
+                    if not self.to_goal and self.arena_check:
+                        self.to_arena_waypoint(data)
                     else:
                         self.score_ball(data)
                 else:
@@ -49,7 +53,7 @@ class ControlLogic:
         vector_waypoint = data.get(f'vector_to_{color}_waypoint_robot_frame')
         distance_to_waypoint = data.get(f'distance_to_closest_{color}_waypoint')
         angle_err_to_waypoint = data.get(f'angle_to_closest_{color}_waypoint')
-        waypoints = data.get('arena_data')
+       
 
         # get ball data
         vector_ball = data.get(f'vector_to_{color}_ball_robot_frame')
@@ -66,37 +70,12 @@ class ControlLogic:
         print(f"Angle error to {color}_ball: {angle_err_to_ball}")
         print('control flags:', self.control_flags)
 
-        # If the initial waypoint data is invalid, find the closest valid waypoint
         if (len(vector_waypoint) == 0):
-            print("no balls reachable\n waypoint info = ", vector_waypoint)
             self.arena_check = True
-            closest_waypoint = None
-            min_distance = float('inf')
+            self.arena_first_way = True
+            return
 
-            for waypoint in waypoints:
-                vector, distance, angle = waypoint
-
-                if distance < min_distance:
-                    min_distance = distance
-                    closest_waypoint = waypoint
-
-            if closest_waypoint:
-                vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = closest_waypoint
-
-            # Check if the current waypoint matches any waypoint, and find the next closest one
-            current_waypoint = (
-                vector_waypoint, distance_to_waypoint, angle_err_to_waypoint)
-            waypoints_sorted_by_distance = sorted(
-                waypoints, key=lambda wp: wp[1])
-
-            for wp in waypoints_sorted_by_distance:
-                if wp != current_waypoint:
-                    vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = wp
-                    break
-
-        # print(data)
-        if (not self.arena_check):
-            try:
+        try:
                 if not self.on_waypoint:
                     # reset control flags to false except for update_robot
                     for key in self.control_flags.keys():
@@ -195,48 +174,64 @@ class ControlLogic:
                     time.sleep(3)
                     self.on_waypoint = False
 
-            except Exception as e:
-                print(f"Error occurred in collect_ball method: {e}")
-                print('Stopping robot')
-                self.stop_robot()
-        else:
-            try:
-                for key in self.control_flags.keys():
-                    if key != 'update_robot':
-                        self.control_flags[key] = False
+        except Exception as e:
+            print(f"Error occurred in collect_ball method: {e}")
+            print('Stopping robot')
+            self.stop_robot()
 
-                if distance_to_waypoint > self.distance_tolerance:
 
-                    # Calculate the direction angle using the normalized orange_waypoint vector
-                    direction_angle = math.degrees(math.atan2(
-                        vector_waypoint[1], vector_waypoint[0]))
+def to_arena_waypoint(self, data):
+    waypoints = data.get('arena_data')
+    if not waypoints:
+        print("No waypoints available.")
+        return
 
-                    # Determine if the robot is moving straight or diagonally
-                    if 45 <= abs(direction_angle) <= 135:
-                        speed_scale = 1  # Scale factor for diagonal movements
-                    else:
-                        speed_scale = 0.5  # Scale factor for straight movements
+    min_distance = float('inf')
 
-                    # Calculate the speed using the distance to the waypoint
-                    speed = self.pid_translation(
-                        -distance_to_waypoint) * speed_scale
-                    y = vector_waypoint[0] * speed
-                    x = vector_waypoint[1] * speed
+    try:
+        if self.arena_first_way:  # I assume this is meant to indicate if it's the first time running this method.
+            for i, waypoint in enumerate(waypoints):
+                vector, distance, angle = waypoint
 
-                    # set rotation to 0
-                    rotation = 0
-                    self.controller.publish_control_data(x, y, rotation)
+                if distance < min_distance:
+                    min_distance = distance
+                    self.closest_waypoint = waypoint
 
+            if self.closest_waypoint and self.closest_waypoint[1] < 5:
+                # Check if there is a next waypoint to move to
+                next_index = waypoints.index(self.closest_waypoint) + 1
+                if next_index < len(waypoints):
+                    self.closest_waypoint = waypoints[next_index]
                 else:
-                    self.stop_robot()
-                    print(f"Reached {color}_waypoint")
-                    time.sleep(1)
-                    self.arena_check = False
+                    # Optional: move to the previous waypoint if no next waypoint exists
+                    previous_index = waypoints.index(self.closest_waypoint) - 1
+                    if previous_index >= 0:
+                        self.closest_waypoint = waypoints[previous_index]
 
-            except Exception as e:
-                print(f"Error occurred in arena_waypoint: {e}")
-                print('Stopping robot')
-                self.stop_robot()
+            self.arena_first_way = False
+
+        if self.closest_waypoint:
+            vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = self.closest_waypoint
+            print("Waypoint: ", self.closest_waypoint)
+
+        if distance_to_waypoint > self.distance_tolerance:
+            direction_angle = math.degrees(math.atan2(vector_waypoint[1], vector_waypoint[0]))
+            speed_scale = 1 if 45 <= abs(direction_angle) <= 135 else 0.5
+            speed = self.pid_translation(-distance_to_waypoint) * speed_scale
+            y = vector_waypoint[0] * speed
+            x = vector_waypoint[1] * speed
+            rotation = 0
+            self.controller.publish_control_data(x, y, rotation)
+        else:
+            self.stop_robot()
+            self.closest_waypoint = None
+            print("\n\nReached arena_waypoint!!!\n\n")
+            time.sleep(0.1)
+            self.arena_check = False
+
+    except Exception as e:
+        print(f"Error occurred in arena_waypoint: {e}")
+        self.stop_robot()
 
     def stop_robot(self):
         self.controller.publish_control_data(0, 0, 0)
