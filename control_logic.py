@@ -184,13 +184,28 @@ class ControlLogic:
     def score_ball(self, data):
         print("Moving to waypoint in front of goal")
         
-        # get waypoint data
-        vector_waypoint = data.get(f'vector_to_goal_waypoint')
-        distance_to_waypoint = data.get(
-            f'distance_to_goal_waypoint')
-        angle_err_to_waypoint = data.get(f'angle_to_goal_waypoint')
+        waypoints = data.get(f'arena_waypoints')
+        vectorone_waypoint = waypoints[0][0]
+        vectortwo_waypoint = waypoints[4][0]
+        
+        distanceone_to_waypoint = waypoints[0][1]
+        distancetwo_to_waypoint = waypoints[4][1]
+
+        angleone_err_to_waypoint = waypoints[0][2]
+        angletwo_err_to_waypoint = waypoints[4][2]
+
+        if(distanceone_to_waypoint<distancetwo_to_waypoint):
+            vector_waypoint = vectorone_waypoint
+            distance_to_waypoint = distanceone_to_waypoint
+            angle_err_to_waypoint = angleone_err_to_waypoint
+        else:
+            vector_waypoint = vectortwo_waypoint
+            distance_to_waypoint = distancetwo_to_waypoint
+            angle_err_to_waypoint = angletwo_err_to_waypoint
+
         goal_toleration = self.distance_tolerance-15
-        self.to_goal = True
+
+        
         # print(data)
         on_goal = False
         try:
