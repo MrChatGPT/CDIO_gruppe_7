@@ -248,7 +248,6 @@ class ControlLogic:
         self.controller.publish_control_data(0, 0, 0, 0, 1)
 
     def score_ball(self, data):
-        # print("Moving to waypoint in front of goal")
 
         waypoints = data.get(f'arena_data')
         vectorone_waypoint = waypoints[0][0]
@@ -326,8 +325,6 @@ class ControlLogic:
             print(f"Error occurred in score_ball method: {e}")
             print('Stopping robot')
             self.stop_robot()
-
-        # drive to waypoint, fix angle, and send ball_out
 
 
 if __name__ == "__main__":
