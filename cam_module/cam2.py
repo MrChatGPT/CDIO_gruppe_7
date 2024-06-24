@@ -1310,7 +1310,7 @@ class Camera2:
 
         if self.cap is None:
             print(f"Opening video source {video_source}")
-            self.cap = cv2.VideoCapture(video_source)  # , cv2.CAP_V4L2
+            self.cap = cv2.VideoCapture(video_source, cv2.CAP_V4L2)  # , cv2.CAP_V4L2
             if not self.cap.isOpened():
                 print(f"Error: Unable to open video source {video_source}")
                 return
@@ -1538,7 +1538,7 @@ class Camera2:
             pass
 
         try:
-            self.cap = cv2.VideoCapture(video_path)  # , cv2.CAP_V4L2
+            self.cap = cv2.VideoCapture(video_path, cv2.CAP_V4L2)  # , cv2.CAP_V4L2
             self.cap.set(cv2.CAP_PROP_FPS, 40)
         except Exception as e:
             print(f"Error: Unable to open video source {video_path}")
