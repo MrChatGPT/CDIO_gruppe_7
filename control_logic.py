@@ -44,7 +44,7 @@ class ControlLogic:
                 break
 
     def collect_ball(self, data, color):
-    # Get the initial waypoint data
+        # Get the initial waypoint data
         vector_waypoint = data.get(f'vector_to_{color}_waypoint_robot_frame')
         distance_to_waypoint = data.get(f'distance_to_closest_{color}_waypoint')
         angle_err_to_waypoint = data.get(f'angle_to_closest_{color}_waypoint')
@@ -268,7 +268,7 @@ class ControlLogic:
             vector_waypoint = vectortwo_waypoint
             distance_to_waypoint = distancetwo_to_waypoint
             angle_err_to_waypoint = angletwo_err_to_waypoint
-
+        print("\nGoing towards goal:\n")
         print(f"Distance to waypoint: {distance_to_waypoint}")
         print(f"Angle error to waypoint: {angle_err_to_waypoint}")
         print('vector to waypoint:', vector_waypoint)
