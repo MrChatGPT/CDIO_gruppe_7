@@ -321,7 +321,6 @@ class ControlLogic:
                 print("Spitting out the balls")
                 self.to_goal = False
                 self.ball_out()
-                time.sleep(8)
                 self.stop_robot()
                 time.sleep(3)
 
