@@ -171,7 +171,7 @@ class ControlLogic:
                 print('Uddating arena, robot and balls')
                 print('control flags:', self.control_flags)
                 self.on_waypoint = False
-                if (self.ball_count % 4 == 0) or ((len(white_balls) == 0) and (len(blocked_balls) == 0)):
+                if (self.ball_count % 4 == 0): # or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
                     self.to_goal = True
                 time.sleep(3)
                 return
