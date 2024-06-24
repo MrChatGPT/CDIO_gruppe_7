@@ -196,7 +196,7 @@ class ControlLogic:
                         min_distance = distance
                         self.closest_waypoint = waypoint
 
-                if self.closest_waypoint and self.closest_waypoint[1] < 5:
+                if len(self.closest_waypoint)>0 and self.closest_waypoint[1] < 5:
                     # Check if there is a next waypoint to move to
                     next_index = waypoints.index(self.closest_waypoint) + 1
                     if next_index < len(waypoints):
@@ -206,12 +206,8 @@ class ControlLogic:
                         previous_index = waypoints.index(self.closest_waypoint) - 1
                         if previous_index >= 0:
                             self.closest_waypoint = waypoints[previous_index]
-
-                self.arena_first_way = False
-
-            if self.closest_waypoint:
                 vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = self.closest_waypoint
-                print("Waypoint: ", self.closest_waypoint)
+                self.arena_first_way = False
 
             if distance_to_waypoint > self.distance_tolerance:
                 direction_angle = math.degrees(math.atan2(vector_waypoint[1], vector_waypoint[0]))
@@ -225,6 +221,10 @@ class ControlLogic:
                 self.stop_robot()
                 self.closest_waypoint = None
                 print("\n\nReached arena_waypoint!!!\n\n")
+                # set control flags to true
+                for key in self.control_flags.keys():
+                    self.control_flags[key] = True
+               
                 time.sleep(0.1)
                 self.arena_check = False
 
