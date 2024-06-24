@@ -22,13 +22,19 @@ class ControlLogic:
         self.angle_tolerance = 2
         self.pid_scaling_factor = 0.5
         self.control_flags = control_flags
+        self.ball_count = 0
+        self.to_goal = False
 
     def run(self):
         while True:
             try:
                 data = self.queue.get_nowait()
                 if data:
-                    self.collect_ball(data, color='white')
+                    if not self.to_goal: 
+                        self.score_ball(data)
+                    else:
+                        self.collect_ball(data, color='white')
+                       
                 else:
                     self.stop_robot()
             except Empty:
@@ -142,11 +148,16 @@ class ControlLogic:
                 self.pid_translation.Ki = self.pid_translation.Ki / self.pid_scaling_factor
                 self.pid_translation.Kd = self.pid_translation.Kd / self.pid_scaling_factor
                 # Collect the ball
-
+                self.ball_count = self.ball_count+1
+                #get data:
+                white_balls = data.get(f'white_ball_centers')
+                blocked_balls = data.get(f'blocked_white_centers')
                 print(f"picking up {color} ball")
                 self.ball_in()
-
                 self.stop_robot()
+
+                if (self.ball_count % 4 == 0) or ((len(white_balls)==0) and (len(blocked_balls)==0)):
+                    self.to_goal = True
                 # set control flags to true
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
@@ -166,6 +177,81 @@ class ControlLogic:
 
     def ball_in(self):
         self.controller.publish_control_data(0, 0, 0, 1, 0)
+
+    def ball_out(self):
+        self.controller.publish_control_data(0, 0, 0, 0, 1)
+
+    def score_ball(self, data):
+        print("Moving to waypoint in front of goal")
+        
+        # get waypoint data
+        vector_waypoint = data.get(f'vector_to_goal_waypoint')
+        distance_to_waypoint = data.get(
+            f'distance_to_goal_waypoint')
+        angle_err_to_waypoint = data.get(f'angle_to_goal_waypoint')
+        goal_toleration = self.distance_tolerance-15
+        self.to_goal = True
+        # print(data)
+        on_goal = False
+        try:
+            if not on_goal:
+                # reset control flags to false except for update_robot
+                for key in self.control_flags.keys():
+                    if key != 'update_robot':
+                        self.control_flags[key] = False
+
+                if distance_to_waypoint > goal_toleration:
+
+                    # Calculate the direction angle using the normalized orange_waypoint vector
+                    direction_angle = math.degrees(math.atan2(
+                        vector_waypoint[1], vector_waypoint[0]))
+
+                    # Determine if the robot is moving straight or diagonally
+                    if 45 <= abs(direction_angle) <= 135:
+                        speed_scale = 1  # Scale factor for diagonal movements
+                    else:
+                        speed_scale = 0.5  # Scale factor for straight movements
+
+                    # Calculate the speed using the distance to the waypoint
+                    speed = self.pid_translation(
+                        -distance_to_waypoint) * speed_scale
+                    y = vector_waypoint[0] * speed
+                    x = vector_waypoint[1] * speed
+
+                    # set rotation to 0
+                    rotation = 0
+                    self.controller.publish_control_data(x, y, rotation)
+                else:
+                    on_goal = True
+
+            elif abs(angle_err_to_waypoint) > self.angle_tolerance:
+                    rotation = -self.pid_rotation(angle_err_to_waypoint)
+
+                    # set x and y to 0
+                    x = y = 0
+
+                    self.controller.publish_control_data(x, y, rotation)
+            else:
+                 print("Spitting out the balls")
+                 self.to_goal = False 
+                 self.ball_out()
+                 self.stop_robot()
+                        
+                    
+        except Exception as e:
+            print(f"Error occurred in score_ball method: {e}")
+            print('Stopping robot')
+            self.stop_robot()
+
+
+        #drive to waypoint, fix angle, and send ball_out
+       
+
+
+          
+
+        
+
 
 
 if __name__ == "__main__":
