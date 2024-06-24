@@ -25,6 +25,7 @@ class ControlLogic:
         self.ball_count = 0
         self.to_goal = False
         self.arena_check = False
+        self.on_goal = False
 
     def run(self):
         while True:
@@ -277,9 +278,9 @@ class ControlLogic:
         goal_toleration = self.distance_tolerance-15
 
         # print(data)
-        on_goal = False
+        
         try:
-            if not on_goal:
+            if not self.on_goal:
                 # reset control flags to false except for update_robot
                 for key in self.control_flags.keys():
                     if key != 'update_robot':
@@ -307,7 +308,7 @@ class ControlLogic:
                     rotation = 0
                     self.controller.publish_control_data(x, y, rotation)
                 else:
-                    on_goal = True
+                    self.on_goal = True
 
             elif abs(angle_err_to_waypoint) > self.angle_tolerance:
                 rotation = -self.pid_rotation(angle_err_to_waypoint)
