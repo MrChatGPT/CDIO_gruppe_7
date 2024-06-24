@@ -315,7 +315,7 @@ class ControlLogic:
                 print("rotation: ", rotation)
                 # set x and y to 0
                 x = y = 0
-
+                exit()
                 self.controller.publish_control_data(x, y, rotation)
             else:
                 print("Spitting out the balls")
