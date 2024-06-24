@@ -240,7 +240,7 @@ class ControlLogic:
             
 
     def stop_robot(self):
-        self.controller.publish_control_data(0, 0, 0, 0, 0)
+        self.controller.publish_control_data(0, 0, 0)
 
     def ball_in(self):
         self.controller.publish_control_data(0, 0, 0, 1, 0)
@@ -322,7 +322,9 @@ class ControlLogic:
                 print("Spitting out the balls")
                 self.to_goal = False
                 self.ball_out()
+                time.sleep(8)
                 self.stop_robot()
+                
 
         except Exception as e:
             print(f"Error occurred in score_ball method: {e}")
