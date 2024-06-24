@@ -56,7 +56,7 @@ class Camera2:
         self.vector_to_orange_waypoint_robot_frame = []
 
         # Robot properties
-        self.robot_radius_scale_factor = 4
+        self.robot_radius_scale_factor = 1.5
         self.green_centers = []
         self.blue_centers = []
         self.robot_center = None
@@ -393,6 +393,10 @@ class Camera2:
 
             self.white_ball_centers = self.find_centers_in_contour_list(
                 sorted_contours[1:11] if len(sorted_contours) > 1 else [])
+
+            # append orange center to white ball centers
+            if self.orange_blob_centers:
+                self.white_ball_centers.append(self.orange_blob_centers[0])
 
             # Remove balls within robot radius of robot center
             if self.robot_center is not None and self.robot_radius is not None:
@@ -1209,28 +1213,28 @@ class Camera2:
         except Exception as e:
             print(f"Error drawing cross lines: {e}")
 
-        try:  # Draw orange ball centers
-            if self.orange_blob_centers is not None:
-                for center in self.orange_blob_centers:
-                    cv2.circle(self.morphed_frame, center, 5, (0, 255, 0), -1)
+        # try:  # Draw orange ball centers
+        #     if self.orange_blob_centers is not None:
+        #         for center in self.orange_blob_centers:
+        #             cv2.circle(self.morphed_frame, center, 5, (0, 255, 0), -1)
 
-                if self.waypoint_for_closest_orange_ball:
-                    nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
+        #         if self.waypoint_for_closest_orange_ball:
+        #             nearest_waypoint = self.waypoint_for_closest_orange_ball[0]
 
-                    waypoint_coord = nearest_waypoint[0]
-                    ball_center = nearest_waypoint[1]
+        #             waypoint_coord = nearest_waypoint[0]
+        #             ball_center = nearest_waypoint[1]
 
-                    cv2.circle(self.morphed_frame, waypoint_coord,
-                               5, (0, 255, 255), -1)
+        #             cv2.circle(self.morphed_frame, waypoint_coord,
+        #                        5, (0, 255, 255), -1)
 
-                    # cv2.line(self.morphed_frame, waypoint_coord,
-                    #          ball_center, (0, 255, 255), 2)
+        #             # cv2.line(self.morphed_frame, waypoint_coord,
+        #             #          ball_center, (0, 255, 255), 2)
 
-                    # if self.robot_center is not None:
-                    #     cv2.line(self.morphed_frame, self.robot_center,
-                    #              waypoint_coord, (0, 255, 255), 2)
-        except Exception as e:
-            print(f"Error drawing orange blobs: {e}")
+        #             # if self.robot_center is not None:
+        #             #     cv2.line(self.morphed_frame, self.robot_center,
+        #             #              waypoint_coord, (0, 255, 255), 2)
+        # except Exception as e:
+        #     print(f"Error drawing orange blobs: {e}")
 
         try:  # Draw robot center and direction
             if self.robot_center is not None:
@@ -1328,7 +1332,7 @@ class Camera2:
             print(f"Error drawing green centers: {e}")
 
     def preprocess_frame(self):
-        # return
+        return
         self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
 
     def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None, manual_corners=False):

@@ -171,7 +171,8 @@ class ControlLogic:
                 print('Uddating arena, robot and balls')
                 print('control flags:', self.control_flags)
                 self.on_waypoint = False
-                if (self.ball_count % 4 == 0): # or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
+                # or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
+                if (self.ball_count % 4 == 0):
                     self.to_goal = True
                 time.sleep(3)
                 return
@@ -346,8 +347,8 @@ if __name__ == "__main__":
     topic = "robot/control"
     controller = Controller(broker_url, broker_port, topic)
 
-    translation_pid = PID(Kp=0.04, Ki=0.000, Kd=0.001, setpoint=0)
-    rotation_pid = PID(Kp=0.01, Ki=0.01, Kd=0.01, setpoint=0)
+    translation_pid = PID(Kp=0.05, Ki=0.000, Kd=0.001, setpoint=0)
+    rotation_pid = PID(Kp=0.01, Ki=0.015, Kd=0.00, setpoint=0)
 
     translation_pid.output_limits = (0.25, 1)
     rotation_pid.output_limits = (-0.3, 0.3)
