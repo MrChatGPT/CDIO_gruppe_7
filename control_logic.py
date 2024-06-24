@@ -270,10 +270,10 @@ class ControlLogic:
             angle_err_to_waypoint = angletwo_err_to_waypoint
 
         
-        print("\nGoing towards goal:\n")
-        print(f"Distance to waypoint: {distance_to_waypoint}")
-        print(f"Angle error to waypoint: {angle_err_to_waypoint}")
-        print(f'vector to waypoint: {vector_waypoint}')
+        # print("\nGoing towards goal:\n")
+        # print(f"Distance to waypoint: {distance_to_waypoint}")
+        # print(f"Angle error to waypoint: {angle_err_to_waypoint}")
+        # print(f'vector to waypoint: {vector_waypoint}')
 
         goal_toleration = self.distance_tolerance-15
 
@@ -308,6 +308,7 @@ class ControlLogic:
                     rotation = 0
                     self.controller.publish_control_data(x, y, rotation)
                 else:
+                    print("waypoint to goal reached!")
                     self.on_goal = True
 
             elif abs(angle_err_to_waypoint) > self.angle_tolerance:
