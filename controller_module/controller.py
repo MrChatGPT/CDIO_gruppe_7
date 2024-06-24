@@ -95,6 +95,7 @@ class Controller:
     def publish_control_data(self, x, y, rotation, int1=0, int2=0):
         wheel_speeds = self.calculate_wheel_speeds(x, y, rotation)
         control_data = (wheel_speeds, int1, int2)
+        print("Control_data = ", control_data)
         self.mqtt_client.publish(self.topic, control_data)
 
 

@@ -250,14 +250,14 @@ class ControlLogic:
     def score_ball(self, data):
 
         waypoints = data.get(f'arena_data')
-        vectorone_waypoint = waypoints[0][0]
-        vectortwo_waypoint = waypoints[4][0]
+        vectorone_waypoint = waypoints[2][0]
+        vectortwo_waypoint = waypoints[5][0]
 
-        distanceone_to_waypoint = waypoints[0][1]
-        distancetwo_to_waypoint = waypoints[4][1]
+        distanceone_to_waypoint = waypoints[2][1]
+        distancetwo_to_waypoint = waypoints[5][1]
 
-        angleone_err_to_waypoint = waypoints[0][2]
-        angletwo_err_to_waypoint = waypoints[4][2]
+        angleone_err_to_waypoint = waypoints[2][2]
+        angletwo_err_to_waypoint = waypoints[5][2]
 
         if (distanceone_to_waypoint < distancetwo_to_waypoint):
             vector_waypoint = vectorone_waypoint
@@ -273,6 +273,7 @@ class ControlLogic:
         print(f"Distance to waypoint: {distance_to_waypoint}")
         print(f"Angle error to waypoint: {angle_err_to_waypoint}")
         print(f'vector to waypoint: {vector_waypoint}')
+
         goal_toleration = self.distance_tolerance-15
 
         # print(data)
@@ -310,7 +311,7 @@ class ControlLogic:
 
             elif abs(angle_err_to_waypoint) > self.angle_tolerance:
                 rotation = -self.pid_rotation(angle_err_to_waypoint)
-
+                print("rotation: ", rotation)
                 # set x and y to 0
                 x = y = 0
 
@@ -330,7 +331,8 @@ class ControlLogic:
 if __name__ == "__main__":
     queue = Queue(maxsize=10)
     manager = Manager()
-    video_path = "/dev/video8"
+    #video_path = "/dev/video8"
+    video_path = 0
 
     broker_url = '192.168.1.101'
     broker_port = 1883
