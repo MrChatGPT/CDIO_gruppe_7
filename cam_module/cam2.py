@@ -9,10 +9,11 @@ import queue
 class Camera2:
     def __init__(self, control_flags):
         self.hsv_ranges = {
-            'red': (np.array([0, 90, 62]), np.array([18, 255, 255])),
+            'red': (np.array([0, 120, 112]), np.array([180, 255, 255])),
             'white': (np.array([0, 0, 253]), np.array([180, 59, 255])),
-            'orange': (np.array([7, 132, 255]), np.array([35, 255, 255])),
-            'blue': (np.array([90, 50, 0]), np.array([122, 255, 255])),
+            'orange': (np.array([14, 112, 255]), np.array([19, 255, 255])),
+            # 'blue': (np.array([90, 50, 0]), np.array([122, 255, 255]))
+            'blue': (np.array([22, 102, 238]), np.array([38, 204, 255])),
             'green': (np.array([34, 67, 171]), np.array([80, 255, 255]))
         }
 
@@ -176,7 +177,7 @@ class Camera2:
             mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         return contours, hierarchy
 
-    def find_sharpest_corners(self, contour, num_corners=4):
+    def find_sharpest_corners_1(self, contour, num_corners=4):
         try:
             # Create a blank mask with the same size as the frame
             mask = np.zeros_like(self.frame, dtype=np.uint8)
@@ -341,6 +342,17 @@ class Camera2:
         # Filter contours based on the minimum area of the bounding rectangle
         return [contour for contour in sorted_contours if cv2.minAreaRect(contour)[1][0] * cv2.minAreaRect(contour)[1][1] >= min_area]
 
+    def sort_contours_by_area(self, contours, min_area=10, reverse=True):
+        # Sort contours based on the area
+        sorted_contours = sorted(
+            contours, key=cv2.contourArea, reverse=reverse)
+
+        # Filter contours based on the minimum area
+        filtered_contours = [
+            contour for contour in sorted_contours if cv2.contourArea(contour) >= min_area]
+
+        return filtered_contours
+
     def find_centers_in_contour_list(self, contours):
         centers = []
         for contour in contours:
@@ -359,7 +371,7 @@ class Camera2:
                 target_frame, color='white', erode=False, open=False, close=False)
 
             # Sort contours by length
-            sorted_contours = self.sort_contours_by_bounding_box_area(
+            sorted_contours = self.sort_contours_by_area(
                 contours, min_area=0.3*self.orange_blob_area, reverse=True)
 
             if not sorted_contours:
@@ -919,8 +931,8 @@ class Camera2:
         contours, _ = self.mask_and_find_contours(
             target_frame, color=color, close=False, open=False, erode=False)
 
-        sorted_contours = self.sort_contours_by_bounding_box_area(
-            contours, min_area=5, reverse=True)
+        sorted_contours = self.sort_contours_by_area(
+            contours, min_area=10, reverse=True)
 
         if not sorted_contours:
             return False
@@ -1043,7 +1055,7 @@ class Camera2:
                     contours, hierarchy = self.mask_and_find_contours(
                         self.frame, color='red', close=False, open=False, erode=False)
 
-                    sorted_contours = self.sort_contours_by_min_area_rect(
+                    sorted_contours = self.sort_contours_by_area(
                         contours, min_area=50, reverse=True)
 
                     if len(sorted_contours) > 2:
@@ -1145,7 +1157,7 @@ class Camera2:
                         cv2.line(self.morphed_frame, self.robot_center,
                                  waypoint_coord, (0, 255, 255), 2)
 
-                    # #  draw vector to waypoint
+                    #  draw vector to waypoint
                     # if self.vector_to_white_waypoint_robot_frame is not None:
                     #     scale_factor = 50
                     #     end_point = tuple(map(int, np.array(
@@ -1234,20 +1246,20 @@ class Camera2:
         except Exception as e:
             print(f"Error drawing last valid points: {e}")
 
-        # try:  # Draw text
+        try:  # Draw text
 
-        #     # Draw the angle to the closest white ball
-        #     if self.robot_center is not None:
-        #         cv2.putText(self.morphed_frame, f"{self.angle_to_closest_white_ball:.1f} deg",
-        #                     self.robot_center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            # Draw the angle to the closest white ball
+            if self.robot_center is not None:
+                cv2.putText(self.morphed_frame, f"{self.angle_to_closest_white_ball:.1f} deg",
+                            self.robot_center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-        #     # Draw the distance to the closest white ball
-        #     if self.waypoint_for_closest_white_ball is not None:
-        #         nearest_waypoint = self.waypoint_for_closest_white_ball[0]
-        #         cv2.putText(self.morphed_frame, f"{self.distance_to_closest_white_waypoint:.1f} cm",
-        #                     nearest_waypoint[0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-        # except Exception as e:
-        #     print(f"Error drawing text: {e}")
+            # Draw the distance to the closest white ball
+            if self.waypoint_for_closest_white_ball is not None:
+                nearest_waypoint = self.waypoint_for_closest_white_ball[0]
+                cv2.putText(self.morphed_frame, f"{self.distance_to_closest_white_waypoint:.1f} cm",
+                            nearest_waypoint[0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        except Exception as e:
+            print(f"Error drawing text: {e}")
 
         # try to draw arena waypoints
         try:
@@ -1258,7 +1270,7 @@ class Camera2:
         except:
             print('Error drawing arena waypoints')
 
-        # Draw arena data
+        # # Draw arena data
         # try:
         #     if self.arena_data is not None:
         #         for index_number, data in enumerate(self.arena_data):
@@ -1301,7 +1313,7 @@ class Camera2:
             print(f"Error drawing green centers: {e}")
 
     def preprocess_frame(self):
-        return
+        # return
         self.frame = cv2.GaussianBlur(self.frame, (3, 3), 0)
 
     def start_video_stream(self, video_source, queue=None, morph=True, record=False, resize=None):
@@ -1578,13 +1590,13 @@ class Camera2:
             # Create trackbars once per color
             hsv_lower, hsv_upper = self.hsv_ranges[color]
             cv2.createTrackbar('H Lower', 'Calibration',
-                               int(hsv_lower[0]), 180, nothing)
+                               int(hsv_lower[0]), 360, nothing)
             cv2.createTrackbar('S Lower', 'Calibration',
                                int(hsv_lower[1]), 255, nothing)
             cv2.createTrackbar('V Lower', 'Calibration',
                                int(hsv_lower[2]), 255, nothing)
             cv2.createTrackbar('H Upper', 'Calibration',
-                               int(hsv_upper[0]), 180, nothing)
+                               int(hsv_upper[0]), 360, nothing)
             cv2.createTrackbar('S Upper', 'Calibration',
                                int(hsv_upper[1]), 255, nothing)
             cv2.createTrackbar('V Upper', 'Calibration',
