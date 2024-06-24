@@ -118,7 +118,7 @@ class Camera2:
             'robot_critical_length': self.robot_critical_length,
 
             # Arena data
-            'arena_waypoints': self.arena_waypoints,
+            'arena_data': self.arena_data,
 
         }
 

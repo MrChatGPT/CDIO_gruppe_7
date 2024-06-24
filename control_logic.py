@@ -30,11 +30,11 @@ class ControlLogic:
             try:
                 data = self.queue.get_nowait()
                 if data:
-                    if not self.to_goal: 
-                        self.score_ball(data)
-                    else:
+                    if not self.to_goal:
                         self.collect_ball(data, color='white')
-                       
+                    else:
+                        self.score_ball(data)
+
                 else:
                     self.stop_robot()
             except Empty:
@@ -149,14 +149,14 @@ class ControlLogic:
                 self.pid_translation.Kd = self.pid_translation.Kd / self.pid_scaling_factor
                 # Collect the ball
                 self.ball_count = self.ball_count+1
-                #get data:
+                # get data:
                 white_balls = data.get(f'white_ball_centers')
                 blocked_balls = data.get(f'blocked_white_centers')
                 print(f"picking up {color} ball")
                 self.ball_in()
                 self.stop_robot()
 
-                if (self.ball_count % 4 == 0) or ((len(white_balls)==0) and (len(blocked_balls)==0)):
+                if (self.ball_count % 4 == 0) or ((len(white_balls) == 0) and (len(blocked_balls) == 0)):
                     self.to_goal = True
                 # set control flags to true
                 for key in self.control_flags.keys():
@@ -182,8 +182,8 @@ class ControlLogic:
         self.controller.publish_control_data(0, 0, 0, 0, 1)
 
     def score_ball(self, data):
-        print("Moving to waypoint in front of goal")
-        
+        # print("Moving to waypoint in front of goal")
+
         waypoints = data.get(f'arena_data')
         vectorone_waypoint = waypoints[0][0]
         vectortwo_waypoint = waypoints[4][0]
@@ -194,7 +194,7 @@ class ControlLogic:
         angleone_err_to_waypoint = waypoints[0][2]
         angletwo_err_to_waypoint = waypoints[4][2]
 
-        if(distanceone_to_waypoint<distancetwo_to_waypoint):
+        if (distanceone_to_waypoint < distancetwo_to_waypoint):
             vector_waypoint = vectorone_waypoint
             distance_to_waypoint = distanceone_to_waypoint
             angle_err_to_waypoint = angleone_err_to_waypoint
@@ -203,9 +203,11 @@ class ControlLogic:
             distance_to_waypoint = distancetwo_to_waypoint
             angle_err_to_waypoint = angletwo_err_to_waypoint
 
+        print(f"Distance to waypoint: {distance_to_waypoint}")
+        print(f"Angle error to waypoint: {angle_err_to_waypoint}")
+        print('vector to waypoint:', vector_waypoint)
         goal_toleration = self.distance_tolerance-15
 
-        
         # print(data)
         on_goal = False
         try:
@@ -240,33 +242,24 @@ class ControlLogic:
                     on_goal = True
 
             elif abs(angle_err_to_waypoint) > self.angle_tolerance:
-                    rotation = -self.pid_rotation(angle_err_to_waypoint)
+                rotation = -self.pid_rotation(angle_err_to_waypoint)
 
-                    # set x and y to 0
-                    x = y = 0
+                # set x and y to 0
+                x = y = 0
 
-                    self.controller.publish_control_data(x, y, rotation)
+                self.controller.publish_control_data(x, y, rotation)
             else:
-                 print("Spitting out the balls")
-                 self.to_goal = False 
-                 self.ball_out()
-                 self.stop_robot()
-                        
-                    
+                print("Spitting out the balls")
+                self.to_goal = False
+                self.ball_out()
+                self.stop_robot()
+
         except Exception as e:
             print(f"Error occurred in score_ball method: {e}")
             print('Stopping robot')
             self.stop_robot()
 
-
-        #drive to waypoint, fix angle, and send ball_out
-       
-
-
-          
-
-        
-
+        # drive to waypoint, fix angle, and send ball_out
 
 
 if __name__ == "__main__":
