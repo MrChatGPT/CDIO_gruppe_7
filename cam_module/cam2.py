@@ -1145,13 +1145,13 @@ class Camera2:
                         cv2.line(self.morphed_frame, self.robot_center,
                                  waypoint_coord, (0, 255, 255), 2)
 
-                    #  draw vector to waypoint
-                    if self.vector_to_white_waypoint_robot_frame is not None:
-                        scale_factor = 50
-                        end_point = tuple(map(int, np.array(
-                            waypoint_coord) + scale_factor * self.vector_to_white_waypoint_robot_frame))
-                        cv2.arrowedLine(
-                            self.morphed_frame, waypoint_coord, end_point, (0, 255, 255), 2)
+                    # #  draw vector to waypoint
+                    # if self.vector_to_white_waypoint_robot_frame is not None:
+                    #     scale_factor = 50
+                    #     end_point = tuple(map(int, np.array(
+                    #         waypoint_coord) + scale_factor * self.vector_to_white_waypoint_robot_frame))
+                    #     cv2.arrowedLine(
+                    #         self.morphed_frame, waypoint_coord, end_point, (0, 255, 255), 2)
         except Exception as e:
             print(f"Error drawing white blobs: {e}")
 
@@ -1259,30 +1259,30 @@ class Camera2:
             print('Error drawing arena waypoints')
 
         # Draw arena data
-        try:
-            if self.arena_data is not None:
-                for index_number, data in enumerate(self.arena_data):
-                    vector = data[0]
-                    distance = data[1]
-                    angle = data[2]
-                    # convert distance to pixels
-                    distance = distance * \
-                        max(self.morphed_frame.shape[0],
-                            self.morphed_frame.shape[1]) / self.arena_dimensions[0]
+        # try:
+        #     if self.arena_data is not None:
+        #         for index_number, data in enumerate(self.arena_data):
+        #             vector = data[0]
+        #             distance = data[1]
+        #             angle = data[2]
+        #             # convert distance to pixels
+        #             distance = distance * \
+        #                 max(self.morphed_frame.shape[0],
+        #                     self.morphed_frame.shape[1]) / self.arena_dimensions[0]
 
-                    # Calculate the endpoint correctly
-                    end_point = tuple(
-                        map(int, np.array(self.robot_center) + distance * vector))
+        #             # Calculate the endpoint correctly
+        #             end_point = tuple(
+        #                 map(int, np.array(self.robot_center) + distance * vector))
 
-                    # Draw arrowed line from robot center to end point
-                    cv2.arrowedLine(self.morphed_frame, tuple(
-                        map(int, self.robot_center)), end_point, (255, 0, 255), 2)
+        #             # Draw arrowed line from robot center to end point
+        #             cv2.arrowedLine(self.morphed_frame, tuple(
+        #                 map(int, self.robot_center)), end_point, (255, 0, 255), 2)
 
-                    # Draw index number at waypoint
-                    cv2.putText(self.morphed_frame, f"{index_number}", end_point,
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-        except Exception as e:
-            print(f'Error drawing arena data: {e}')
+        #             # Draw index number at waypoint
+        #             cv2.putText(self.morphed_frame, f"{index_number}", end_point,
+        #                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        # except Exception as e:
+        #     print(f'Error drawing arena data: {e}')
 
     # draw blue centers
         try:
