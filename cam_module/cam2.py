@@ -42,7 +42,7 @@ class Camera2:
         self.egg_scale_factor = 1.5
 
         # Orange blob properties
-        self.orange_blob_area = 0
+        self.orange_blob_area = 4
         self.orange_blob_detected = False
 
         self.orange_blob_centers = []
