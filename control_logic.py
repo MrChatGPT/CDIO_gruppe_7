@@ -36,8 +36,8 @@ class ControlLogic:
                 if data:
                     if not self.to_goal:
                         self.collect_ball(data, color='white')
-                    # if not self.to_goal and self.arena_check:
-                    #     self.to_arena_waypoint(data)
+                    if not self.to_goal and self.arena_check:
+                        self.to_arena_waypoint(data)
                     else:
                         self.score_ball(data)
                 else:
@@ -51,7 +51,8 @@ class ControlLogic:
     def collect_ball(self, data, color):
         # Get the initial waypoint data
         vector_waypoint = data.get(f'vector_to_{color}_waypoint_robot_frame')
-        distance_to_waypoint = data.get(f'distance_to_closest_{color}_waypoint')
+        distance_to_waypoint = data.get(
+            f'distance_to_closest_{color}_waypoint')
         angle_err_to_waypoint = data.get(f'angle_to_closest_{color}_waypoint')
 
         # get ball data
@@ -72,7 +73,6 @@ class ControlLogic:
         if (len(vector_waypoint) == 0 or None):
             self.arena_check = True
             self.arena_first_way = True
-            print("length of vector_waypoint is none or zero..\n\n")
             return
 
         try:
@@ -92,7 +92,8 @@ class ControlLogic:
                     if 45 <= abs(direction_angle) <= 135:
                         speed_scale = 1  # Scale factor for diagonal movements
                     else:
-                        speed_scale = 0.5  # Scale factor for straight movements
+                        speed_scale = 0.4
+                        # Scale factor for straight movements
 
                     # Calculate the speed using the distance to the waypoint
                     speed = self.pid_translation(
@@ -134,7 +135,7 @@ class ControlLogic:
                     speed_scale = 1
 
                 else:
-                    speed_scale = 0.5
+                    speed_scale = 0.4
 
                 # Calculate the speed using the distance to the ball
                 speed = self.pid_translation(
@@ -158,18 +159,19 @@ class ControlLogic:
                 self.ball_count = self.ball_count+1
                 # get data:
                 white_balls = data.get(f'white_ball_centers')
-                print("White balls from collect_ball: ", white_balls)
                 blocked_balls = data.get(f'blocked_white_centers')
                 print(f"picking up {color} ball")
                 self.ball_in()
                 self.stop_robot()
 
+               
                 # set control flags to true
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
 
                 print('Uddating arena, robot and balls')
                 print('control flags:', self.control_flags)
+                time.sleep(3)
                 self.on_waypoint = False
                 if (self.ball_count % 4 == 0): # or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
                     self.to_goal = True
@@ -199,7 +201,7 @@ class ControlLogic:
                         min_distance = distance
                         self.closest_waypoint = waypoint
 
-                if len(self.closest_waypoint)>0 and self.closest_waypoint[1] < 5:
+                if len(self.closest_waypoint) > 0 and self.closest_waypoint[1] < 5:
                     # Check if there is a next waypoint to move to
                     next_index = waypoints.index(self.closest_waypoint) + 1
                     if next_index < len(waypoints):
@@ -230,6 +232,7 @@ class ControlLogic:
                 # set control flags to true
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
+
                 time.sleep(0.1)
                 self.arena_check = False
 
@@ -284,7 +287,8 @@ class ControlLogic:
                     if 45 <= abs(direction_angle) <= 135:
                         speed_scale = 1  # Scale factor for diagonal movements
                     else:
-                        speed_scale = 0.5  # Scale factor for straight movements
+                        speed_scale = 0.4
+                        # Scale factor for straight movements
 
                     # Calculate the speed using the distance to the waypoint
                     speed = self.pid_translation(
@@ -312,7 +316,6 @@ class ControlLogic:
                 self.ball_out()
                 self.stop_robot()
                 time.sleep(3)
-                return
 
         except Exception as e:
             print(f"Error occurred in score_ball method: {e}")
@@ -340,8 +343,8 @@ if __name__ == "__main__":
     topic = "robot/control"
     controller = Controller(broker_url, broker_port, topic)
 
-    translation_pid = PID(Kp=0.03, Ki=0.000, Kd=0.001, setpoint=0)
-    rotation_pid = PID(Kp=0.01, Ki=0.015, Kd=0.01, setpoint=0)
+    translation_pid = PID(Kp=0.04, Ki=0.000, Kd=0.001, setpoint=0)
+    rotation_pid = PID(Kp=0.01, Ki=0.01, Kd=0.01, setpoint=0)
 
     translation_pid.output_limits = (0.25, 1)
     rotation_pid.output_limits = (-0.3, 0.3)
