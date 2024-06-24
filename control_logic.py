@@ -73,6 +73,7 @@ class ControlLogic:
         if (len(vector_waypoint) == 0 or None):
             self.arena_check = True
             self.arena_first_way = True
+            print("length of vector_waypoint is none or zero..\n\n")
             return
 
         try:
@@ -310,6 +311,7 @@ class ControlLogic:
                 self.ball_out()
                 self.stop_robot()
                 time.sleep(3)
+                return
 
         except Exception as e:
             print(f"Error occurred in score_ball method: {e}")
