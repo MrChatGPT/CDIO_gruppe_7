@@ -36,8 +36,8 @@ class ControlLogic:
                 if data:
                     if not self.to_goal:
                         self.collect_ball(data, color='white')
-                    if not self.to_goal and self.arena_check:
-                        self.to_arena_waypoint(data)
+                    # if not self.to_goal and self.arena_check:
+                    #     self.to_arena_waypoint(data)
                     else:
                         self.score_ball(data)
                 else:
