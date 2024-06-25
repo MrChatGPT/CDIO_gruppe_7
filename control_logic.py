@@ -47,9 +47,9 @@ class ControlLogic:
             except Exception as e:
                 print(f"Error occurred: {e}")
                 break
-            finally:
-                data = self.queue.get_nowait()
-                print("HSV = ", data.get(f'hsv_values'))
+            # finally:
+            #     data = self.queue.get_nowait()
+            #     print("HSV = ", data.get(f'hsv_values'))
 
     def collect_ball(self, data, color):
         # Get the initial waypoint data
