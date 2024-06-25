@@ -325,8 +325,8 @@ class ControlLogic:
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
                 self.ball_out()
-                self.stop_robot()
                 time.sleep(3)
+                self.stop_robot()
 
         except Exception as e:
             print(f"Error occurred in score_ball method: {e}")
