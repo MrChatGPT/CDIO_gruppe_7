@@ -272,6 +272,7 @@ class ControlLogic:
         # print(data)
 
         try:
+            #translate to goal waypoint
             if not self.on_goal:
                 # reset control flags to false except for update_robot
                 for key in self.control_flags.keys():
@@ -307,7 +308,8 @@ class ControlLogic:
                     self.pid_translation.Kd = self.pid_translation.Kd / self.pid_scaling_factor
                     print("waypoint to goal reached!")
                     self.on_goal = True
-
+            
+            #change angle
             elif abs(angle_err_to_waypoint) > self.angle_tolerance:
                 rotation = -self.pid_rotation(angle_err_to_waypoint)
                 print("rotation: ", rotation)
@@ -316,6 +318,8 @@ class ControlLogic:
                 self.controller.publish_control_data(x, y, rotation)
                 time.sleep(0.1)
                 self.stop_robot()
+            
+            #spit balls out:
             else:
                 self.pid_translation.Kp = self.pid_translation.Kp / self.pid_scaling_factor
                 self.pid_translation.Ki = self.pid_translation.Ki / self.pid_scaling_factor
