@@ -175,6 +175,7 @@ class ControlLogic:
                 if (self.ball_count % 4 == 0):
                     self.to_goal = True
                 time.sleep(3)
+
                 return
 
         except Exception as e:
@@ -328,10 +329,10 @@ class ControlLogic:
                 self.pid_translation.Ki = self.pid_translation.Ki / self.pid_scaling_factor
                 self.pid_translation.Kd = self.pid_translation.Kd / self.pid_scaling_factor
                 print("Spitting out the balls")
-                
+
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
-                
+
                 self.on_goal = False
                 self.to_goal = False
 
