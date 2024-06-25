@@ -329,7 +329,8 @@ class ControlLogic:
                 
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
-                    
+                
+                self.on_goal = False
                 self.to_goal = False
 
                 self.ball_out()
