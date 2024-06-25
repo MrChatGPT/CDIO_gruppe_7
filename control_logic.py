@@ -313,6 +313,7 @@ class ControlLogic:
 
             # change angle
             elif abs(angle_err_to_waypoint) > self.angle_tolerance:
+                print("Score ball Angle_error to goal: ", angle_err_to_waypoint)
                 rotation = -self.pid_rotation(angle_err_to_waypoint)
                 print("rotation: ", rotation)
                 # set x and y to 0
