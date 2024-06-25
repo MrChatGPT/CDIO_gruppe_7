@@ -58,12 +58,12 @@ class Camera2:
         # goal blob properties
         self.blocked_goal_centers = []
         self.goal_ball_centers = []
-        self.angle_to_closest_goal_blob = None
-        self.distance_to_closest_goal_blob = None
+        self.angle_to_closest_goal_ball = None
+        self.distance_to_closest_goal_ball = None
         self.angle_to_closest_goal_waypoint = None
         self.distance_to_closest_goal_waypoint = None
         self.waypoint_for_closest_goal_blob = None
-        self.vector_to_goal_blob_robot_frame = []
+        self.vector_to_goal_ball_robot_frame = []
         self.vector_to_goal_waypoint_robot_frame = []
 
         # Robot properties
@@ -120,6 +120,18 @@ class Camera2:
             'vector_to_white_ball_robot_frame': self.vector_to_white_ball_robot_frame,
             'vector_to_white_waypoint_robot_frame': self.vector_to_white_waypoint_robot_frame,
 
+            # goal ball data
+            'goal_ball_centers': self.goal_ball_centers,
+            'blocked_goal_centers': self.blocked_goal_centers,
+            'angle_to_closest_goal_ball': self.angle_to_closest_goal_ball,
+            'distance_to_closest_goal_ball': self.distance_to_closest_goal_ball,
+            'angle_to_closest_goal_waypoint': self.angle_to_closest_goal_waypoint,
+            'distance_to_closest_goal_waypoint': self.distance_to_closest_goal_waypoint,
+            'waypoint_for_closest_goal_ball': self.waypoint_for_closest_goal_ball,
+            'vector_to_goal_ball_robot_frame': self.vector_to_goal_ball_robot_frame,
+            'vector_to_goal_waypoint_robot_frame': self.vector_to_goal_waypoint_robot_frame,
+
+
             # Orange ball data
             'orange_blob_detected': self.orange_blob_detected,
             'orange_blob_centers': self.orange_blob_centers,
@@ -132,8 +144,11 @@ class Camera2:
             'vector_to_orange_ball_robot_frame': self.vector_to_orange_ball_robot_frame,
             'vector_to_orange_waypoint_robot_frame': self.vector_to_orange_waypoint_robot_frame,
 
+
             # Robot data
             'robot_critical_length': self.robot_critical_length,
+
+
 
             # Arena data
             'arena_data': self.arena_data,
