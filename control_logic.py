@@ -171,7 +171,8 @@ class ControlLogic:
                 print('Uddating arena, robot and balls')
                 print('control flags:', self.control_flags)
                 self.on_waypoint = False
-                if (self.ball_count % 4 == 0):# or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
+                # or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
+                if (self.ball_count % 4 == 0):
                     self.to_goal = True
                 time.sleep(3)
                 return
@@ -271,7 +272,7 @@ class ControlLogic:
         # print(data)
 
         try:
-            #translate to goal waypoint
+            # translate to goal waypoint
             if not self.on_goal:
                 # reset control flags to false except for update_robot
                 for key in self.control_flags.keys():
@@ -309,8 +310,8 @@ class ControlLogic:
                     print("waypoint to goal reached!")
                     time.sleep(1)
                     self.on_goal = True
-            
-            #change angle
+
+            # change angle
             elif abs(angle_err_to_waypoint) > self.angle_tolerance:
                 rotation = -self.pid_rotation(angle_err_to_waypoint)
                 print("rotation: ", rotation)
@@ -319,8 +320,8 @@ class ControlLogic:
                 self.controller.publish_control_data(x, y, rotation)
                 time.sleep(0.1)
                 self.stop_robot()
-            
-            #spit balls out:
+
+            # spit balls out:
             else:
                 self.pid_translation.Kp = self.pid_translation.Kp / self.pid_scaling_factor
                 self.pid_translation.Ki = self.pid_translation.Ki / self.pid_scaling_factor
