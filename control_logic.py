@@ -51,7 +51,8 @@ class ControlLogic:
     def collect_ball(self, data, color):
         # Get the initial waypoint data
         vector_waypoint = data.get(f'vector_to_{color}_waypoint_robot_frame')
-        distance_to_waypoint = data.get(f'distance_to_closest_{color}_waypoint')
+        distance_to_waypoint = data.get(
+            f'distance_to_closest_{color}_waypoint')
         angle_err_to_waypoint = data.get(f'angle_to_closest_{color}_waypoint')
 
         # get ball data
@@ -244,7 +245,8 @@ class ControlLogic:
     def score_ball(self, data, color):
         # Get the initial waypoint data
         vector_waypoint = data.get(f'vector_to_{color}_waypoint_robot_frame')
-        distance_to_waypoint = data.get(f'distance_to_closest_{color}_waypoint')
+        distance_to_waypoint = data.get(
+            f'distance_to_closest_{color}_waypoint')
         angle_err_to_waypoint = data.get(f'angle_to_closest_{color}_waypoint')
 
         # get ball data
@@ -365,7 +367,6 @@ class ControlLogic:
             print(f"Error occurred in collect_ball method: {e}")
             print('Stopping robot')
             self.stop_robot()
-
 
     def stop_robot(self):
         self.controller.publish_control_data(0, 0, 0)
