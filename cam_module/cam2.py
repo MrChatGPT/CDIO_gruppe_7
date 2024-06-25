@@ -96,6 +96,8 @@ class Camera2:
         This method can be customized to return any required class attributes.
         """
         return {
+
+            'hsv_values': self.hsv_ranges,
             # White ball data
             'white_ball_centers': self.white_ball_centers,
             'blocked_white_centers': self.blocked_white_centers,

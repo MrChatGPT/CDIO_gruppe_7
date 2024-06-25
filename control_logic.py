@@ -419,8 +419,14 @@ if __name__ == "__main__":
     try:
         control_logic.run()
     except KeyboardInterrupt:
+        data = control_logic.queue.get_nowait()
+        print("HSV = ", data.get(f'hsv_values'))
+        control_logic.stop_robot()
         camera_proc.terminate()
         camera_proc.join()
     finally:
+        data = control_logic.queue.get_nowait()
+        print("HSV = ", data.get(f'hsv_values'))
+        control_logic.stop_robot()
         camera_proc.terminate()
         camera_proc.join()
