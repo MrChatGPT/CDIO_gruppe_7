@@ -319,7 +319,7 @@ class ControlLogic:
                 # set x and y to 0
                 x = y = 0
                 self.controller.publish_control_data(x, y, rotation)
-                time.sleep(0.1)
+                time.sleep(1)
                 self.stop_robot()
 
             # spit balls out:
