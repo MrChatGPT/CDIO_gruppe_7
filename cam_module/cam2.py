@@ -55,6 +55,17 @@ class Camera2:
         self.vector_to_orange_ball_robot_frame = []
         self.vector_to_orange_waypoint_robot_frame = []
 
+        # goal blob properties
+        self.blocked_goal_centers = []
+        self.goal_ball_centers = []
+        self.angle_to_closest_goal_blob = None
+        self.distance_to_closest_goal_blob = None
+        self.angle_to_closest_goal_waypoint = None
+        self.distance_to_closest_goal_waypoint = None
+        self.waypoint_for_closest_goal_blob = None
+        self.vector_to_goal_blob_robot_frame = []
+        self.vector_to_goal_waypoint_robot_frame = []
+
         # Robot properties
         self.robot_radius_scale_factor = 1.5
         self.green_centers = []
@@ -453,6 +464,24 @@ class Camera2:
         if not self.white_ball_centers:
             self.waypoint_for_closest_white_ball = None
 
+    def find_waypoint_for_closest_goal_ball(self):
+        print('Finding waypoint for goal ball')
+        r = self.waypoint_distance * \
+            max(self.morphed_frame.shape[0],
+                self.morphed_frame.shape[1]) / self.arena_dimensions[0]
+        while self.goal_ball_centers:
+            self.waypoint_for_closest_goal_ball = self.calculate_waypoint(
+                self.goal_ball_centers[0], r)
+            temp_white_centers, temp_blocked_centers = self.filter_blocked_balls(
+                [self.goal_ball_centers[0]])
+            if not temp_blocked_centers:
+                break
+            else:
+                blocked_center = self.goal_ball_centers.pop(0)
+                self.blocked_goal_centers.append(blocked_center)
+        if not self.goal_ball_centers:
+            self.waypoint_for_closest_goal_ball = None
+
     def find_waypoint_for_closest_orange_ball(self):
         r = self.waypoint_distance * \
             max(self.morphed_frame.shape[0],
@@ -503,6 +532,14 @@ class Camera2:
                     'angle_to_closest_orange_ball',
                     'distance_to_closest_orange_ball'
                 )
+            if self.goal_ball_centers:
+                nearest_goal_center = self.goal_ball_centers[0]
+                calculate_and_store_vectors(
+                    nearest_goal_center,
+                    'vector_to_goal_ball_robot_frame',
+                    'angle_to_closest_goal_ball',
+                    'distance_to_closest_goal_ball'
+                )
 
             if self.waypoint_for_closest_white_ball:
                 nearest_waypoint = self.waypoint_for_closest_white_ball[0]
@@ -520,6 +557,15 @@ class Camera2:
                     'vector_to_orange_waypoint_robot_frame',
                     'angle_to_closest_orange_waypoint',
                     'distance_to_closest_orange_waypoint'
+                )
+
+            if self.waypoint_for_closest_goal_ball:
+                nearest_waypoint = self.waypoint_for_closest_goal_ball[0]
+                calculate_and_store_vectors(
+                    nearest_waypoint[0],
+                    'vector_to_goal_waypoint_robot_frame',
+                    'angle_to_closest_goal_waypoint',
+                    'distance_to_closest_goal_waypoint'
                 )
 
             # Calculate and store vectors for all arena waypoints
@@ -938,6 +984,19 @@ class Camera2:
 
     def find_blobs(self, color, num_points):
         target_frame = self.morphed_frame if self.morph else self.frame
+
+        if color == 'goal':
+            # morphed frame dims
+            height, width = target_frame.shape[:2]
+
+            # center of left med
+            left_mid_center = (2, int(height * 0.5))
+            right_mid_center = (width - 2, int(height * 0.5))
+
+            self.goal_ball_centers = [left_mid_center, right_mid_center]
+
+            return
+
         contours, _ = self.mask_and_find_contours(
             target_frame, color=color, close=False, open=False, erode=False)
 
@@ -1134,6 +1193,12 @@ class Camera2:
                             print(f"Error finding orange blobs: {e}")
 
                     if self.control_flags['update_white_balls']:
+                        try:
+                            self.find_blobs('goal', num_points=1)
+                            self.find_waypoint_for_closest_goal_ball()
+                        except Exception as e:
+                            print(f"Error finding goal blobs: {e}")
+
                         try:
                             self.find_white_blobs()
                             self.find_waypoint_for_closest_white_ball()
