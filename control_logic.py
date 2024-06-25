@@ -314,6 +314,8 @@ class ControlLogic:
                 # set x and y to 0
                 x = y = 0
                 self.controller.publish_control_data(x, y, rotation)
+                time.sleep(0.1)
+                self.stop_robot()
             else:
                 self.pid_translation.Kp = self.pid_translation.Kp / self.pid_scaling_factor
                 self.pid_translation.Ki = self.pid_translation.Ki / self.pid_scaling_factor
