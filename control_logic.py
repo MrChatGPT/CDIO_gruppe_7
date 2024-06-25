@@ -20,7 +20,7 @@ class ControlLogic:
         self.ball_collected = False
         self.distance_tolerance = 2
         self.angle_tolerance = 2
-        self.pid_scaling_factor = 0.5
+        self.pid_scaling_factor = 1
         self.control_flags = control_flags
         self.ball_count = 0
         self.to_goal = False
@@ -185,16 +185,15 @@ class ControlLogic:
         waypoints = data.get('arena_data')
 
         min_distance = float('inf')
-        
+
         vector_waypoint, distance_to_waypoint, angle_err_to_waypoint = self.closest_waypoint
 
-
         try:
-            #find closest waypoint, mangler ydre if....:
+            # find closest waypoint, mangler ydre if....:
             for key in self.control_flags.keys():
-                    if key != 'update_robot':
-                        self.control_flags[key] = False
-            if(distance_to_waypoint < 6 or None):
+                if key != 'update_robot':
+                    self.control_flags[key] = False
+            if (distance_to_waypoint < 6 or None):
                 print("We're choosing an arena waypoint...")
                 for i, waypoint in enumerate(waypoints):
                     vector, distance, angle = waypoint
@@ -214,7 +213,7 @@ class ControlLogic:
                             self.closest_waypoint) - 1
                         if previous_index >= 0:
                             self.closest_waypoint = waypoints[previous_index]
-            
+
             if distance_to_waypoint > self.distance_tolerance:
                 print("we're translating to closest arena_waypoint...")
                 direction_angle = math.degrees(math.atan2(
@@ -233,7 +232,7 @@ class ControlLogic:
                 # set control flags to true
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
-                
+
                 time.sleep(0.1)
                 self.arena_check = False
 
@@ -358,7 +357,7 @@ if __name__ == "__main__":
     topic = "robot/control"
     controller = Controller(broker_url, broker_port, topic)
 
-    translation_pid = PID(Kp=0.05, Ki=0.000, Kd=0.001, setpoint=0)
+    translation_pid = PID(Kp=0.04, Ki=0.000, Kd=0.001, setpoint=0)
     rotation_pid = PID(Kp=0.01, Ki=0.015, Kd=0.00, setpoint=0)
 
     translation_pid.output_limits = (0.25, 1)

@@ -11,12 +11,12 @@ import queue
 class Camera2:
     def __init__(self, control_flags):
         self.hsv_ranges = {
-            'red': (np.array([0, 120, 112]), np.array([180, 255, 255])),
+            'red': (np.array([87, 81, 138]), np.array([180, 255, 255])),
             'white': (np.array([0, 0, 253]), np.array([180, 59, 255])),
-            'orange': (np.array([0, 75, 244]), np.array([6, 255, 255])),
+            'orange': (np.array([0, 68, 139]), np.array([9, 255, 255])),
             # 'blue': (np.array([90, 50, 0]), np.array([122, 255, 255]))
-            'blue': (np.array([39, 60, 0]), np.array([87, 255, 255])),
-            'green': (np.array([0, 79, 233]), np.array([40, 255, 255]))
+            'blue': (np.array([27, 47, 0]), np.array([106, 255, 255])),
+            'green': (np.array([163, 40, 255]), np.array([180, 255, 255]))
         }
 
         # Camera properties and frame data
