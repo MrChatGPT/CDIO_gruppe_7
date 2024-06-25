@@ -171,7 +171,7 @@ class ControlLogic:
                 print('control flags:', self.control_flags)
                 self.on_waypoint = False
                 # or ((len(white_balls) == 0) and (len(blocked_balls) == 0))
-                if (self.ball_count % 4 == 0):
+                if (self.ball_count % 2 == 0):
                     self.to_goal = True
                 time.sleep(3)
 
