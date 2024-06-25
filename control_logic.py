@@ -47,6 +47,9 @@ class ControlLogic:
             except Exception as e:
                 print(f"Error occurred: {e}")
                 break
+            finally:
+                data = self.queue.get_nowait()
+                print("HSV = ", data.get(f'hsv_values'))
 
     def collect_ball(self, data, color):
         # Get the initial waypoint data
@@ -246,7 +249,7 @@ class ControlLogic:
         vector_waypoint = data.get(f'vector_to_{color}_waypoint_robot_frame')
         distance_to_waypoint = data.get(f'distance_to_closest_{color}_waypoint')
         angle_err_to_waypoint = data.get(f'angle_to_closest_{color}_waypoint')
-
+        
         # get ball data
         vector_ball = data.get(f'vector_to_{color}_ball_robot_frame')
         distance_to_ball = data.get(f'distance_to_closest_{color}_ball')
