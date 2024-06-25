@@ -303,10 +303,12 @@ class ControlLogic:
                     rotation = 0
                     self.controller.publish_control_data(x, y, rotation)
                 else:
+                    self.stop_robot()
                     self.pid_translation.Kp = self.pid_translation.Kp / self.pid_scaling_factor
                     self.pid_translation.Ki = self.pid_translation.Ki / self.pid_scaling_factor
                     self.pid_translation.Kd = self.pid_translation.Kd / self.pid_scaling_factor
                     print("waypoint to goal reached!")
+                    time.sleep(1)
                     self.on_goal = True
             
             #change angle
@@ -325,9 +327,12 @@ class ControlLogic:
                 self.pid_translation.Ki = self.pid_translation.Ki / self.pid_scaling_factor
                 self.pid_translation.Kd = self.pid_translation.Kd / self.pid_scaling_factor
                 print("Spitting out the balls")
-                self.to_goal = False
+                
                 for key in self.control_flags.keys():
                     self.control_flags[key] = True
+                    
+                self.to_goal = False
+
                 self.ball_out()
                 time.sleep(3)
                 self.stop_robot()
